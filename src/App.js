@@ -1,14 +1,22 @@
 import { createGlobalStyle } from "styled-components";
 import styled from "styled-components";
-//booklove-d393f
-import { addMessageRoom } from "./utils/firestore";
+
+import Footer from "./components/Footer/Footer";
+import Header from "./components/Header/Header";
+import { Outlet } from "react-router-dom";
+
+import { addMessageRoom, addUser, getMessageRoom } from "./utils/firestore";
 
 function App() {
   return (
     <>
       <GlobalStyle />
-
-      <button onClick={addMessageRoom}>按鈕</button>
+      <Header />
+      <Outlet />
+      <Footer />
+      <button onClick={addMessageRoom}>addMessageRoom按鈕</button>
+      <button onClick={addUser}>addUser按鈕</button>
+      <button onClick={getMessageRoom}>MessageRoom按鈕</button>
     </>
   );
 }
