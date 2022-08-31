@@ -1,12 +1,14 @@
 import { createGlobalStyle } from "styled-components";
 import styled from "styled-components";
-
-import "./App.css";
+//booklove-d393f
+import { addMessageRoom } from "./utils/firestore";
 
 function App() {
   return (
     <>
       <GlobalStyle />
+
+      <button onClick={addMessageRoom}>按鈕</button>
     </>
   );
 }
