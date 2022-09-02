@@ -7,6 +7,7 @@ import Home from "./pages/Home/Home";
 import Book from "./pages/Book/Book";
 import Edit from "./pages/Edit/Edit";
 import Message from "./pages/Message/Message";
+import Search from "./pages/Search/Search";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -17,6 +18,7 @@ root.render(
         <Route path="book/:id" element={<Book />} />
         <Route path="edit/:id" element={<Edit />} />
         <Route path="message" element={<Message />} />
+        <Route path="search" element={<Search />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

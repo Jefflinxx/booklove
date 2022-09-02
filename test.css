@@ -1,0 +1,10 @@
+* {
+  letter-spacing: 1px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  font-weight: 200;
+  flex-direction: column;
+}
