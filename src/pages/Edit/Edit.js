@@ -1,17 +1,43 @@
 import styled from "styled-components";
+import { useSelector, useDispatch } from "react-redux";
+import { updateUserLibrary } from "../../utils/firestore";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
 
 function Edit() {
+  const user = useSelector((state) => state.userReducer);
+  const currentbook = useSelector((state) => state.currentBookReducer);
+  const library = useSelector((state) => state.currentLibraryReducer);
+  const navigator = useNavigate();
+  const { register, handleSubmit } = useForm();
   return (
     <>
-      <>
-        <Center>
-          <DeleteIconDivWrapper>
-            <DeleteIconDiv onClick={() => {}}>
-              <DeleteIcon></DeleteIcon>delete
-            </DeleteIconDiv>
-          </DeleteIconDivWrapper>
-        </Center>
-
+      <Center>
+        <DeleteIconDivWrapper>
+          <BackDiv
+            onClick={() => {
+              navigator(-1);
+            }}
+          >
+            <Back></Back>Back
+          </BackDiv>
+          <DeleteIconDiv
+            onClick={() => {
+              const a = library.filter((i) => i.isbn !== currentbook.isbn);
+              console.log(a);
+              updateUserLibrary(user.uid, a);
+              navigator("../../");
+            }}
+          >
+            <DeleteIcon></DeleteIcon>delete
+          </DeleteIconDiv>
+        </DeleteIconDivWrapper>
+      </Center>
+      <form
+        onSubmit={handleSubmit((data) => {
+          console.log(data);
+        })}
+      >
         <TopSection>
           <BookImg />
           <TopRightSection>
@@ -19,13 +45,13 @@ function Edit() {
               return (
                 <SectionItem>
                   <BooknameP>{i}</BooknameP>
-                  <Bookname></Bookname>
+                  <Bookname {...register("bookname")}></Bookname>
                 </SectionItem>
               );
             })}
             <SectionItem>
               <CategoryP>分類</CategoryP>
-              <Category></Category>
+              <Category {...register("category")}></Category>
             </SectionItem>
 
             <SectionItem>
@@ -38,20 +64,22 @@ function Edit() {
         <BottomSection>
           <SectionItem>
             <ProgressP>總章節</ProgressP>
-            <Progress></Progress>
+            <Progress {...register("totalChapter")}></Progress>
           </SectionItem>
           <SectionItem>
             <PlaceP>地點</PlaceP>
-            <Place></Place>
+            <Place {...register("place")}></Place>
           </SectionItem>
           <SectionItem>
             <LendToP>出借給</LendToP>
-            <LendTo></LendTo>
+            <LendTo {...register("lendTo")}></LendTo>
           </SectionItem>
           <SummaryP>書摘</SummaryP>
-          <Summary></Summary>
+          <Summary {...register("summary")}></Summary>
         </BottomSection>
-      </>
+
+        <ModifyButton type="submit">修改</ModifyButton>
+      </form>
     </>
   );
 }
@@ -68,8 +96,15 @@ const DeleteIconDivWrapper = styled.div`
   width: 80%;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
 `;
+
+const BackDiv = styled.div`
+  width: 40px;
+  height: 40px;
+  border: 1px solid black;
+`;
+const Back = styled.div``;
 
 const DeleteIconDiv = styled.div`
   width: 40px;
@@ -138,3 +173,6 @@ const Summary = styled.input`
 `;
 
 const BottomSection = styled.div``;
+
+const ModifyButton = styled.button``;
+const BackButton = styled.button``;

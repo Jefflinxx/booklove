@@ -1,15 +1,18 @@
 import { combineReducers } from "redux";
 import userReducer from "./userReducer";
-import currentBookIdReducer from "./currentBookIdReducer";
+import currentBookReducer from "./currentBookReducer";
+import currentLibraryReducer from "./currentLibraryReducer";
 
 export const actionType = {
   USER: { SETUSER: "setUser" },
-  BOOK: { SETBOOKID: "setBookId" },
+  BOOK: { SETBOOKDATA: "setBookdata" },
+  LIBRARY: { SETLIBRARY: "setLibrary" },
 };
 
 const rootReducer = combineReducers({
   userReducer,
-  currentBookIdReducer,
+  currentBookReducer,
+  currentLibraryReducer,
 });
 
 export default rootReducer;

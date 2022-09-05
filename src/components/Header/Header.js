@@ -8,7 +8,7 @@ import { signOut } from "firebase/auth";
 
 import search from "./search.svg";
 import alert from "./alert.svg";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Friend from "../Friend/Friend";
 import Account from "../Account/Account";
@@ -16,7 +16,7 @@ import Theme from "../Theme/Theme";
 
 function Header() {
   const dispatch = useDispatch();
-  const user = useSelector((user) => user);
+  const user = useSelector((state) => state.userReducer);
   //console.log(user);
   const [active, setActive] = useState(false);
   const [friendActive, setFriendActive] = useState(false);
@@ -24,24 +24,32 @@ function Header() {
   const [themeActive, setThemeActive] = useState(false);
   const navigator = useNavigate();
 
-  console.log(friendActive);
   //登出
   function logOut() {
     signOut(auth)
       .then(() => {
-        // Sign-out successful.
         window.localStorage.clear();
         dispatch({
           type: actionType.USER.SETUSER,
           value: null,
         });
-        //navigate("./");
+        setActive(false);
+        navigator("./");
       })
       .catch((error) => {
         console.log("登出失敗");
-        // An error happened.
       });
   }
+
+  useEffect(() => {
+    dispatch({
+      type: actionType.USER.SETUSER,
+      value: JSON.parse(window.localStorage.getItem("user")) || null,
+    });
+  }, []);
+
+  //console.log("user", user);
+
   return (
     <>
       <HeaderDiv>

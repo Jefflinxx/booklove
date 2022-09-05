@@ -51,12 +51,12 @@ export const addMessageRoom = (Uid, from, message) => {
 export const addUser = (Uid, uname) => {
   console.log("add User");
   const users = collection(db, "users");
-  const user = doc(users, "userid");
+  const user = doc(users, Uid);
   const docData = {
-    Uid: "userid" || "",
+    Uid: Uid || "",
     uname: uname || "",
-    background: "url",
-    avatar: "url",
+    background: "",
+    avatar: "",
     followList: [{ Uid: "2", name: "max" }],
     category: ["文學", "漫畫", "美術"],
     library: [
@@ -66,15 +66,15 @@ export const addUser = (Uid, uname) => {
         author: "ironman",
         bookname: "spiderman",
         publish: "batman",
-        cover: "url",
-        likes: 12,
-        category: ["漫畫", "美術"],
-        totalChapter: 10,
-        alreadyReadChapter: 3,
-        place: "我家",
-        lendTo: "max",
-        書評: "好棒棒",
-        uploadCover: ["url", "url"],
+        cover: "",
+        likes: 0,
+        category: [],
+        totalChapter: 0,
+        alreadyReadChapter: 0,
+        place: "",
+        lendTo: "",
+        summary: "",
+        uploadCover: [],
         isPublic: true,
       },
     ],
@@ -101,4 +101,57 @@ export const getMessageRoom = async () => {
     // doc.data() will be undefined in this case
     console.log("No such document!");
   }
+};
+
+export const initUser = async (Uid, uname) => {
+  console.log("initUser");
+  const users = collection(db, "users");
+  const user = doc(users, Uid);
+  const docData = {
+    Uid: Uid || "",
+    uname: uname || "",
+  };
+  setDoc(user, docData);
+};
+
+export const addSearchBookToUserLibrary = async (
+  Uid,
+  isbn,
+  bookname,
+  author,
+  publisher,
+  cover
+) => {
+  console.log("addSearchBookToUserLibrary");
+  const docRef = doc(db, "users", Uid);
+  await updateDoc(docRef, {
+    library: arrayUnion({
+      isbn: isbn,
+      bookname: bookname,
+      author: author,
+      publisher: publisher,
+      cover: cover,
+      isPublic: true,
+    }),
+  });
+};
+
+export const getUserLibrary = async (Uid) => {
+  const docRef = doc(db, "users", Uid);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const a = docSnap.data();
+    console.log(a);
+    return a;
+  } else {
+    console.log("No such document!");
+  }
+};
+
+export const updateUserLibrary = async (Uid, library) => {
+  const Ref = doc(db, "users", Uid);
+  await updateDoc(Ref, {
+    library: library,
+  });
 };

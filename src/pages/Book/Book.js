@@ -4,16 +4,17 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 function Book() {
+  const book = useSelector((state) => state.currentBookReducer);
+  const user = useSelector((state) => state.userReducer);
   const navigator = useNavigate();
-  const bookId = useSelector((state) => state.currentBookIdReducer);
-  console.log(bookId);
+  console.log(book);
   return (
     <>
       <Center>
         <EditIconDivWrapper>
           <EditIconDiv
             onClick={() => {
-              navigator(`../edit/${bookId}`);
+              navigator(`../edit/${user.uid}${book.isbn}`);
             }}
           >
             <EditIcon></EditIcon>edit
@@ -22,19 +23,23 @@ function Book() {
       </Center>
 
       <TopSection>
-        <BookImg />
+        <BookImg src={book.cover} />
         <TopRightSection>
-          {["書名", "作者", "出版"].map((i) => {
+          {[
+            { key: "書名", v: book.bookname },
+            { key: "作者", v: book.author },
+            { key: "出版", v: book.publisher },
+          ].map((i) => {
             return (
               <SectionItem>
-                <BooknameP>{i}</BooknameP>
-                <Bookname>{i}</Bookname>
+                <BooknameP>{i.key}</BooknameP>
+                <Bookname>{i.v}</Bookname>
               </SectionItem>
             );
           })}
           <SectionItem>
             <CategoryP>分類</CategoryP>
-            <Category>DSFJL</Category>
+            <Category>df</Category>
           </SectionItem>
 
           <SectionItem>
@@ -91,7 +96,7 @@ const TopSection = styled.div`
   display: flex;
 `;
 
-const BookImg = styled.div`
+const BookImg = styled.img`
   width: 100px;
   height: 120px;
   border: 1px solid black;

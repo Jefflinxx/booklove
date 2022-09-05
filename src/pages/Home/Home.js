@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import TopSection from "../../components/TopSection/TopSection";
 import { auth } from "../../utils/firebase";
+import { initUser, getUserLibrary } from "../../utils/firestore";
 
 import {
   createUserWithEmailAndPassword,
@@ -17,21 +18,32 @@ function Home() {
   const dispatch = useDispatch();
   const navigator = useNavigate();
   const user = useSelector((state) => state.userReducer);
+  const library = useSelector((state) => state.currentLibraryReducer);
   const [signState, setSignState] = useState("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    console.log("useefect");
-    dispatch({
-      type: actionType.USER.SETUSER,
-      value: JSON.parse(window.localStorage.getItem("user")) || null,
-    });
-  }, []);
-
   //const [errorMessage, setErrorMessage] = useState(null);
-  console.log("user", user);
+
   //console.log("error", errorMessage);
+  console.log(library);
+  useEffect(() => {
+    console.log(user);
+    if (user) {
+      getUserLibrary(user.uid).then((v) => {
+        dispatch({
+          type: actionType.LIBRARY.SETLIBRARY,
+          value: v.library,
+        });
+        // const a = [...library, v.library];
+        // console.log(typeof a);
+        // setLibrary(a);
+        // setLibrary((pre) => {
+        //   return [...pre, v.library]
+        // })
+      });
+    }
+  }, [user]);
 
   return (
     <>
@@ -51,28 +63,30 @@ function Home() {
           </Center>
           <Center>
             <Bookcase>
-              {[1, 2, 3, 4, 5].map((i) => {
+              {console.log(typeof [])}
+              {library.map((i) => {
                 return (
                   <BookDiv>
                     <BookImg
+                      src={i.cover}
                       onClick={() => {
                         dispatch({
-                          type: actionType.BOOK.SETBOOKID,
+                          type: actionType.BOOK.SETBOOKDATA,
                           value: i,
                         });
-                        navigator(`./book/${i}`);
+                        navigator(`./book/${user.uid}${i.isbn}`);
                       }}
                     ></BookImg>
                     <BookName
                       onClick={() => {
                         dispatch({
-                          type: actionType.BOOK.SETBOOKID,
+                          type: actionType.BOOK.SETBOOKDATA,
                           value: i,
                         });
-                        navigator(`./book/${i}`);
+                        navigator(`./book/${user.uid}${i.isbn}`);
                       }}
                     >
-                      {i}
+                      {i.bookname}
                     </BookName>
                   </BookDiv>
                 );
@@ -109,6 +123,7 @@ function Home() {
                     localStorage.setItem("user", JSON.stringify(u.user));
                     console.log("註冊成功");
                     dispatch({ type: actionType.USER.SETUSER, value: u.user });
+                    initUser(u.user.uid, u.user.email);
                   })
                   .catch((e) => {
                     console.log(e.code);
