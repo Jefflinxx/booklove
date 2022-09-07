@@ -9,7 +9,7 @@ import Edit from "./pages/Edit/Edit";
 import Message from "./pages/Message/Message";
 import Search from "./pages/Search/Search";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+const root = ReactDOM.createRoot(document.getElementById("root")!);
 root.render(
   <BrowserRouter>
     <Routes>

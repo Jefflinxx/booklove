@@ -1,6 +1,14 @@
 import styled from "styled-components";
 
-function Account({ accountActive, setAccountActive }) {
+type AccountProps = {
+  accountActive: boolean;
+  setAccountActive: (value: boolean) => void;
+};
+
+const Account: React.FC<AccountProps> = ({
+  accountActive,
+  setAccountActive,
+}) => {
   return (
     <Wrapper $active={accountActive}>
       Account:
@@ -13,11 +21,11 @@ function Account({ accountActive, setAccountActive }) {
       </div>
     </Wrapper>
   );
-}
+};
 
 export default Account;
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ $active: boolean }>`
   z-index: 3;
   display: ${(props) => (props.$active ? "block" : "none")};
   position: absolute;

@@ -16,12 +16,15 @@ import Theme from "../Theme/Theme";
 
 function Header() {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.userReducer);
+  const user = useSelector(
+    (state: { userReducer: object }) => state.userReducer
+  );
+
   //console.log(user);
-  const [active, setActive] = useState(false);
-  const [friendActive, setFriendActive] = useState(false);
-  const [accountActive, setAccountActive] = useState(false);
-  const [themeActive, setThemeActive] = useState(false);
+  const [active, setActive] = useState<boolean>(false);
+  const [friendActive, setFriendActive] = useState<boolean>(false);
+  const [accountActive, setAccountActive] = useState<boolean>(false);
+  const [themeActive, setThemeActive] = useState<boolean>(false);
   const navigator = useNavigate();
 
   //登出
@@ -44,7 +47,7 @@ function Header() {
   useEffect(() => {
     dispatch({
       type: actionType.USER.SETUSER,
-      value: JSON.parse(window.localStorage.getItem("user")) || null,
+      value: JSON.parse(window.localStorage.getItem("user") || "") || null,
     });
   }, []);
 
@@ -63,6 +66,7 @@ function Header() {
           </Logo>
           <SearchIconDiv>
             <SearchIcon src={search} />
+            <SearchInput />
           </SearchIconDiv>
         </LeftDiv>
         <RightDiv>
@@ -173,6 +177,15 @@ const SearchIcon = styled.img`
   top: 9px;
 `;
 
+const SearchInput = styled.img`
+  position: absolute;
+
+  left: 9px;
+  top: 9px;
+  width: ${(props) => (true ? 0 : 0)};
+  border-button: ${(props) => (true ? "none" : "none")};
+`;
+
 const RightDiv = styled.div`
   display: flex;
   align-items: center;
@@ -217,7 +230,7 @@ const AvatarArrowIconDiv = styled.div`
 
 const AvatarArrowIcon = styled.img``;
 
-const UserWrapper = styled.div`
+const UserWrapper = styled.div<{ $active: boolean }>`
   display: ${(props) => (props.$active ? "block" : "none")};
   position: absolute;
   top: 47px;

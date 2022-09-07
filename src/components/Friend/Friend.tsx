@@ -1,6 +1,11 @@
 import styled from "styled-components";
 
-function Friend({ friendActive, setFriendActive }) {
+type FriendProps = {
+  friendActive: boolean;
+  setFriendActive: (value: boolean) => void;
+};
+
+const Friend: React.FC<FriendProps> = ({ friendActive, setFriendActive }) => {
   return (
     <Wrapper $active={friendActive}>
       friend:
@@ -13,11 +18,13 @@ function Friend({ friendActive, setFriendActive }) {
       </div>
     </Wrapper>
   );
-}
+};
 
 export default Friend;
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{
+  $active: boolean;
+}>`
   z-index: 3;
   display: ${(props) => (props.$active ? "block" : "none")};
   position: absolute;

@@ -1,6 +1,11 @@
 import styled from "styled-components";
 
-function Theme({ themeActive, setThemeActive }) {
+type ThemeProps = {
+  themeActive: boolean;
+  setThemeActive: (value: boolean) => void;
+};
+
+const Theme: React.FC<ThemeProps> = ({ themeActive, setThemeActive }) => {
   return (
     <Wrapper $active={themeActive}>
       Theme:
@@ -13,11 +18,11 @@ function Theme({ themeActive, setThemeActive }) {
       </div>
     </Wrapper>
   );
-}
+};
 
 export default Theme;
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ $active: boolean }>`
   z-index: 3;
   display: ${(props) => (props.$active ? "block" : "none")};
   position: absolute;

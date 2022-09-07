@@ -8,6 +8,9 @@ import TopSection from "../../components/TopSection/TopSection";
 import { auth } from "../../utils/firebase";
 import { initUser, getUserLibrary } from "../../utils/firestore";
 
+import { User } from "../../reducer/userReducer";
+import { CurrentBook } from "../../reducer/currentBookReducer";
+
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -17,8 +20,11 @@ import { useNavigate } from "react-router-dom";
 function Home() {
   const dispatch = useDispatch();
   const navigator = useNavigate();
-  const user = useSelector((state) => state.userReducer);
-  const library = useSelector((state) => state.currentLibraryReducer);
+  const user = useSelector((state: { userReducer: User }) => state.userReducer);
+  const library = useSelector(
+    (state: { currentLibraryReducer: CurrentBook[] }) =>
+      state.currentLibraryReducer
+  );
   const [signState, setSignState] = useState("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,10 +37,12 @@ function Home() {
     console.log(user);
     if (user) {
       getUserLibrary(user.uid).then((v) => {
-        dispatch({
-          type: actionType.LIBRARY.SETLIBRARY,
-          value: v.library,
-        });
+        if (v) {
+          dispatch({
+            type: actionType.LIBRARY.SETLIBRARY,
+            value: v.library,
+          });
+        }
         // const a = [...library, v.library];
         // console.log(typeof a);
         // setLibrary(a);
@@ -63,7 +71,6 @@ function Home() {
           </Center>
           <Center>
             <Bookcase>
-              {console.log(typeof [])}
               {library.map((i) => {
                 return (
                   <BookDiv>
@@ -123,7 +130,7 @@ function Home() {
                     localStorage.setItem("user", JSON.stringify(u.user));
                     console.log("註冊成功");
                     dispatch({ type: actionType.USER.SETUSER, value: u.user });
-                    initUser(u.user.uid, u.user.email);
+                    initUser(u.user.uid, u.user.email!);
                   })
                   .catch((e) => {
                     console.log(e.code);
@@ -215,14 +222,14 @@ const LoginButtonDiv = styled.div`
   display: flex;
 `;
 
-const Signup = styled.div`
+const Signup = styled.div<{ signState: string }>`
   width: 200px;
   height: 50px;
   border: 1px solid black;
   background: ${(props) => (props.signState === "signup" ? "gray" : "none")};
 `;
 
-const Signin = styled.div`
+const Signin = styled.div<{ signState: string }>`
   width: 200px;
   height: 50px;
   border: 1px solid black;

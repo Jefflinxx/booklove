@@ -18,11 +18,13 @@ import {
 } from "firebase/firestore";
 import { async } from "@firebase/util";
 
+import { CurrentBook } from "../reducer/currentBookReducer";
+
 const db = getFirestore(app);
 
 //collection
 
-export const addMessageRoom = (Uid, from, message) => {
+export const addMessageRoom = (Uid: [], from: string, message: string) => {
   console.log("add Message");
   const messageRooms = collection(db, "messageRooms");
   const contents = collection(db, "contents");
@@ -48,7 +50,7 @@ export const addMessageRoom = (Uid, from, message) => {
   );
 };
 
-export const addUser = (Uid, uname) => {
+export const addUser = (Uid: string, uname: string) => {
   console.log("add User");
   const users = collection(db, "users");
   const user = doc(users, Uid);
@@ -67,7 +69,6 @@ export const addUser = (Uid, uname) => {
         bookname: "spiderman",
         publish: "batman",
         cover: "",
-        likes: 0,
         category: [],
         totalChapter: 0,
         alreadyReadChapter: 0,
@@ -103,7 +104,7 @@ export const getMessageRoom = async () => {
   }
 };
 
-export const initUser = async (Uid, uname) => {
+export const initUser = async (Uid: string, uname: string) => {
   console.log("initUser");
   const users = collection(db, "users");
   const user = doc(users, Uid);
@@ -115,12 +116,12 @@ export const initUser = async (Uid, uname) => {
 };
 
 export const addSearchBookToUserLibrary = async (
-  Uid,
-  isbn,
-  bookname,
-  author,
-  publisher,
-  cover
+  Uid: string,
+  isbn: string,
+  bookname: string,
+  author: string,
+  publisher: string,
+  cover: string
 ) => {
   console.log("addSearchBookToUserLibrary");
   const docRef = doc(db, "users", Uid);
@@ -136,7 +137,7 @@ export const addSearchBookToUserLibrary = async (
   });
 };
 
-export const getUserLibrary = async (Uid) => {
+export const getUserLibrary = async (Uid: string) => {
   const docRef = doc(db, "users", Uid);
   const docSnap = await getDoc(docRef);
 
@@ -149,7 +150,10 @@ export const getUserLibrary = async (Uid) => {
   }
 };
 
-export const updateUserLibrary = async (Uid, library) => {
+export const updateUserLibrary = async (
+  Uid: string,
+  library: CurrentBook[]
+) => {
   const Ref = doc(db, "users", Uid);
   await updateDoc(Ref, {
     library: library,
