@@ -1,10 +1,8 @@
 import { CurrentBook } from "./currentBookReducer";
 
-type Library = CurrentBook[];
-
 const currentLibraryReducer = (
-  state = [],
-  action: { type: string; value: [] }
+  state = [] || null,
+  action: { type: string; value: CurrentBook[] }
 ) => {
   if (action.type === "setLibrary") return action.value;
   else return state;

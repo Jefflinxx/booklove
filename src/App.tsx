@@ -1,29 +1,49 @@
-import store from "./store/store";
-import { Provider } from "react-redux";
-
+import { useDispatch } from "react-redux";
+import { onAuthStateChanged } from "firebase/auth";
 import { createGlobalStyle } from "styled-components";
 import styled from "styled-components";
+import { auth } from "./utils/firebase";
+import { getUserInfo } from "./utils/firestore";
+import { actionType } from "./reducer/rootReducer";
 
 import Footer from "./components/Footer/Footer";
 import Header from "./components/Header/Header";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
-import { addMessageRoom, addUser, getMessageRoom } from "./utils/firestore";
-
-console.log(store);
 function App() {
+  const dispatch = useDispatch();
+  const navigator = useNavigate();
+  const Location = useLocation();
+  const localPath = Location.pathname.split("/")[1];
+  useEffect(() => {
+    onAuthStateChanged(auth, async (u) => {
+      console.log("監聽登入變化");
+      if (u) {
+        const uid = u.uid;
+        const user = await getUserInfo(uid);
+        dispatch({
+          type: actionType.USER.SETUSER,
+          value: user || null,
+        });
+        if (localPath === "login") {
+          navigator("../");
+        }
+      } else {
+        navigator("../login");
+      }
+    });
+  }, []);
   return (
     <>
-      <Provider store={store}>
-        <GlobalStyle />
+      <GlobalStyle />
 
-        <Header />
-        <Outlet />
-        <Footer />
-        {/* <button onClick={addMessageRoom}>addMessageRoom按鈕</button>
+      <Header />
+      <Outlet />
+      <Footer />
+      {/* <button onClick={addMessageRoom}>addMessageRoom按鈕</button>
       <button onClick={addUser}>addUser按鈕</button>
       <button onClick={getMessageRoom}>MessageRoom按鈕</button> */}
-      </Provider>
     </>
   );
 }
@@ -37,4 +57,9 @@ const GlobalStyle = createGlobalStyle`
     font-family: 'Noto Sans TC', sans-serif;
     font-family: 'Poppins', sans-serif;
   }
+  input{
+    background:none;  	
+    outline:none;  	
+    border:none;
+}
 `;

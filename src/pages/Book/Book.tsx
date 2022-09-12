@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { actionType } from "../../reducer/rootReducer";
 import { User } from "../../reducer/userReducer";
 import { CurrentBook } from "../../reducer/currentBookReducer";
-import { getUserLibrary } from "../../utils/firestore";
+import { getUserInfo } from "../../utils/firestore";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
@@ -29,7 +29,7 @@ function Book() {
 
   useEffect(() => {
     console.log(userId);
-    getUserLibrary(userId).then((v) => {
+    getUserInfo(userId).then((v) => {
       if (v) {
         dispatch({
           type: actionType.LIBRARY.SETLIBRARY,
@@ -89,12 +89,7 @@ function Book() {
           })}
           <SectionItem>
             <CategoryP>分類</CategoryP>
-            <Category>df</Category>
-          </SectionItem>
-
-          <SectionItem>
-            <LikeP>點讚</LikeP>
-            <Like>DFKLS</Like>
+            <Category>{currentBook.category}</Category>
           </SectionItem>
         </TopRightSection>
       </TopSection>
@@ -102,18 +97,18 @@ function Book() {
       <BottomSection>
         <SectionItem>
           <ProgressP>進度</ProgressP>
-          <Progress>DSFKLJ</Progress>
+          <Progress>{currentBook.alreadyReadChapter}</Progress>
         </SectionItem>
         <SectionItem>
           <PlaceP>地點</PlaceP>
-          <Place>dfk</Place>
+          <Place>{currentBook.place}</Place>
         </SectionItem>
         <SectionItem>
           <LendToP>出借給</LendToP>
-          <LendTo>a</LendTo>
+          <LendTo>{currentBook.lendTo}</LendTo>
         </SectionItem>
         <SummaryP>書摘</SummaryP>
-        <Summary>b</Summary>
+        <Summary>{currentBook.summary}</Summary>
       </BottomSection>
     </>
   );

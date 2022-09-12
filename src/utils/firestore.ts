@@ -17,7 +17,7 @@ import {
   arrayRemove,
 } from "firebase/firestore";
 import { async } from "@firebase/util";
-
+import { User } from "../reducer/userReducer";
 import { CurrentBook } from "../reducer/currentBookReducer";
 
 const db = getFirestore(app);
@@ -59,8 +59,8 @@ export const addUser = (Uid: string, uname: string) => {
     uname: uname || "",
     background: "",
     avatar: "",
-    followList: [{ Uid: "2", name: "max" }],
-    category: ["文學", "漫畫", "美術"],
+    followList: [{ Uid: "2", name: "max", avatar: "a" }],
+    category: ["文學", "漫畫", "美術"], //opt1
     library: [
       {
         Bid: "1",
@@ -79,7 +79,7 @@ export const addUser = (Uid: string, uname: string) => {
         isPublic: true,
       },
     ],
-    wishList: [],
+    wishList: [], //opt2
     Notification: [{ follower: "name" }],
   };
   setDoc(user, docData);
@@ -104,15 +104,29 @@ export const getMessageRoom = async () => {
   }
 };
 
-export const initUser = async (Uid: string, uname: string) => {
+export const initUser = async (uid: string, uname: string, avatar: string) => {
   console.log("initUser");
   const users = collection(db, "users");
-  const user = doc(users, Uid);
+  const user = doc(users, uid);
   const docData = {
-    Uid: Uid || "",
+    uid: uid || "",
     uname: uname || "",
+    avatar: avatar,
   };
   setDoc(user, docData);
+};
+
+export const updateUser = async (
+  uid: string,
+  uname: string,
+  avatar: string
+) => {
+  console.log("editUser");
+  const Ref = doc(db, "users", uid);
+  await updateDoc(Ref, {
+    uname: uname,
+    avatar: avatar,
+  });
 };
 
 export const addSearchBookToUserLibrary = async (
@@ -137,25 +151,53 @@ export const addSearchBookToUserLibrary = async (
   });
 };
 
-export const getUserLibrary = async (Uid: string) => {
-  const docRef = doc(db, "users", Uid);
+export const getUserInfo = async (uid: string) => {
+  const docRef = doc(db, "users", uid);
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
     const a = docSnap.data();
     console.log(a);
-    return a;
+    return a as User;
   } else {
-    console.log("No such document!");
+    return null;
   }
 };
 
 export const updateUserLibrary = async (
-  Uid: string,
-  library: CurrentBook[]
+  uid: string,
+  library: CurrentBook[] | object[]
 ) => {
-  const Ref = doc(db, "users", Uid);
+  const Ref = doc(db, "users", uid);
   await updateDoc(Ref, {
     library: library,
+  });
+};
+
+export const searchFriend = async (uname: string) => {
+  const q = query(collection(db, "users"), where("uname", "==", uname));
+  const querySnapshot = await getDocs(q);
+  let a: { uid: string; uname: string; avatar: string }[] = [];
+  querySnapshot.forEach((doc) => {
+    a = [
+      ...a,
+      { uid: doc.id, avatar: doc.data().avatar, uname: doc.data().uname },
+    ];
+  });
+  if (a.length > 0) return a;
+  else return null;
+};
+
+export const updateFollowList = async (
+  uid: string,
+  followArray: {
+    uid: string;
+    uname: string;
+    avatar: string;
+  }[]
+) => {
+  const Ref = doc(db, "users", uid);
+  await updateDoc(Ref, {
+    followList: followArray,
   });
 };

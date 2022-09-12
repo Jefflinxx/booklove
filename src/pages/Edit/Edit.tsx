@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { storage } from "../../utils/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useState } from "react";
-import currentBookReducer from "../../reducer/currentBookReducer";
 import { User } from "../../reducer/userReducer";
 import { CurrentBook } from "../../reducer/currentBookReducer";
 
@@ -25,11 +24,12 @@ function Edit() {
 
   const uploadImage = async () => {
     if (imageFile === null) return;
-    const imageRef = ref(storage, `images/${Date.now() + imageFile.name}`);
+    const imageRef = ref(storage, `${user.uid}/${Date.now() + imageFile.name}`);
     await uploadBytes(imageRef, imageFile);
     const imageUrl = await getDownloadURL(imageRef);
     return imageUrl;
   };
+
   return (
     <>
       <Center>
@@ -56,8 +56,26 @@ function Edit() {
       <form
         onSubmit={handleSubmit(async (data) => {
           const imageUrl = await uploadImage();
-          const a = { ...data, cover: imageUrl };
-          console.log(a);
+          let a: object;
+
+          if (imageUrl) {
+            a = { ...data, cover: imageUrl };
+          } else {
+            a = { ...data };
+          }
+          let b: object = {};
+          library.forEach((i) => {
+            if (i.isbn === currentbook.isbn) {
+              b = { ...i, ...a };
+            }
+          });
+          const c: object[] = library.filter(
+            (i) => i.isbn !== currentbook.isbn
+          );
+          const d: object[] = [...c, b];
+          console.log(d);
+          updateUserLibrary(user.uid, d);
+          navigator(-1);
         })}
       >
         <TopSection>
@@ -83,8 +101,12 @@ function Edit() {
 
           <TopRightSection>
             {[
-              { tagName: "書名", key: "bookname", value: currentbook.bookname },
-              { tagName: "作者", key: "author", value: currentbook.author },
+              {
+                tagName: "書名",
+                key: "bookname",
+                value: currentbook?.bookname,
+              },
+              { tagName: "作者", key: "author", value: currentbook?.author },
               {
                 tagName: "出版社",
                 key: "publisher",
@@ -95,7 +117,7 @@ function Edit() {
                 <SectionItem>
                   <BooknameP>{i.tagName}</BooknameP>
                   <Bookname
-                    value={i.value}
+                    defaultValue={i.value}
                     {...register(`${i.key}`)}
                   ></Bookname>
                 </SectionItem>
@@ -104,7 +126,7 @@ function Edit() {
             <SectionItem>
               <CategoryP>分類</CategoryP>
               <Category
-                value={currentbook.category}
+                defaultValue={currentbook?.category}
                 {...register("category")}
               ></Category>
             </SectionItem>
@@ -115,21 +137,27 @@ function Edit() {
           <SectionItem>
             <ProgressP>總章節</ProgressP>
             <Progress
-              value={currentbook.totalChapter}
+              defaultValue={currentbook?.totalChapter}
               {...register("totalChapter")}
             ></Progress>
           </SectionItem>
           <SectionItem>
             <PlaceP>地點</PlaceP>
-            <Place value={currentbook.place} {...register("place")}></Place>
+            <Place
+              defaultValue={currentbook?.place}
+              {...register("place")}
+            ></Place>
           </SectionItem>
           <SectionItem>
             <LendToP>出借給</LendToP>
-            <LendTo value={currentbook.lendTo} {...register("lendTo")}></LendTo>
+            <LendTo
+              defaultValue={currentbook?.lendTo}
+              {...register("lendTo")}
+            ></LendTo>
           </SectionItem>
           <SummaryP>書摘</SummaryP>
           <Summary
-            value={currentbook.summary}
+            defaultValue={currentbook?.summary}
             {...register("summary")}
           ></Summary>
         </BottomSection>

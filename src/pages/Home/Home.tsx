@@ -3,21 +3,18 @@ import { actionType } from "../../reducer/rootReducer";
 
 import styled from "styled-components";
 import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../utils/firebase";
 
 import TopSection from "../../components/TopSection/TopSection";
-import { auth } from "../../utils/firebase";
-import { initUser, getUserLibrary } from "../../utils/firestore";
 
 import { User } from "../../reducer/userReducer";
 import { CurrentBook } from "../../reducer/currentBookReducer";
-
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { getUserInfo } from "../../utils/firestore";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function Home() {
+  const Location = useLocation();
   const dispatch = useDispatch();
   const navigator = useNavigate();
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
@@ -25,33 +22,63 @@ function Home() {
     (state: { currentLibraryReducer: CurrentBook[] }) =>
       state.currentLibraryReducer
   );
-  const [signState, setSignState] = useState("signin");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const localPath = Location.pathname.split("/")[1];
 
-  //const [errorMessage, setErrorMessage] = useState(null);
-
-  //console.log("error", errorMessage);
-  console.log(library);
   useEffect(() => {
     console.log(user);
-    if (user) {
-      getUserLibrary(user.uid).then((v) => {
-        if (v) {
+    console.log(localPath);
+    console.log(localPath === "");
+
+    if (user?.library) {
+      console.log(user.library);
+      if (localPath === user.uid || localPath === "") {
+        getUserInfo(user.uid).then((v) => {
           dispatch({
             type: actionType.LIBRARY.SETLIBRARY,
-            value: v.library,
+            value: v?.library,
           });
-        }
-        // const a = [...library, v.library];
-        // console.log(typeof a);
-        // setLibrary(a);
-        // setLibrary((pre) => {
-        //   return [...pre, v.library]
-        // })
-      });
+        });
+      } else {
+        getUserInfo(localPath).then((v) => {
+          if (!v) {
+            dispatch({
+              type: actionType.LIBRARY.SETLIBRARY,
+              value: [
+                {
+                  cover:
+                    "https://firebasestorage.googleapis.com/v0/b/booklove-d393f.appspot.com/o/%E5%8A%9B%E9%87%8F%E4%BA%BA.png?alt=media&token=2a68c67d-2fd7-45d2-a9fc-93dea469b437",
+                  isbn: "彩蛋",
+                  bookname:
+                    "恭喜你找到隱藏彩蛋，歡迎mail聯絡作者將予以口頭讚美",
+                },
+              ],
+            });
+          } else if (v) {
+            dispatch({
+              type: actionType.LIBRARY.SETLIBRARY,
+              value: v.library,
+            });
+          }
+        });
+      }
     }
-  }, [user]);
+  }, [localPath, user]);
+  // useEffect(() => {
+  //   onAuthStateChanged(auth, async (u) => {
+  //     console.log("監聽登入變化");
+  //     if (u) {
+  //       const uid = u.uid;
+  //       const user = await getUserInfo(uid);
+  //       dispatch({
+  //         type: actionType.USER.SETUSER,
+  //         value: user || null,
+  //       });
+  //     } else {
+  //       navigator("../login");
+  //     }
+  //   });
+  // }, []);
+  console.log(user);
 
   return (
     <>
@@ -61,6 +88,8 @@ function Home() {
           <Center>
             <PlusIconDivWrapper>
               <PlusIconDiv
+                $uid={user.uid}
+                localPath={localPath}
                 onClick={() => {
                   navigator("./search");
                 }}
@@ -102,89 +131,7 @@ function Home() {
           </Center>
         </>
       ) : (
-        <LoginPage>
-          <LoginButtonDiv>
-            <Signup
-              signState={signState}
-              onClick={() => {
-                setSignState("signup");
-              }}
-            >
-              註冊
-            </Signup>
-            <Signin
-              signState={signState}
-              onClick={() => {
-                setSignState("signin");
-              }}
-            >
-              登入
-            </Signin>
-          </LoginButtonDiv>
-          <Form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (signState === "signup") {
-                createUserWithEmailAndPassword(auth, email, password)
-                  .then((u) => {
-                    localStorage.setItem("user", JSON.stringify(u.user));
-                    console.log("註冊成功");
-                    dispatch({ type: actionType.USER.SETUSER, value: u.user });
-                    initUser(u.user.uid, u.user.email!);
-                  })
-                  .catch((e) => {
-                    console.log(e.code);
-
-                    if (e.code === "auth/email-already-in-use") {
-                      console.log("信箱已存在");
-                    } else if (e.code === "auth/invalid-email") {
-                      console.log("信箱格式不正確");
-                    } else if (e.code === "auth/week-password") {
-                      console.log("密碼強度不足");
-                    }
-                  });
-              } else if (signState === "signin") {
-                signInWithEmailAndPassword(auth, email, password)
-                  .then((u) => {
-                    localStorage.user = JSON.stringify(u.user);
-                    console.log("登入成功");
-                    dispatch({ type: actionType.USER.SETUSER, value: u.user });
-                  })
-                  .catch((e) => {
-                    if (e.code === "auth/invalid-email") {
-                      console.log("信箱格式不正確");
-                    } else if (e.code === "auth/user-not-found") {
-                      console.log("信箱不存在");
-                    } else if (e.code === "auth/wrong-password") {
-                      console.log("密碼錯誤");
-                    }
-                  });
-              }
-            }}
-          >
-            <Input
-              placeholder="帳號"
-              onChange={(e) => {
-                setEmail(e.target.value.replace(/^\s*/, ""));
-              }}
-              value={email}
-            ></Input>
-            <Input
-              placeholder="密碼"
-              type="password"
-              onChange={(e) => {
-                setPassword(e.target.value.replace(/^\s*/, ""));
-              }}
-              value={password}
-            ></Input>
-            <Button>
-              {signState === "signup" && "註冊"}
-              {signState === "signin" && "登入"}
-            </Button>
-          </Form>
-          <p>jeffxxtest@gmail.com</p>
-          <p>12345678</p>
-        </LoginPage>
+        <></>
       )}
     </>
   );
@@ -198,63 +145,6 @@ const Center = styled.div`
   justify-content: center;
 `;
 
-const LoginPage = styled.div`
-  z-index: 3;
-  position: fixed;
-  top: 56px;
-  left: 0px;
-
-  width: 100vw;
-  height: 100vh;
-  background: white;
-  border: 1px solid black;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-`;
-
-const LoginButtonDiv = styled.div`
-  width: 400px;
-  height: 50px;
-  border: 1px solid black;
-  display: flex;
-`;
-
-const Signup = styled.div<{ signState: string }>`
-  width: 200px;
-  height: 50px;
-  border: 1px solid black;
-  background: ${(props) => (props.signState === "signup" ? "gray" : "none")};
-`;
-
-const Signin = styled.div<{ signState: string }>`
-  width: 200px;
-  height: 50px;
-  border: 1px solid black;
-  background: ${(props) => (props.signState === "signin" ? "gray" : "none")};
-`;
-
-const Form = styled.form`
-  width: 400px;
-  height: 300px;
-  border: 1px solid black;
-`;
-
-const Input = styled.input`
-  display: block;
-  width: 400px;
-  height: 40px;
-  border: 1px solid black;
-`;
-
-const Button = styled.button`
-  width: 100px;
-  height: 40px;
-  border: 1px solid black;
-`;
-
 const PlusIconDivWrapper = styled.div`
   width: 80%;
   display: flex;
@@ -262,10 +152,16 @@ const PlusIconDivWrapper = styled.div`
   justify-content: flex-end;
 `;
 
-const PlusIconDiv = styled.div`
+const PlusIconDiv = styled.div<{ localPath: string; $uid: string }>`
   width: 40px;
   height: 40px;
   border: 1px solid black;
+  display: ${(props) => {
+    console.log(props.localPath === "");
+    if (props.localPath === props.$uid || props.localPath === "") {
+      return "block";
+    } else return "none";
+  }};
 `;
 
 const PlusIcon = styled.div``;

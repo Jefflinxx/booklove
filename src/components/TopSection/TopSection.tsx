@@ -1,17 +1,85 @@
+import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
+import avatar from "./avatar.svg";
+import { User } from "../../reducer/userReducer";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { getUserInfo, updateFollowList } from "../../utils/firestore";
+import { actionType } from "../../reducer/rootReducer";
 
 function TopSection() {
+  const Location = useLocation();
+  const dispatch = useDispatch();
+  const user = useSelector((state: { userReducer: User }) => state.userReducer);
+  const [followObj, setFollowObj] = useState<
+    { uid: string; uname: string; avatar: string } | undefined
+  >(undefined);
+  const localPath = Location.pathname.split("/")[1];
+  useEffect(() => {
+    const getFollowObj = async () => {
+      const a = await getUserInfo(localPath);
+      console.log(a);
+      if (a) {
+        setFollowObj({ uid: a.uid, uname: a.uname, avatar: a.avatar });
+      }
+    };
+    getFollowObj();
+  }, []);
   return (
     <>
       <Background />
       <InfoDiv>
         <InfoLeft>
-          <Avatar />
-          <Username>username</Username>
+          <Avatar src={user?.avatar || avatar} />
+          <Username>{user?.uname}</Username>
         </InfoLeft>
         <InfoRight>
-          <InfoRightP>朋友</InfoRightP>
-          <InfoRightP>訊息</InfoRightP>
+          <InfoRightP
+            $uid={user?.uid}
+            localPath={localPath}
+            onClick={() => {
+              const a:
+                | {
+                    uid: string;
+                    uname: string;
+                    avatar: string;
+                  }[]
+                | undefined = user?.followList;
+              if (a?.find((k) => k.uid === localPath)) {
+                updateFollowList(
+                  user.uid,
+                  a.filter((j) => j.uid !== localPath)
+                );
+                dispatch({
+                  type: actionType.USER.SETUSER,
+                  value: {
+                    ...user,
+                    followList: a.filter((j) => j.uid !== localPath),
+                  },
+                });
+              } else if (a && !a?.find((k) => k.uid === localPath)) {
+                if (followObj) {
+                  updateFollowList(user.uid, [...a, followObj]);
+                  dispatch({
+                    type: actionType.USER.SETUSER,
+                    value: { ...user, followList: [...a, followObj] },
+                  });
+                }
+              } else if (!a) {
+                if (followObj) {
+                  updateFollowList(user.uid, [followObj]);
+                  dispatch({
+                    type: actionType.USER.SETUSER,
+                    value: { ...user, followList: [followObj] },
+                  });
+                }
+              }
+            }}
+          >
+            {user?.followList?.find((k) => k.uid === localPath)
+              ? "unfollow"
+              : "follow"}
+          </InfoRightP>
         </InfoRight>
       </InfoDiv>
       <Center>
@@ -52,7 +120,6 @@ const Avatar = styled.img`
   position: absolute;
   top: -80px;
   left: 20px;
-  background: black;
 `;
 
 const Username = styled.p`
@@ -67,11 +134,15 @@ const InfoRight = styled.div`
   align-items: center;
 `;
 
-const InfoRightP = styled.p`
+const InfoRightP = styled.p<{ localPath: string; $uid: string }>`
   font-size: 20px;
   margin-right: 30px;
   padding: 4px 20px;
   border: 1px solid black;
+  display: ${(props) => {
+    if (props.localPath === props.$uid || props.localPath === "") return "none";
+    else return "block";
+  }};
 `;
 
 const Split = styled.div`
