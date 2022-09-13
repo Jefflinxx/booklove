@@ -24,7 +24,9 @@ const Friend: React.FC<FriendProps> = ({ friendActive, setFriendActive }) => {
         setFollowList(a.followList);
       }
     };
-    f();
+    if (user) {
+      f();
+    }
   }, [friendActive]);
   return (
     <Wrapper $active={friendActive}>

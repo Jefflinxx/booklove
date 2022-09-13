@@ -1,24 +1,11 @@
+import { BookInfo } from "./userReducer";
+
 const initialState = {
   counter: 0,
   showCounter: true,
 };
 
-export type CurrentBook = {
-  isbn: string;
-  author: string;
-  bookname: string;
-  publisher: string;
-  cover: string;
-  likes: number;
-  category: string[];
-  totalChapter: number;
-  alreadyReadChapter: number;
-  place: string;
-  lendTo: string;
-  summary: string;
-  uploadCover: string[];
-  isPublic: boolean;
-};
+export type CurrentBook = BookInfo;
 
 const currentBookReducer = (
   state = {},

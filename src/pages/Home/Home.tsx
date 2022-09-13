@@ -10,8 +10,9 @@ import TopSection from "../../components/TopSection/TopSection";
 
 import { User } from "../../reducer/userReducer";
 import { CurrentBook } from "../../reducer/currentBookReducer";
-import { getUserInfo } from "../../utils/firestore";
+import { getUserInfo, updateCategory } from "../../utils/firestore";
 import { useNavigate, useLocation } from "react-router-dom";
+import { async } from "@firebase/util";
 
 function Home() {
   const Location = useLocation();
@@ -22,6 +23,13 @@ function Home() {
     (state: { currentLibraryReducer: CurrentBook[] }) =>
       state.currentLibraryReducer
   );
+  const [categorySelectActive, setCategorySelectActive] =
+    useState<boolean>(false);
+  const [categoryAllActive, setCategoryAllActive] = useState<boolean>(false);
+  const [categoryReadActive, setCategoryReadActive] = useState<boolean>(false);
+  const [categoryLendActive, setCategoryLendActive] = useState<boolean>(false);
+  const [categoryInput, setCategoryInput] = useState<string>("");
+  const [categoryCurrent, setCategoryCurrent] = useState<string | null>(null);
   const localPath = Location.pathname.split("/")[1];
 
   useEffect(() => {
@@ -100,6 +108,138 @@ function Home() {
           </Center>
           <Center>
             <Bookcase>
+              <LendToOther
+                onClick={async () => {
+                  setCategoryLendActive(true);
+                  let categoryResult: CurrentBook[] = [];
+
+                  const a = await getUserInfo(user.uid);
+
+                  a?.library?.forEach((j) => {
+                    if (j?.isLendTo) {
+                      categoryResult = [...categoryResult, j];
+                    }
+                  });
+                  dispatch({
+                    type: actionType.LIBRARY.SETLIBRARY,
+                    value: categoryResult,
+                  });
+                  setCategoryCurrent(null);
+                  setCategoryAllActive(false);
+                  setCategoryReadActive(false);
+                }}
+              >
+                出借中{categoryLendActive && `(${library.length})`}
+              </LendToOther>
+
+              <FinishRead
+                onClick={async () => {
+                  setCategoryReadActive(true);
+                  let categoryResult: CurrentBook[] = [];
+
+                  const a = await getUserInfo(user.uid);
+
+                  a?.library?.forEach((j) => {
+                    if (j?.isFinishRead) {
+                      categoryResult = [...categoryResult, j];
+                    }
+                  });
+                  dispatch({
+                    type: actionType.LIBRARY.SETLIBRARY,
+                    value: categoryResult,
+                  });
+                  setCategoryCurrent(null);
+                  setCategoryAllActive(false);
+                  setCategoryLendActive(false);
+                }}
+              >
+                完成閱讀{categoryReadActive && `(${library.length})`}
+              </FinishRead>
+
+              <CategoryAll
+                onClick={async () => {
+                  setCategoryAllActive(true);
+                  const a = await getUserInfo(user.uid);
+                  dispatch({
+                    type: actionType.LIBRARY.SETLIBRARY,
+                    value: a?.library || [],
+                  });
+                  setCategoryCurrent(null);
+                  setCategoryReadActive(false);
+                  setCategoryLendActive(false);
+                }}
+              >
+                全部{categoryAllActive && `(${library.length})`}
+              </CategoryAll>
+              <CategoryButton
+                onClick={() => {
+                  setCategorySelectActive(!categorySelectActive);
+                  setCategoryAllActive(false);
+                  setCategoryReadActive(false);
+                  setCategoryLendActive(false);
+                }}
+              >
+                類別
+                {categoryCurrent && `:${categoryCurrent}(${library?.length})`}
+              </CategoryButton>
+              <CategoryWrapper categorySelectActive={categorySelectActive}>
+                {user?.category?.map((i) => {
+                  return (
+                    <CategoryDiv
+                      onClick={async () => {
+                        let categoryResult: CurrentBook[] = [];
+
+                        const a = await getUserInfo(user.uid);
+
+                        a?.library?.forEach((j) => {
+                          console.log(j);
+                          j?.category?.forEach((k) => {
+                            if (k === i) {
+                              categoryResult = [...categoryResult, j];
+                            }
+                          });
+                        });
+                        dispatch({
+                          type: actionType.LIBRARY.SETLIBRARY,
+                          value: categoryResult,
+                        });
+                        setCategoryCurrent(i);
+                        setCategorySelectActive(false);
+                      }}
+                    >
+                      {i}
+                    </CategoryDiv>
+                  );
+                })}
+              </CategoryWrapper>
+              <CategoryInput
+                onChange={(e) => {
+                  setCategoryInput(e.target.value);
+                }}
+              />
+              <CategoryPlus
+                onClick={() => {
+                  if (user?.category) {
+                    updateCategory(user.uid, [...user.category, categoryInput]);
+                    dispatch({
+                      type: actionType.USER.SETUSER,
+                      value: {
+                        ...user,
+                        category: [...user.category, categoryInput],
+                      },
+                    });
+                  } else {
+                    updateCategory(user.uid, [categoryInput]);
+                    dispatch({
+                      type: actionType.USER.SETUSER,
+                      value: { ...user, category: [categoryInput] },
+                    });
+                  }
+                }}
+              >
+                +
+              </CategoryPlus>
+
               {library.map((i) => {
                 return (
                   <BookDiv>
@@ -168,13 +308,73 @@ const PlusIcon = styled.div``;
 
 const Bookcase = styled.div`
   border: 1px solid black;
-
+  position: relative;
   margin: 100px 0px;
   width: 80%;
   display: flex;
   align-items: center;
   ${"" /* justify-content: center; */}
   flex-wrap: wrap;
+`;
+
+const LendToOther = styled.div`
+  border: 1px solid black;
+  position: absolute;
+  top: -30px;
+  left: 50px;
+`;
+
+const FinishRead = styled.div`
+  border: 1px solid black;
+  position: absolute;
+  top: -30px;
+  left: 120px;
+`;
+
+const CategoryAll = styled.div`
+  border: 1px solid black;
+  position: absolute;
+  top: -30px;
+  left: 200px;
+`;
+
+const CategoryButton = styled.div`
+  border: 1px solid black;
+  position: absolute;
+  top: -30px;
+  left: 250px;
+`;
+
+const CategoryWrapper = styled.div<{ categorySelectActive: boolean }>`
+  width: 200px;
+  height: auto;
+  border: 1px solid black;
+  position: absolute;
+  top: -5px;
+  left: 250px;
+  z-index: 1;
+  background: white;
+  display: ${(props) => (props.categorySelectActive ? "block" : "none")};
+`;
+
+const CategoryDiv = styled.div`
+  border: 1px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const CategoryInput = styled.input`
+  border: 1px solid black;
+  position: absolute;
+  top: -30px;
+  left: 350px;
+`;
+const CategoryPlus = styled.div`
+  border: 1px solid black;
+  position: absolute;
+  top: -30px;
+  left: 500px;
 `;
 
 const BookDiv = styled.div`

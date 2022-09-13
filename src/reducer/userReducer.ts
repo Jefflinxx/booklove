@@ -3,18 +3,20 @@ const initialState = {
   showCounter: true,
 };
 
-type BookInfo = {
+export type BookInfo = {
   isbn: string;
   author: string;
   bookname: string;
   publisher: string;
   cover: string;
-  likes: number;
+  like: boolean;
   category: string[];
   totalChapter: number;
   alreadyReadChapter: number;
+  isFinishRead: boolean;
   place: string;
   lendTo: string;
+  isLendTo: boolean;
   summary: string;
   uploadCover: string[];
   isPublic: boolean;

@@ -129,6 +129,22 @@ export const updateUser = async (
   });
 };
 
+export const updateBackground = async (uid: string, background: string) => {
+  console.log("editBG");
+  const Ref = doc(db, "users", uid);
+  await updateDoc(Ref, {
+    background: background,
+  });
+};
+
+export const updateCategory = async (uid: string, category: string[]) => {
+  console.log("editCategory");
+  const Ref = doc(db, "users", uid);
+  await updateDoc(Ref, {
+    category: category,
+  });
+};
+
 export const addSearchBookToUserLibrary = async (
   Uid: string,
   isbn: string,
@@ -200,4 +216,15 @@ export const updateFollowList = async (
   await updateDoc(Ref, {
     followList: followArray,
   });
+};
+
+export const getAllUserDoc = async () => {
+  const querySnapshot = await getDocs(collection(db, "users"));
+  const a: any = [];
+  querySnapshot.forEach((doc) => {
+    // doc.data() is never undefined for query doc snapshots
+    //console.log(doc.id, " => ", doc.data());
+    a.push(doc.data());
+  });
+  return a;
 };

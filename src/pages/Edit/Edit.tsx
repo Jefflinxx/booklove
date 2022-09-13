@@ -5,13 +5,13 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { storage } from "../../utils/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User } from "../../reducer/userReducer";
 import { CurrentBook } from "../../reducer/currentBookReducer";
 
 function Edit() {
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
-  const currentbook = useSelector(
+  const currentBook = useSelector(
     (state: { currentBookReducer: CurrentBook }) => state.currentBookReducer
   );
   const library = useSelector(
@@ -21,6 +21,10 @@ function Edit() {
   const navigator = useNavigate();
   const { register, handleSubmit } = useForm();
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [categoryArray, setCategoryArray] = useState<string[]>([]);
+  const [progress, setProgress] = useState<number>(0);
+  const [progressWarn, setProgressWarn] = useState<boolean>(false);
+  const [likeActive, setLikeActive] = useState<boolean>(false);
 
   const uploadImage = async () => {
     if (imageFile === null) return;
@@ -29,6 +33,10 @@ function Edit() {
     const imageUrl = await getDownloadURL(imageRef);
     return imageUrl;
   };
+
+  useEffect(() => {
+    setCategoryArray(currentBook?.category || []);
+  }, []);
 
   return (
     <>
@@ -43,7 +51,7 @@ function Edit() {
           </BackDiv>
           <DeleteIconDiv
             onClick={() => {
-              const a = library.filter((i) => i.isbn !== currentbook.isbn);
+              const a = library.filter((i) => i.isbn !== currentBook.isbn);
               console.log(a);
               updateUserLibrary(user.uid, a);
               navigator("../../");
@@ -56,25 +64,39 @@ function Edit() {
       <form
         onSubmit={handleSubmit(async (data) => {
           const imageUrl = await uploadImage();
-          let a: object;
+          let submitData: object;
 
           if (imageUrl) {
-            a = { ...data, cover: imageUrl };
+            submitData = {
+              ...data,
+              cover: imageUrl,
+              category: categoryArray,
+              totalChapter: progress,
+            };
           } else {
-            a = { ...data };
+            submitData = {
+              ...data,
+              category: categoryArray,
+              totalChapter: progress,
+            };
           }
-          let b: object = {};
+
+          let bookInfoAddSubmitData: object = {};
           library.forEach((i) => {
-            if (i.isbn === currentbook.isbn) {
-              b = { ...i, ...a };
+            if (i.isbn === currentBook.isbn) {
+              bookInfoAddSubmitData = { ...i, ...submitData };
             }
           });
-          const c: object[] = library.filter(
-            (i) => i.isbn !== currentbook.isbn
+
+          const allBookExceptEditBook: object[] = user.library.filter(
+            (i) => i.isbn !== currentBook.isbn
           );
-          const d: object[] = [...c, b];
-          console.log(d);
-          updateUserLibrary(user.uid, d);
+          const allBookData: object[] = [
+            ...allBookExceptEditBook,
+            bookInfoAddSubmitData,
+          ];
+          console.log(allBookData);
+          updateUserLibrary(user.uid, allBookData);
           navigator(-1);
         })}
       >
@@ -92,7 +114,7 @@ function Edit() {
             />
             <BookImg
               src={
-                imageFile ? URL.createObjectURL(imageFile) : currentbook.cover
+                imageFile ? URL.createObjectURL(imageFile) : currentBook.cover
               }
             />
             <BookImgMask />
@@ -104,13 +126,13 @@ function Edit() {
               {
                 tagName: "書名",
                 key: "bookname",
-                value: currentbook?.bookname,
+                value: currentBook?.bookname,
               },
-              { tagName: "作者", key: "author", value: currentbook?.author },
+              { tagName: "作者", key: "author", value: currentBook?.author },
               {
                 tagName: "出版社",
                 key: "publisher",
-                value: currentbook.publisher,
+                value: currentBook.publisher,
               },
             ].map((i) => {
               return (
@@ -125,10 +147,41 @@ function Edit() {
             })}
             <SectionItem>
               <CategoryP>分類</CategoryP>
-              <Category
-                defaultValue={currentbook?.category}
-                {...register("category")}
-              ></Category>
+              <CategoryWrapper>
+                {user?.category?.map((i) => (
+                  <CategoryDiv
+                    $i={i}
+                    categoryArray={categoryArray}
+                    onClick={() => {
+                      if (categoryArray.find((j) => j === i)) {
+                        setCategoryArray((prev) => {
+                          prev.filter((k) => k !== i);
+                          return [...prev.filter((k) => k !== i)];
+                        });
+                      } else {
+                        setCategoryArray((prev) => [...prev, i]);
+                      }
+                    }}
+                  >
+                    {i}
+                  </CategoryDiv>
+                ))}
+              </CategoryWrapper>
+            </SectionItem>
+
+            <SectionItem>
+              <LikeDiv
+                likeActive={likeActive}
+                onClick={() => {
+                  setLikeActive(!likeActive);
+                  updateUserLibrary(user.uid, [
+                    ...user.library.filter((i) => i.isbn !== currentBook.isbn),
+                    { ...currentBook, like: !likeActive },
+                  ]);
+                }}
+              >
+                <Like>愛心</Like>
+              </LikeDiv>
             </SectionItem>
           </TopRightSection>
         </TopSection>
@@ -137,27 +190,38 @@ function Edit() {
           <SectionItem>
             <ProgressP>總章節</ProgressP>
             <Progress
-              defaultValue={currentbook?.totalChapter}
-              {...register("totalChapter")}
+              onChange={(e) => {
+                const a = Number(e.target.value);
+                console.log(typeof a, a);
+                if (isNaN(a)) {
+                  setProgressWarn(true);
+                } else {
+                  setProgressWarn(false);
+                  setProgress(a);
+                }
+              }}
+              defaultValue={currentBook?.totalChapter}
+              // {...register("totalChapter")}
             ></Progress>
+            <ProgressWarn progressWarn={progressWarn}>請輸入數字</ProgressWarn>
           </SectionItem>
           <SectionItem>
             <PlaceP>地點</PlaceP>
             <Place
-              defaultValue={currentbook?.place}
+              defaultValue={currentBook?.place}
               {...register("place")}
             ></Place>
           </SectionItem>
           <SectionItem>
             <LendToP>出借給</LendToP>
             <LendTo
-              defaultValue={currentbook?.lendTo}
+              defaultValue={currentBook?.lendTo}
               {...register("lendTo")}
             ></LendTo>
           </SectionItem>
           <SummaryP>書摘</SummaryP>
           <Summary
-            defaultValue={currentbook?.summary}
+            defaultValue={currentBook?.summary}
             {...register("summary")}
           ></Summary>
         </BottomSection>
@@ -212,6 +276,7 @@ const BookImgLabel = styled.label`
 const BookImgInput = styled.input`
   opacity: 0;
   z-index: -1;
+  border: 1px solid black;
 `;
 
 const BookImg = styled.img`
@@ -261,30 +326,59 @@ const BooknameP = styled.div``;
 const Bookname = styled.input`
   width: 160px;
   height: 40px;
+  border: 1px solid black;
 `;
 
 const CategoryP = styled.div``;
-const Category = styled.input`
+const CategoryWrapper = styled.div`
+  display: flex;
+  height: 50px;
+`;
+const CategoryDiv = styled.div<{ categoryArray: string[]; $i: string }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  border: 1px solid black;
+  background: ${(props) =>
+    props.categoryArray.find((j) => j === props.$i) ? "blue" : "white"};
+`;
+
+const LikeDiv = styled.div<{ likeActive: boolean }>`
+  background: ${(props) => (props.likeActive ? "blue" : "white")};
+`;
+const Like = styled.div`
   width: 160px;
   height: 40px;
+  border: 1px solid black;
 `;
 
 const ProgressP = styled.div``;
 const Progress = styled.input`
   width: 160px;
   height: 40px;
+  border: 1px solid black;
+`;
+
+const ProgressWarn = styled.div<{ progressWarn: boolean }>`
+  width: 100px;
+  height: 40px;
+  border: 1px solid black;
+  display: ${(props) => (props.progressWarn ? "block" : "none")};
 `;
 
 const PlaceP = styled.div``;
 const Place = styled.input`
   width: 160px;
   height: 40px;
+  border: 1px solid black;
 `;
 
 const LendToP = styled.div``;
 const LendTo = styled.input`
   width: 160px;
   height: 40px;
+  border: 1px solid black;
 `;
 
 const SummaryP = styled.div``;

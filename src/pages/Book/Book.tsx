@@ -2,10 +2,15 @@ import styled from "styled-components";
 import { actionType } from "../../reducer/rootReducer";
 import { User } from "../../reducer/userReducer";
 import { CurrentBook } from "../../reducer/currentBookReducer";
-import { getUserInfo } from "../../utils/firestore";
+import {
+  getUserInfo,
+  updateUserLibrary,
+  getAllUserDoc,
+} from "../../utils/firestore";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { async } from "@firebase/util";
 
 function Book() {
   const Location = useLocation();
@@ -19,8 +24,15 @@ function Book() {
     (state: { currentLibraryReducer: CurrentBook[] }) =>
       state.currentLibraryReducer
   );
+  const [progressArray, setProgressArray] = useState<number[]>([0]);
+  const [totalLike, setTotalLike] = useState<number | null>(null);
 
-  console.log(currentBook);
+  const progressRows: number[] = [];
+  for (let i = 1; i <= currentBook.totalChapter; i++) {
+    progressRows.push(i);
+  }
+
+  console.log(progressArray);
 
   const a = Location.pathname.split("/")[2];
   const bookId = a.slice(-13);
@@ -37,6 +49,28 @@ function Book() {
         });
       }
     });
+    setProgressArray(() => {
+      const a: number[] = [];
+      for (let i = 1; i <= currentBook.alreadyReadChapter; i++) {
+        a.push(i);
+      }
+      return a;
+    });
+    let likeCounter: number = 0;
+    const getTotalLike = async () => {
+      const a = await getAllUserDoc();
+      console.log(a);
+      a.forEach((i) => {
+        i.library?.forEach((j) => {
+          if (j.isbn === currentBook.isbn && j.like) {
+            likeCounter++;
+          }
+        });
+      });
+      setTotalLike(likeCounter);
+    };
+
+    getTotalLike();
   }, []);
 
   useEffect(() => {
@@ -91,13 +125,77 @@ function Book() {
             <CategoryP>分類</CategoryP>
             <Category>{currentBook.category}</Category>
           </SectionItem>
+
+          <SectionItem>
+            <LikeP>本書全站讚數</LikeP>
+            <Like>{totalLike}</Like>
+          </SectionItem>
         </TopRightSection>
       </TopSection>
 
       <BottomSection>
         <SectionItem>
-          <ProgressP>進度</ProgressP>
-          <Progress>{currentBook.alreadyReadChapter}</Progress>
+          <ProgressP>進度{`${currentBook.totalChapter}`}</ProgressP>
+          <ProgressWrapper>
+            {progressRows.map((i) => (
+              <Progress
+                $i={i}
+                progressArray={progressArray}
+                key={i}
+                onClick={() => {
+                  if (
+                    //刪掉
+                    progressArray.find((j) => j === i) &&
+                    Math.max(...progressArray) === i
+                  ) {
+                    setProgressArray((prev) => {
+                      prev.filter((k) => k !== i);
+                      return [...prev.filter((k) => k !== i)];
+                    });
+                    updateUserLibrary(user.uid, [
+                      ...user.library.filter(
+                        (i) => i.isbn !== currentBook.isbn
+                      ),
+                      {
+                        ...currentBook,
+                        alreadyReadChapter: i - 1,
+                        isFinishRead: false,
+                      },
+                    ]);
+                  } else if (
+                    //增加
+                    Math.max(...progressArray) + 1 ===
+                    i
+                  ) {
+                    setProgressArray((prev) => [...prev, i]);
+                    if (i === currentBook.totalChapter) {
+                      updateUserLibrary(user.uid, [
+                        ...user.library.filter(
+                          (i) => i.isbn !== currentBook.isbn
+                        ),
+                        {
+                          ...currentBook,
+                          alreadyReadChapter: i,
+                          isFinishRead: true,
+                        },
+                      ]);
+                    } else {
+                      updateUserLibrary(user.uid, [
+                        ...user.library.filter(
+                          (i) => i.isbn !== currentBook.isbn
+                        ),
+                        {
+                          ...currentBook,
+                          alreadyReadChapter: i,
+                          isFinishRead: false,
+                        },
+                      ]);
+                    }
+                  }
+                }}
+              ></Progress>
+            ))}
+          </ProgressWrapper>
         </SectionItem>
         <SectionItem>
           <PlaceP>地點</PlaceP>
@@ -170,7 +268,20 @@ const LikeP = styled.div``;
 const Like = styled.div``;
 
 const ProgressP = styled.div``;
-const Progress = styled.div``;
+const ProgressWrapper = styled.div`
+  display: flex;
+  border-radius: 20px;
+  border-left: 2px solid black;
+  border-right: 2px solid black;
+  overflow: hidden;
+`;
+const Progress = styled.div<{ progressArray: number[]; $i: number }>`
+  width: 40px;
+  height: 40px;
+  border: 1px solid black;
+  background: ${(props) =>
+    props.progressArray.find((j) => j === props.$i) ? "blue" : "white"};
+`;
 
 const PlaceP = styled.div``;
 const Place = styled.div``;

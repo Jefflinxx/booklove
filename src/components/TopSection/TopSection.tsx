@@ -4,8 +4,15 @@ import avatar from "./avatar.svg";
 import { User } from "../../reducer/userReducer";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getUserInfo, updateFollowList } from "../../utils/firestore";
+import {
+  getUserInfo,
+  updateBackground,
+  updateFollowList,
+} from "../../utils/firestore";
 import { actionType } from "../../reducer/rootReducer";
+import { storage } from "../../utils/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { async } from "@firebase/util";
 
 function TopSection() {
   const Location = useLocation();
@@ -14,7 +21,19 @@ function TopSection() {
   const [followObj, setFollowObj] = useState<
     { uid: string; uname: string; avatar: string } | undefined
   >(undefined);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [confirmActive, setConfirmActive] = useState<boolean>(false);
+
   const localPath = Location.pathname.split("/")[1];
+
+  const uploadImage = async () => {
+    if (imageFile === null) return;
+    const imageRef = ref(storage, `${user.uid}/${Date.now() + imageFile.name}`);
+    await uploadBytes(imageRef, imageFile);
+    const imageUrl = await getDownloadURL(imageRef);
+    return imageUrl;
+  };
+
   useEffect(() => {
     const getFollowObj = async () => {
       const a = await getUserInfo(localPath);
@@ -25,9 +44,63 @@ function TopSection() {
     };
     getFollowObj();
   }, []);
+
+  console.log(imageFile);
   return (
     <>
-      <Background />
+      <BgWrapper>
+        <AvatarImgLabel
+          confirmActive={confirmActive}
+          htmlFor="bg"
+          onClick={() => {
+            setConfirmActive(true);
+          }}
+        >
+          <EditImgBtn>圖</EditImgBtn>
+        </AvatarImgLabel>
+
+        <ConfirmBtn
+          onClick={async () => {
+            setConfirmActive(false);
+            const imageUrl = await uploadImage();
+            const a = { cover: imageUrl };
+            console.log(a);
+            if (imageUrl) {
+              updateBackground(user.uid, imageUrl);
+              dispatch({
+                type: actionType.USER.SETUSER,
+                value: { ...user, background: imageUrl },
+              });
+            }
+          }}
+          confirmActive={confirmActive}
+        >
+          確定
+        </ConfirmBtn>
+        <CancelBtn
+          onClick={() => {
+            setConfirmActive(false);
+          }}
+          confirmActive={confirmActive}
+        >
+          取消
+        </CancelBtn>
+
+        <BackgroundImgInput
+          id="bg"
+          type="file"
+          accept="image/gif, image/jpeg, image/png"
+          onChange={(e) => {
+            if (e.target.files) {
+              setImageFile(e.target.files[0]);
+            }
+          }}
+        />
+        <Background
+          src={imageFile ? URL.createObjectURL(imageFile) : user?.background}
+        />
+      </BgWrapper>
+
       <InfoDiv>
         <InfoLeft>
           <Avatar src={user?.avatar || avatar} />
@@ -91,9 +164,62 @@ function TopSection() {
 
 export default TopSection;
 
-const Background = styled.div`
-  height: 200px;
+const BgWrapper = styled.div`
+  position: relative;
+`;
+
+const AvatarImgLabel = styled.label<{ confirmActive: boolean }>`
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  border: 1px solid black;
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+
+  align-items: center;
+  justify-content: center;
+  display: ${(props) => (props.confirmActive ? "none" : "flex")};
+`;
+
+const EditImgBtn = styled.div``;
+
+const ConfirmBtn = styled.div<{ confirmActive: boolean }>`
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border: 1px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  display: ${(props) => (props.confirmActive ? "block" : "none")};
+`;
+const CancelBtn = styled.div<{ confirmActive: boolean }>`
+  position: absolute;
+  bottom: 20px;
+  right: 100px;
+  width: 50px;
+  height: 50px;
+  border: 1px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  display: ${(props) => (props.confirmActive ? "block" : "none")};
+`;
+
+const BackgroundImgInput = styled.input`
+  opacity: 0;
+  z-index: -1;
+  display: none;
+`;
+
+const Background = styled.img`
+  height: 400px;
+  width: 100%;
   background: gray;
+  object-fit: cover;
 `;
 
 const InfoDiv = styled.div`

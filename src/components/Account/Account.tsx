@@ -50,8 +50,8 @@ const Account: React.FC<AccountProps> = ({
         返回
       </div>
       <Center>
-        <BookImgLabel>
-          <BookImgInput
+        <AvatarImgLabel>
+          <AvatarImgInput
             type="file"
             accept="image/gif, image/jpeg, image/png"
             onChange={(e) => {
@@ -63,9 +63,9 @@ const Account: React.FC<AccountProps> = ({
           <Avatar
             src={imageFile ? URL.createObjectURL(imageFile) : user?.avatar}
           />
-          <BookImgMask />
+          <AvatarImgMask />
           <UploadImgBtn>更新封面</UploadImgBtn>
-        </BookImgLabel>
+        </AvatarImgLabel>
 
         <UnameWrapper>
           <Username $isEdit={isEdit}>{user?.uname}</Username>
@@ -133,14 +133,14 @@ const Center = styled.div`
   flex-direction: column;
 `;
 
-const BookImgLabel = styled.label`
+const AvatarImgLabel = styled.label`
   width: 130px;
   height: 130px;
   border-radius: 50%;
   position: relative;
 `;
 
-const BookImgInput = styled.input`
+const AvatarImgInput = styled.input`
   opacity: 0;
   z-index: -1;
 `;
@@ -155,7 +155,7 @@ const Avatar = styled.img`
   z-index: 1;
 `;
 
-const BookImgMask = styled.div`
+const AvatarImgMask = styled.div`
   width: 100%;
   height: 100%;
   position: absolute;

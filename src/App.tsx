@@ -19,6 +19,9 @@ function App() {
   useEffect(() => {
     onAuthStateChanged(auth, async (u) => {
       console.log("監聽登入變化");
+      console.log(u);
+      console.log(localPath);
+
       if (u) {
         const uid = u.uid;
         const user = await getUserInfo(uid);
