@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { storage } from "../../utils/firebase";
-import { updateUser } from "../../utils/firestore";
+import { getUserInfo, updateUser } from "../../utils/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { User } from "../../reducer/userReducer";
 import { useSelector, useDispatch } from "react-redux";
@@ -24,6 +24,8 @@ const Account: React.FC<AccountProps> = ({
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [input, setInput] = useState<string>("");
+  const [readCount, setReadCount] = useState<number>(0);
+  const [writeCount, setWriteCount] = useState<number>(0);
 
   const uploadImage = async () => {
     if (imageFile === null) return;
@@ -38,6 +40,39 @@ const Account: React.FC<AccountProps> = ({
       setInput(user.uname);
     }
   }, [user]);
+
+  useEffect(() => {
+    const getReadCount = async () => {
+      let counter = 0;
+
+      const a = await getUserInfo(user.uid);
+
+      a?.library?.forEach((i) => {
+        if (i.isFinishRead) {
+          counter++;
+        }
+      });
+      setReadCount(counter);
+    };
+
+    const getWriteCount = async () => {
+      let counter = 0;
+      const a = await getUserInfo(user.uid);
+
+      a?.library?.forEach((i) => {
+        if (i.summary) {
+          counter += i.summary.length;
+        }
+      });
+      console.log(counter);
+      setWriteCount(counter);
+    };
+
+    if (user?.uid) {
+      getReadCount();
+      getWriteCount();
+    }
+  }, [accountActive, user]);
 
   return (
     <Wrapper $active={accountActive}>
@@ -107,6 +142,12 @@ const Account: React.FC<AccountProps> = ({
         >
           確認修改
         </button>
+        <ReadCountWrapper>
+          <ReadCountP>閱讀書本累計{readCount}</ReadCountP>
+        </ReadCountWrapper>
+        <WriteCountWrapper>
+          <WriteCountP>書摘字數累計{writeCount}</WriteCountP>
+        </WriteCountWrapper>
       </Center>
     </Wrapper>
   );
@@ -217,3 +258,8 @@ const EditIcon = styled.div`
   height: 30px;
   border: 1px solid black;
 `;
+
+const ReadCountWrapper = styled.div``;
+const ReadCountP = styled.div``;
+const WriteCountWrapper = styled.div``;
+const WriteCountP = styled.div``;

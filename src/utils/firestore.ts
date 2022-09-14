@@ -145,8 +145,16 @@ export const updateCategory = async (uid: string, category: string[]) => {
   });
 };
 
+export const updateWishList = async (uid: string, wishList: CurrentBook[]) => {
+  console.log("editWishList");
+  const Ref = doc(db, "users", uid);
+  await updateDoc(Ref, {
+    wishList: wishList,
+  });
+};
+
 export const addSearchBookToUserLibrary = async (
-  Uid: string,
+  uid: string,
   isbn: string,
   bookname: string,
   author: string,
@@ -154,9 +162,31 @@ export const addSearchBookToUserLibrary = async (
   cover: string
 ) => {
   console.log("addSearchBookToUserLibrary");
-  const docRef = doc(db, "users", Uid);
+  const docRef = doc(db, "users", uid);
   await updateDoc(docRef, {
     library: arrayUnion({
+      isbn: isbn,
+      bookname: bookname,
+      author: author,
+      publisher: publisher,
+      cover: cover,
+      isPublic: true,
+    }),
+  });
+};
+
+export const addSearchBookToUserWishList = async (
+  uid: string,
+  isbn: string,
+  bookname: string,
+  author: string,
+  publisher: string,
+  cover: string
+) => {
+  console.log("addSearchBookToUserWishList");
+  const docRef = doc(db, "users", uid);
+  await updateDoc(docRef, {
+    wishList: arrayUnion({
       isbn: isbn,
       bookname: bookname,
       author: author,
@@ -184,6 +214,7 @@ export const updateUserLibrary = async (
   uid: string,
   library: CurrentBook[] | object[]
 ) => {
+  console.log(library);
   const Ref = doc(db, "users", uid);
   await updateDoc(Ref, {
     library: library,

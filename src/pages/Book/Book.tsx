@@ -98,6 +98,20 @@ function Book() {
           </BackDiv>
           <EditIconDiv
             onClick={() => {
+              getUserInfo(user.uid).then((v) => {
+                dispatch({
+                  type: actionType.USER.SETUSER,
+                  value: v,
+                });
+                v?.library.forEach((i) => {
+                  if (i.isbn === currentBook.isbn) {
+                    dispatch({
+                      type: actionType.BOOK.SETBOOKDATA,
+                      value: i,
+                    });
+                  }
+                });
+              });
               navigator(`../edit/${user.uid}${currentBook.isbn}`);
             }}
           >
@@ -142,54 +156,59 @@ function Book() {
                 $i={i}
                 progressArray={progressArray}
                 key={i}
-                onClick={() => {
-                  if (
-                    //刪掉
-                    progressArray.find((j) => j === i) &&
-                    Math.max(...progressArray) === i
-                  ) {
-                    setProgressArray((prev) => {
-                      prev.filter((k) => k !== i);
-                      return [...prev.filter((k) => k !== i)];
-                    });
-                    updateUserLibrary(user.uid, [
-                      ...user.library.filter(
-                        (i) => i.isbn !== currentBook.isbn
-                      ),
-                      {
-                        ...currentBook,
-                        alreadyReadChapter: i - 1,
-                        isFinishRead: false,
-                      },
-                    ]);
-                  } else if (
-                    //增加
-                    Math.max(...progressArray) + 1 ===
-                    i
-                  ) {
-                    setProgressArray((prev) => [...prev, i]);
-                    if (i === currentBook.totalChapter) {
+                onClick={async () => {
+                  const userData = await getUserInfo(user.uid);
+                  if (userData) {
+                    if (
+                      //刪掉
+                      progressArray.find((j) => j === i) &&
+                      Math.max(...progressArray) === i
+                    ) {
+                      setProgressArray((prev) => {
+                        prev.filter((k) => k !== i);
+                        return [...prev.filter((k) => k !== i)];
+                      });
+
                       updateUserLibrary(user.uid, [
-                        ...user.library.filter(
+                        ...userData.library.filter(
                           (i) => i.isbn !== currentBook.isbn
                         ),
                         {
                           ...currentBook,
-                          alreadyReadChapter: i,
-                          isFinishRead: true,
-                        },
-                      ]);
-                    } else {
-                      updateUserLibrary(user.uid, [
-                        ...user.library.filter(
-                          (i) => i.isbn !== currentBook.isbn
-                        ),
-                        {
-                          ...currentBook,
-                          alreadyReadChapter: i,
+                          alreadyReadChapter: i - 1,
                           isFinishRead: false,
                         },
                       ]);
+                    } else if (
+                      //增加
+                      Math.max(...progressArray) + 1 === i ||
+                      i === 1
+                    ) {
+                      setProgressArray((prev) => [...prev, i]);
+                      if (i === Number(currentBook.totalChapter)) {
+                        console.log("設為已讀完");
+                        updateUserLibrary(user.uid, [
+                          ...userData.library.filter(
+                            (i) => i.isbn !== currentBook.isbn
+                          ),
+                          {
+                            ...currentBook,
+                            alreadyReadChapter: i,
+                            isFinishRead: true,
+                          },
+                        ]);
+                      } else {
+                        updateUserLibrary(user.uid, [
+                          ...userData.library.filter(
+                            (i) => i.isbn !== currentBook.isbn
+                          ),
+                          {
+                            ...currentBook,
+                            alreadyReadChapter: i,
+                            isFinishRead: false,
+                          },
+                        ]);
+                      }
                     }
                   }
                 }}

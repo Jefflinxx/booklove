@@ -7,7 +7,10 @@ import { useEffect, useState } from "react";
 import { User } from "../../reducer/userReducer";
 import { CurrentBook } from "../../reducer/currentBookReducer";
 
-import { addSearchBookToUserLibrary } from "../../utils/firestore";
+import {
+  addSearchBookToUserLibrary,
+  addSearchBookToUserWishList,
+} from "../../utils/firestore";
 import { stringify } from "querystring";
 
 const googleApi = `https://www.googleapis.com/books/v1/volumes?q=`;
@@ -164,14 +167,22 @@ function Search() {
         <Bookcase>
           {books.map((i) => {
             let a = 0;
-            library.forEach((j) => {
+            user.library?.forEach((j) => {
               console.log(j.isbn, i.isbn);
               if (j.isbn === i.isbn) {
                 console.log("有一樣");
                 a += 1;
               }
             });
-            console.log(a);
+            let b = 0;
+            user.wishList?.forEach((j) => {
+              console.log(j.isbn, i.isbn);
+              if (j.isbn === i.isbn) {
+                console.log("有一樣");
+                b += 1;
+              }
+            });
+
             return (
               <BookDiv key={i.isbn}>
                 <BookImg src={i.picture_url}></BookImg>
@@ -188,22 +199,38 @@ function Search() {
                     <PublishP>出版</PublishP>
                     <Publish>{i.publisher}</Publish>
                   </BookItem>
-
-                  <AddBookBtn
-                    $a={a}
-                    onClick={() => {
-                      addSearchBookToUserLibrary(
-                        user.uid,
-                        i.isbn,
-                        i.name,
-                        i.author,
-                        i.publisher,
-                        i.picture_url
-                      );
-                    }}
-                  >
-                    加入此書
-                  </AddBookBtn>
+                  <AddWrapper>
+                    <AddBookBtn
+                      $a={a}
+                      onClick={() => {
+                        addSearchBookToUserLibrary(
+                          user.uid,
+                          i.isbn,
+                          i.name,
+                          i.author,
+                          i.publisher,
+                          i.picture_url
+                        );
+                      }}
+                    >
+                      加入書櫃
+                    </AddBookBtn>
+                    <AddToWishList
+                      $b={b}
+                      onClick={() => {
+                        addSearchBookToUserWishList(
+                          user.uid,
+                          i.isbn,
+                          i.name,
+                          i.author,
+                          i.publisher,
+                          i.picture_url
+                        );
+                      }}
+                    >
+                      加入願望清單
+                    </AddToWishList>
+                  </AddWrapper>
                 </BookRightSection>
               </BookDiv>
             );
@@ -279,9 +306,17 @@ const Author = styled.p``;
 const PublishP = styled.p``;
 const Publish = styled.p``;
 
+const AddWrapper = styled.div``;
+
 const AddBookBtn = styled.button<{ $a: number }>`
   display: ${(props) => {
     console.log(props.$a);
     return props.$a ? "none" : "block";
+  }};
+`;
+
+const AddToWishList = styled.button<{ $b: number }>`
+  display: ${(props) => {
+    return props.$b ? "none" : "block";
   }};
 `;

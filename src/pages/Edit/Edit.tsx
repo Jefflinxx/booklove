@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
-import { updateUserLibrary } from "../../utils/firestore";
+import { getUserInfo, updateUserLibrary } from "../../utils/firestore";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { storage } from "../../utils/firebase";
@@ -25,6 +25,7 @@ function Edit() {
   const [progress, setProgress] = useState<number>(0);
   const [progressWarn, setProgressWarn] = useState<boolean>(false);
   const [likeActive, setLikeActive] = useState<boolean>(false);
+  const [publicActive, setPublicActive] = useState<boolean>(true);
 
   const uploadImage = async () => {
     if (imageFile === null) return;
@@ -36,8 +37,22 @@ function Edit() {
 
   useEffect(() => {
     setCategoryArray(currentBook?.category || []);
-  }, []);
+    if (user?.uid) {
+      getUserInfo(user.uid).then((v) => {
+        v?.library.forEach((i) => {
+          if (i.isbn === currentBook.isbn) {
+            console.log("public", i.isPublic);
+            setProgress(i.totalChapter);
+            setLikeActive(i.like);
+            setPublicActive(i.isPublic);
+          }
+        });
+      });
+    }
+  }, [user]);
 
+  console.log(publicActive);
+  console.log(progress);
   return (
     <>
       <Center>
@@ -67,19 +82,48 @@ function Edit() {
           let submitData: object;
 
           if (imageUrl) {
-            submitData = {
-              ...data,
-              cover: imageUrl,
-              category: categoryArray,
-              totalChapter: progress,
-            };
+            if (currentBook.alreadyReadChapter < progress) {
+              submitData = {
+                ...data,
+                cover: imageUrl,
+                category: categoryArray,
+                totalChapter: progress,
+                like: likeActive,
+                isPublic: publicActive,
+              };
+            } else {
+              submitData = {
+                ...data,
+                cover: imageUrl,
+                category: categoryArray,
+                totalChapter: progress,
+                alreadyReadChapter: progress,
+                like: likeActive,
+                isPublic: publicActive,
+              };
+            }
           } else {
-            submitData = {
-              ...data,
-              category: categoryArray,
-              totalChapter: progress,
-            };
+            console.log("v", currentBook.alreadyReadChapter <= progress);
+            if (currentBook.alreadyReadChapter <= progress) {
+              submitData = {
+                ...data,
+                category: categoryArray,
+                totalChapter: progress,
+                like: likeActive,
+                isPublic: publicActive,
+              };
+            } else {
+              submitData = {
+                ...data,
+                category: categoryArray,
+                totalChapter: progress,
+                alreadyReadChapter: progress,
+                like: likeActive,
+                isPublic: publicActive,
+              };
+            }
           }
+          console.log(submitData);
 
           let bookInfoAddSubmitData: object = {};
           library.forEach((i) => {
@@ -88,16 +132,19 @@ function Edit() {
             }
           });
 
-          const allBookExceptEditBook: object[] = user.library.filter(
-            (i) => i.isbn !== currentBook.isbn
-          );
-          const allBookData: object[] = [
-            ...allBookExceptEditBook,
-            bookInfoAddSubmitData,
-          ];
-          console.log(allBookData);
-          updateUserLibrary(user.uid, allBookData);
-          navigator(-1);
+          const userData = await getUserInfo(user.uid);
+          if (userData) {
+            const allBookExceptEditBook: object[] = userData.library.filter(
+              (i) => i.isbn !== currentBook.isbn
+            );
+            const allBookData: object[] = [
+              ...allBookExceptEditBook,
+              bookInfoAddSubmitData,
+            ];
+            console.log(allBookData);
+            updateUserLibrary(user.uid, allBookData);
+            navigator(-1);
+          }
         })}
       >
         <TopSection>
@@ -182,6 +229,21 @@ function Edit() {
               >
                 <Like>愛心</Like>
               </LikeDiv>
+            </SectionItem>
+
+            <SectionItem>
+              <PublicDiv
+                publicActive={publicActive}
+                onClick={() => {
+                  setPublicActive(!publicActive);
+                  updateUserLibrary(user.uid, [
+                    ...user.library.filter((i) => i.isbn !== currentBook.isbn),
+                    { ...currentBook, like: !publicActive },
+                  ]);
+                }}
+              >
+                <Public>是公開</Public>
+              </PublicDiv>
             </SectionItem>
           </TopRightSection>
         </TopSection>
@@ -348,6 +410,15 @@ const LikeDiv = styled.div<{ likeActive: boolean }>`
   background: ${(props) => (props.likeActive ? "blue" : "white")};
 `;
 const Like = styled.div`
+  width: 160px;
+  height: 40px;
+  border: 1px solid black;
+`;
+
+const PublicDiv = styled.div<{ publicActive: boolean }>`
+  background: ${(props) => (props.publicActive ? "blue" : "white")};
+`;
+const Public = styled.div`
   width: 160px;
   height: 40px;
   border: 1px solid black;

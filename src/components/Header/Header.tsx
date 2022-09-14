@@ -15,6 +15,7 @@ import {
 
 import search from "./search.svg";
 import alert from "./alert.svg";
+import arrow from "./arrow.svg";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Friend from "../Friend/Friend";
@@ -92,15 +93,17 @@ function Header() {
         <LeftDiv>
           <Logo
             onClick={() => {
-              if (user) {
-                dispatch({
-                  type: actionType.LIBRARY.SETLIBRARY,
-                  value: user?.library,
-                });
-                navigator("./");
-              } else {
-                window.alert("請先登入");
-              }
+              getUserInfo(user.uid).then((v) => {
+                if (v?.library) {
+                  dispatch({
+                    type: actionType.LIBRARY.SETLIBRARY,
+                    value: v?.library,
+                  });
+                  navigator("./");
+                } else {
+                  window.alert("請先登入");
+                }
+              });
             }}
           >
             booklove
@@ -185,6 +188,7 @@ function Header() {
             <AlertIcon src={alert} />
           </AlertIconDiv>
           <Avatar
+            src={user?.avatar}
             onClick={() => {
               setActive(!active);
               setAccountActive(false);
@@ -200,7 +204,7 @@ function Header() {
               setThemeActive(false);
             }}
           >
-            <AvatarArrowIcon />
+            <AvatarArrowIcon src={arrow} />
           </AvatarArrowIconDiv>
         </RightDiv>
       </HeaderDiv>
@@ -266,7 +270,7 @@ const HeaderDiv = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid black;
+  border: 1px solid #e4e6eb;
 `;
 
 const LeftDiv = styled.div`
@@ -277,7 +281,8 @@ const LeftDiv = styled.div`
 const Logo = styled.p`
   margin-left: 16px;
   font-size: 26px;
-  font-weight: 800;
+  font-weight: 700;
+  color: #1a77f2;
 `;
 
 const SearchWrapper = styled.div`
@@ -286,19 +291,21 @@ const SearchWrapper = styled.div`
 
 const SearchIconDiv = styled.div`
   position: relative;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   margin-left: 16px;
-
-  border: 1px solid black;
+  background: #eff2f5;
   border-radius: 50%;
+  :hover {
+    background: rgb(200, 200, 200);
+  }
 `;
 
 const SearchIcon = styled.img`
   position: absolute;
   width: 18px;
-  left: 9px;
-  top: 9px;
+  left: 10px;
+  top: 10px;
 `;
 
 const SearchInput = styled.input<{ isInputActive: boolean }>`
@@ -373,8 +380,7 @@ const Avatar = styled.img`
   width: 38px;
   height: 38px;
   margin-right: 16px;
-
-  border: 1px solid black;
+  background: #ffffff;
   border-radius: 50%;
 `;
 
@@ -384,12 +390,17 @@ const AvatarArrowIconDiv = styled.div`
   top: 30px;
   width: 16px;
   height: 16px;
-
-  border: 1px solid black;
+  background: #eff2f5;
+  border: 1px solid white;
   border-radius: 50%;
 `;
 
-const AvatarArrowIcon = styled.img``;
+const AvatarArrowIcon = styled.img`
+  position: absolute;
+  width: 12px;
+  left: 1.5px;
+  top: 4px;
+`;
 
 const UserWrapper = styled.div<{ $active: boolean }>`
   display: ${(props) => (props.$active ? "block" : "none")};

@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import avatar from "./avatar.svg";
+import camera from "./camera.svg";
 import { User } from "../../reducer/userReducer";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -47,166 +48,204 @@ function TopSection() {
 
   console.log(imageFile);
   return (
-    <>
-      <BgWrapper>
-        <AvatarImgLabel
-          confirmActive={confirmActive}
-          htmlFor="bg"
-          onClick={() => {
-            setConfirmActive(true);
-          }}
-        >
-          <EditImgBtn>圖</EditImgBtn>
-        </AvatarImgLabel>
-
-        <ConfirmBtn
-          onClick={async () => {
-            setConfirmActive(false);
-            const imageUrl = await uploadImage();
-            const a = { cover: imageUrl };
-            console.log(a);
-            if (imageUrl) {
-              updateBackground(user.uid, imageUrl);
-              dispatch({
-                type: actionType.USER.SETUSER,
-                value: { ...user, background: imageUrl },
-              });
-            }
-          }}
-          confirmActive={confirmActive}
-        >
-          確定
-        </ConfirmBtn>
-        <CancelBtn
-          onClick={() => {
-            setConfirmActive(false);
-          }}
-          confirmActive={confirmActive}
-        >
-          取消
-        </CancelBtn>
-
-        <BackgroundImgInput
-          id="bg"
-          type="file"
-          accept="image/gif, image/jpeg, image/png"
-          onChange={(e) => {
-            if (e.target.files) {
-              setImageFile(e.target.files[0]);
-            }
-          }}
-        />
-        <Background
-          src={imageFile ? URL.createObjectURL(imageFile) : user?.background}
-        />
-      </BgWrapper>
-
-      <InfoDiv>
-        <InfoLeft>
-          <Avatar src={user?.avatar || avatar} />
-          <Username>{user?.uname}</Username>
-        </InfoLeft>
-        <InfoRight>
-          <InfoRightP
-            $uid={user?.uid}
-            localPath={localPath}
+    <WholeWrapper>
+      <CenterWrapper>
+        <BgWrapper>
+          <AvatarImgLabel
+            confirmActive={confirmActive}
+            htmlFor="bg"
             onClick={() => {
-              const a:
-                | {
-                    uid: string;
-                    uname: string;
-                    avatar: string;
-                  }[]
-                | undefined = user?.followList;
-              if (a?.find((k) => k.uid === localPath)) {
-                updateFollowList(
-                  user.uid,
-                  a.filter((j) => j.uid !== localPath)
-                );
-                dispatch({
-                  type: actionType.USER.SETUSER,
-                  value: {
-                    ...user,
-                    followList: a.filter((j) => j.uid !== localPath),
-                  },
-                });
-              } else if (a && !a?.find((k) => k.uid === localPath)) {
-                if (followObj) {
-                  updateFollowList(user.uid, [...a, followObj]);
-                  dispatch({
-                    type: actionType.USER.SETUSER,
-                    value: { ...user, followList: [...a, followObj] },
-                  });
-                }
-              } else if (!a) {
-                if (followObj) {
-                  updateFollowList(user.uid, [followObj]);
-                  dispatch({
-                    type: actionType.USER.SETUSER,
-                    value: { ...user, followList: [followObj] },
-                  });
-                }
-              }
+              setConfirmActive(true);
             }}
           >
-            {user?.followList?.find((k) => k.uid === localPath)
-              ? "unfollow"
-              : "follow"}
-          </InfoRightP>
-        </InfoRight>
-      </InfoDiv>
-      <Center>
-        <Split />
-      </Center>
-    </>
+            <EditImgBtn>
+              <CameraIcon src={camera} />
+              編輯封面相片
+            </EditImgBtn>
+          </AvatarImgLabel>
+
+          <ConfirmBtn
+            onClick={async () => {
+              setConfirmActive(false);
+              const imageUrl = await uploadImage();
+              const a = { cover: imageUrl };
+              console.log(a);
+              if (imageUrl) {
+                updateBackground(user.uid, imageUrl);
+                dispatch({
+                  type: actionType.USER.SETUSER,
+                  value: { ...user, background: imageUrl },
+                });
+              }
+            }}
+            confirmActive={confirmActive}
+          >
+            確定
+          </ConfirmBtn>
+          <CancelBtn
+            onClick={() => {
+              setConfirmActive(false);
+            }}
+            confirmActive={confirmActive}
+          >
+            取消
+          </CancelBtn>
+
+          <BackgroundImgInput
+            id="bg"
+            type="file"
+            accept="image/gif, image/jpeg, image/png"
+            onChange={(e) => {
+              if (e.target.files) {
+                setImageFile(e.target.files[0]);
+              }
+            }}
+          />
+          <Background
+            src={imageFile ? URL.createObjectURL(imageFile) : user?.background}
+          />
+        </BgWrapper>
+
+        <InfoDiv>
+          <InfoLeft>
+            <Avatar src={user?.avatar || avatar} />
+            <Username>{user?.uname}</Username>
+          </InfoLeft>
+          <InfoRight>
+            <InfoRightP
+              $uid={user?.uid}
+              localPath={localPath}
+              onClick={() => {
+                const a:
+                  | {
+                      uid: string;
+                      uname: string;
+                      avatar: string;
+                    }[]
+                  | undefined = user?.followList;
+                if (a?.find((k) => k.uid === localPath)) {
+                  updateFollowList(
+                    user.uid,
+                    a.filter((j) => j.uid !== localPath)
+                  );
+                  dispatch({
+                    type: actionType.USER.SETUSER,
+                    value: {
+                      ...user,
+                      followList: a.filter((j) => j.uid !== localPath),
+                    },
+                  });
+                } else if (a && !a?.find((k) => k.uid === localPath)) {
+                  if (followObj) {
+                    updateFollowList(user.uid, [...a, followObj]);
+                    dispatch({
+                      type: actionType.USER.SETUSER,
+                      value: { ...user, followList: [...a, followObj] },
+                    });
+                  }
+                } else if (!a) {
+                  if (followObj) {
+                    updateFollowList(user.uid, [followObj]);
+                    dispatch({
+                      type: actionType.USER.SETUSER,
+                      value: { ...user, followList: [followObj] },
+                    });
+                  }
+                }
+              }}
+            >
+              {user?.followList?.find((k) => k.uid === localPath)
+                ? "unfollow"
+                : "follow"}
+            </InfoRightP>
+          </InfoRight>
+        </InfoDiv>
+        <Center>
+          <Split />
+        </Center>
+      </CenterWrapper>
+    </WholeWrapper>
   );
 }
 
 export default TopSection;
 
+const Center = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
+const WholeWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background: white;
+  border: 1px solid #e4e6eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+`;
+
+const CenterWrapper = styled.div`
+  width: 1250px;
+`;
+
 const BgWrapper = styled.div`
   position: relative;
+  height: 460px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e4e6eb;
 `;
 
 const AvatarImgLabel = styled.label<{ confirmActive: boolean }>`
   position: absolute;
   bottom: 20px;
-  right: 20px;
-  border: 1px solid black;
-  height: 50px;
-  width: 50px;
-  border-radius: 50%;
-
+  right: 36px;
+  width: 136px;
+  height: 36px;
+  border-radius: 6px;
+  background: white;
   align-items: center;
   justify-content: center;
   display: ${(props) => (props.confirmActive ? "none" : "flex")};
 `;
 
-const EditImgBtn = styled.div``;
+const CameraIcon = styled.img`
+  position: relative;
+  top: 1px;
+  left: -4px;
+  width: 16px;
+`;
+const EditImgBtn = styled.div`
+  font-size: 15px;
+`;
 
 const ConfirmBtn = styled.div<{ confirmActive: boolean }>`
   position: absolute;
   bottom: 20px;
-  right: 20px;
-  width: 50px;
-  height: 50px;
-  border: 1px solid black;
-  display: flex;
+  right: 36px;
+  width: 68px;
+  height: 30px;
+  border-radius: 6px;
+  background: white;
+  font-size: 15px;
+
   align-items: center;
   justify-content: center;
-  display: ${(props) => (props.confirmActive ? "block" : "none")};
+  display: ${(props) => (props.confirmActive ? "flex" : "none")};
 `;
 const CancelBtn = styled.div<{ confirmActive: boolean }>`
   position: absolute;
   bottom: 20px;
-  right: 100px;
-  width: 50px;
-  height: 50px;
-  border: 1px solid black;
-  display: flex;
+  right: 124px;
+  width: 68px;
+  height: 30px;
+  border-radius: 6px;
+  background: white;
+  font-size: 15px;
+
   align-items: center;
   justify-content: center;
-  display: ${(props) => (props.confirmActive ? "block" : "none")};
+  display: ${(props) => (props.confirmActive ? "flex" : "none")};
 `;
 
 const BackgroundImgInput = styled.input`
@@ -216,8 +255,8 @@ const BackgroundImgInput = styled.input`
 `;
 
 const Background = styled.img`
-  height: 400px;
   width: 100%;
+  height: 100%;
   background: gray;
   object-fit: cover;
 `;
@@ -235,8 +274,8 @@ const InfoLeft = styled.div`
 `;
 
 const Avatar = styled.img`
-  width: 130px;
-  height: 130px;
+  width: 168px;
+  height: 168px;
   margin-right: 16px;
 
   border: 6px solid white;
@@ -244,15 +283,17 @@ const Avatar = styled.img`
   z-index: 1;
 
   position: absolute;
-  top: -80px;
-  left: 20px;
+  top: -100px;
+  left: 40px;
 `;
 
 const Username = styled.p`
-  font-size: 30px;
+  width: 228px;
+  font-weight: 700;
+  font-size: 32px;
   position: absolute;
-  top: -26px;
-  left: 160px;
+  top: -40px;
+  left: 220px;
 `;
 
 const InfoRight = styled.div`
@@ -272,12 +313,8 @@ const InfoRightP = styled.p<{ localPath: string; $uid: string }>`
 `;
 
 const Split = styled.div`
-  width: 80%;
-  height: 40px;
-  border-bottom: 2px solid black;
-`;
-
-const Center = styled.div`
-  display: flex;
-  justify-content: center;
+  width: 1218px;
+  height: 24px;
+  border-bottom: 2px solid rgb(206, 208, 212);
+  margin-bottom: 80px;
 `;
