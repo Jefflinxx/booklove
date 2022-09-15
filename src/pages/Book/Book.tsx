@@ -10,7 +10,8 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { async } from "@firebase/util";
+import edit from "./edit.svg";
+import back from "./back.svg";
 
 function Book() {
   const Location = useLocation();
@@ -87,206 +88,270 @@ function Book() {
 
   return (
     <>
-      <Center>
-        <TopIconDivWrapper>
-          <BackDiv
-            onClick={() => {
-              navigator(-1);
-            }}
-          >
-            <Back></Back>Back
-          </BackDiv>
-          <EditIconDiv
-            onClick={() => {
-              getUserInfo(user.uid).then((v) => {
-                dispatch({
-                  type: actionType.USER.SETUSER,
-                  value: v,
-                });
-                v?.library.forEach((i) => {
-                  if (i.isbn === currentBook.isbn) {
-                    dispatch({
-                      type: actionType.BOOK.SETBOOKDATA,
-                      value: i,
-                    });
-                  }
-                });
-              });
-              navigator(`../edit/${user.uid}${currentBook.isbn}`);
-            }}
-          >
-            <EditIcon></EditIcon>edit
-          </EditIconDiv>
-        </TopIconDivWrapper>
-      </Center>
-
-      <TopSection>
-        <BookImg src={currentBook.cover} />
-        <TopRightSection>
-          {[
-            { key: "書名", v: currentBook.bookname },
-            { key: "作者", v: currentBook.author },
-            { key: "出版", v: currentBook.publisher },
-          ].map((i) => {
-            return (
-              <SectionItem>
-                <BooknameP>{i.key}</BooknameP>
-                <Bookname>{i.v}</Bookname>
-              </SectionItem>
-            );
-          })}
-          <SectionItem>
-            <CategoryP>分類</CategoryP>
-            <Category>{currentBook.category}</Category>
-          </SectionItem>
-
-          <SectionItem>
-            <LikeP>本書全站讚數</LikeP>
-            <Like>{totalLike}</Like>
-          </SectionItem>
-        </TopRightSection>
-      </TopSection>
-
-      <BottomSection>
-        <SectionItem>
-          <ProgressP>進度{`${currentBook.totalChapter}`}</ProgressP>
-          <ProgressWrapper>
-            {progressRows.map((i) => (
-              <Progress
-                $i={i}
-                progressArray={progressArray}
-                key={i}
-                onClick={async () => {
-                  const userData = await getUserInfo(user.uid);
-                  if (userData) {
-                    if (
-                      //刪掉
-                      progressArray.find((j) => j === i) &&
-                      Math.max(...progressArray) === i
-                    ) {
-                      setProgressArray((prev) => {
-                        prev.filter((k) => k !== i);
-                        return [...prev.filter((k) => k !== i)];
+      <WholeWrapper>
+        <WholeCenterWrapper>
+          <TopIconDivWrapper>
+            <BackIconDiv
+              onClick={() => {
+                navigator(-1);
+              }}
+            >
+              <BackIcon src={back}></BackIcon>
+            </BackIconDiv>
+            <EditIconDiv
+              onClick={() => {
+                getUserInfo(user.uid).then((v) => {
+                  dispatch({
+                    type: actionType.USER.SETUSER,
+                    value: v,
+                  });
+                  v?.library.forEach((i) => {
+                    if (i.isbn === currentBook.isbn) {
+                      dispatch({
+                        type: actionType.BOOK.SETBOOKDATA,
+                        value: i,
                       });
-
-                      updateUserLibrary(user.uid, [
-                        ...userData.library.filter(
-                          (i) => i.isbn !== currentBook.isbn
-                        ),
-                        {
-                          ...currentBook,
-                          alreadyReadChapter: i - 1,
-                          isFinishRead: false,
-                        },
-                      ]);
-                    } else if (
-                      //增加
-                      Math.max(...progressArray) + 1 === i ||
-                      i === 1
-                    ) {
-                      setProgressArray((prev) => [...prev, i]);
-                      if (i === Number(currentBook.totalChapter)) {
-                        console.log("設為已讀完");
-                        updateUserLibrary(user.uid, [
-                          ...userData.library.filter(
-                            (i) => i.isbn !== currentBook.isbn
-                          ),
-                          {
-                            ...currentBook,
-                            alreadyReadChapter: i,
-                            isFinishRead: true,
-                          },
-                        ]);
-                      } else {
-                        updateUserLibrary(user.uid, [
-                          ...userData.library.filter(
-                            (i) => i.isbn !== currentBook.isbn
-                          ),
-                          {
-                            ...currentBook,
-                            alreadyReadChapter: i,
-                            isFinishRead: false,
-                          },
-                        ]);
-                      }
                     }
-                  }
-                }}
-              ></Progress>
-            ))}
-          </ProgressWrapper>
-        </SectionItem>
-        <SectionItem>
-          <PlaceP>地點</PlaceP>
-          <Place>{currentBook.place}</Place>
-        </SectionItem>
-        <SectionItem>
-          <LendToP>出借給</LendToP>
-          <LendTo>{currentBook.lendTo}</LendTo>
-        </SectionItem>
-        <SummaryP>書摘</SummaryP>
-        <Summary>{currentBook.summary}</Summary>
-      </BottomSection>
+                  });
+                });
+                navigator(`../edit/${user.uid}${currentBook.isbn}`);
+              }}
+            >
+              <EditIcon src={edit}></EditIcon>
+            </EditIconDiv>
+          </TopIconDivWrapper>
+
+          <TopSection>
+            <BookImg src={currentBook.cover} />
+            <TopRightSection>
+              {[
+                { key: "書名", v: currentBook.bookname },
+                { key: "作者", v: currentBook.author },
+                { key: "出版", v: currentBook.publisher },
+              ].map((i) => {
+                return (
+                  <SectionItem>
+                    <BooknameP>{i.key}</BooknameP>
+                    <Bookname>{i.v}</Bookname>
+                  </SectionItem>
+                );
+              })}
+              <SectionItem>
+                <CategoryP>分類</CategoryP>
+                <Category>{currentBook.category}</Category>
+              </SectionItem>
+
+              <SectionItem>
+                <LikeP>全站讚數</LikeP>
+                <Like>{totalLike}</Like>
+              </SectionItem>
+            </TopRightSection>
+          </TopSection>
+
+          <BottomSection>
+            <SectionBItem>
+              <ProgressP>進度{`${currentBook.totalChapter}`}</ProgressP>
+              <ProgressWrapper>
+                {progressRows.map((i) => (
+                  <Progress
+                    $i={i}
+                    progressArray={progressArray}
+                    key={i}
+                    onClick={async () => {
+                      const userData = await getUserInfo(user.uid);
+                      if (userData) {
+                        if (
+                          //刪掉
+                          progressArray.find((j) => j === i) &&
+                          Math.max(...progressArray) === i
+                        ) {
+                          setProgressArray((prev) => {
+                            prev.filter((k) => k !== i);
+                            return [...prev.filter((k) => k !== i)];
+                          });
+
+                          updateUserLibrary(user.uid, [
+                            ...userData.library.filter(
+                              (i) => i.isbn !== currentBook.isbn
+                            ),
+                            {
+                              ...currentBook,
+                              alreadyReadChapter: i - 1,
+                              isFinishRead: false,
+                            },
+                          ]);
+                        } else if (
+                          //增加
+                          Math.max(...progressArray) + 1 === i ||
+                          i === 1
+                        ) {
+                          setProgressArray((prev) => [...prev, i]);
+                          if (i === Number(currentBook.totalChapter)) {
+                            console.log("設為已讀完");
+                            updateUserLibrary(user.uid, [
+                              ...userData.library.filter(
+                                (i) => i.isbn !== currentBook.isbn
+                              ),
+                              {
+                                ...currentBook,
+                                alreadyReadChapter: i,
+                                isFinishRead: true,
+                              },
+                            ]);
+                          } else {
+                            updateUserLibrary(user.uid, [
+                              ...userData.library.filter(
+                                (i) => i.isbn !== currentBook.isbn
+                              ),
+                              {
+                                ...currentBook,
+                                alreadyReadChapter: i,
+                                isFinishRead: false,
+                              },
+                            ]);
+                          }
+                        }
+                      }
+                    }}
+                  ></Progress>
+                ))}
+              </ProgressWrapper>
+            </SectionBItem>
+            <SectionBItem>
+              <PlaceP>地點</PlaceP>
+              <Place>{currentBook.place}</Place>
+            </SectionBItem>
+            <SectionBItem>
+              <LendToP>出借給</LendToP>
+              <LendTo>{currentBook.lendTo}</LendTo>
+            </SectionBItem>
+            <SummaryP>書摘</SummaryP>
+            <Summary>{currentBook.summary}</Summary>
+          </BottomSection>
+        </WholeCenterWrapper>
+      </WholeWrapper>
     </>
   );
 }
 
 export default Book;
 
-const Center = styled.div`
+const WholeWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #eff2f5;
+  width: 100%;
+`;
+
+const WholeCenterWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e4e6eb;
+  flex-direction: column;
+  width: 902px;
+  background: #ffffff;
+  border-radius: 6px;
+  margin: 120px 0px;
+`;
+
+const TopIconDivWrapper = styled.div`
+  width: 902px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding: 8px;
+`;
+
+const BackIconDiv = styled.div`
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  :hover {
+    background: rgba(200, 200, 200, 0.4);
+  }
+`;
+const BackIcon = styled.img`
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  width: 14px;
+`;
+
+const EditIconDiv = styled.div`
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  :hover {
+    background: rgba(200, 200, 200, 0.4);
+  }
+`;
+const EditIcon = styled.img`
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 20px;
+`;
+
+const TopSection = styled.div`
+  border: 1px solid black;
+  display: flex;
+  width: 720px;
   display: flex;
   align-items: center;
   justify-content: center;
 `;
 
-const TopIconDivWrapper = styled.div`
-  width: 80%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const BackDiv = styled.div`
-  width: 40px;
-  height: 40px;
-  border: 1px solid black;
-`;
-const Back = styled.div``;
-
-const EditIconDiv = styled.div`
-  width: 40px;
-  height: 40px;
-  border: 1px solid black;
-`;
-
-const EditIcon = styled.div``;
-
-const TopSection = styled.div`
-  display: flex;
-`;
-
 const BookImg = styled.img`
-  width: 100px;
-  height: 120px;
-  border: 1px solid black;
+  width: 180px;
+  height: 250px;
+
+  margin: 32px;
+  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
 `;
 
 const TopRightSection = styled.div``;
 
 const SectionItem = styled.div`
   display: flex;
+  border: 1px solid black;
+  margin: 24px 0px;
+  width: 440px;
 `;
 
-const BooknameP = styled.div``;
+const SectionBItem = styled.div`
+  display: flex;
+  border: 1px solid black;
+  margin: 24px 0px 24px 54px;
+`;
+
+const BooknameP = styled.div`
+  width: 90px;
+  color: gray;
+`;
 const Bookname = styled.div``;
 
-const CategoryP = styled.div``;
+const CategoryP = styled.div`
+  width: 90px;
+  color: gray;
+`;
 const Category = styled.div``;
 
-const LikeP = styled.div``;
+const LikeP = styled.div`
+  width: 90px;
+  color: gray;
+`;
 const Like = styled.div``;
 
-const ProgressP = styled.div``;
+const ProgressP = styled.div`
+  width: 90px;
+  color: gray;
+`;
 const ProgressWrapper = styled.div`
   display: flex;
   border-radius: 20px;
@@ -302,13 +367,30 @@ const Progress = styled.div<{ progressArray: number[]; $i: number }>`
     props.progressArray.find((j) => j === props.$i) ? "blue" : "white"};
 `;
 
-const PlaceP = styled.div``;
+const PlaceP = styled.div`
+  width: 90px;
+  color: gray;
+`;
 const Place = styled.div``;
 
-const LendToP = styled.div``;
+const LendToP = styled.div`
+  width: 90px;
+  color: gray;
+`;
 const LendTo = styled.div``;
 
-const SummaryP = styled.div``;
-const Summary = styled.div``;
+const SummaryP = styled.div`
+  width: 90px;
+  color: gray;
+  margin: 24px 0px 12px 54px;
+`;
+const Summary = styled.div`
+  border: 1px solid black;
+  margin: 0px 0px 24px 54px;
+`;
 
-const BottomSection = styled.div``;
+const BottomSection = styled.div`
+  width: 720px;
+  border: 1px solid black;
+  margin-bottom: 54px;
+`;
