@@ -6,6 +6,8 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { User } from "../../reducer/userReducer";
 import { useSelector, useDispatch } from "react-redux";
 import { actionType } from "../../reducer/rootReducer";
+import back from "../Header/back.svg";
+import edit from "./edit.svg";
 
 type AccountProps = {
   accountActive: boolean;
@@ -76,14 +78,18 @@ const Account: React.FC<AccountProps> = ({
 
   return (
     <Wrapper $active={accountActive}>
-      Account:
-      <div
-        onClick={() => {
-          setAccountActive(false);
-        }}
-      >
-        返回
-      </div>
+      <TitleWrapper>
+        <BackIconDiv
+          onClick={() => {
+            setAccountActive(false);
+          }}
+        >
+          <BackIcon src={back}></BackIcon>
+        </BackIconDiv>
+
+        <Title>帳戶資訊</Title>
+      </TitleWrapper>
+
       <Center>
         <AvatarImgLabel>
           <AvatarImgInput
@@ -111,15 +117,17 @@ const Account: React.FC<AccountProps> = ({
             }}
             value={input}
           ></UsernameInput>
-          <EditIcon
+          <EditIconDiv
             onClick={() => {
-              setIsEdit(true);
+              setIsEdit(!isEdit);
             }}
           >
-            edit
-          </EditIcon>
+            <EditIcon src={edit}></EditIcon>
+          </EditIconDiv>
         </UnameWrapper>
-        <button
+        <ConfirmBtn
+          $imageFile={imageFile}
+          $isEdit={isEdit}
           onClick={async () => {
             const imageUrl = await uploadImage();
             const a = { cover: imageUrl, uname: input };
@@ -141,12 +149,15 @@ const Account: React.FC<AccountProps> = ({
           }}
         >
           確認修改
-        </button>
-        <ReadCountWrapper>
-          <ReadCountP>閱讀書本累計{readCount}</ReadCountP>
+        </ConfirmBtn>
+
+        <ReadCountWrapper $imageFile={imageFile} $isEdit={isEdit}>
+          <ReadCountP>閱讀書本累計</ReadCountP>
+          <ReadCountP>{readCount}本</ReadCountP>
         </ReadCountWrapper>
         <WriteCountWrapper>
-          <WriteCountP>書摘字數累計{writeCount}</WriteCountP>
+          <WriteCountP>書摘字數累計</WriteCountP>
+          <WriteCountP>{writeCount}字</WriteCountP>
         </WriteCountWrapper>
       </Center>
     </Wrapper>
@@ -157,14 +168,47 @@ export default Account;
 
 const Wrapper = styled.div<{ $active: boolean }>`
   z-index: 3;
-  display: ${(props) => (props.$active ? "block" : "none")};
+  display: ${(props) => (props.$active ? "flex" : "none")};
   position: absolute;
   top: 0px;
-  right: 0px;
-  width: 350px;
+  left: 0px;
+  width: 360px;
   height: 450px;
-  border: 1px solid black;
+
   background: white;
+  flex-direction: column;
+
+  padding-bottom: 8px;
+  border-radius: 6px;
+  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+`;
+
+const TitleWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  height: 60px;
+  padding: 16px 16px 8px;
+`;
+const BackIconDiv = styled.div`
+  width: 38px;
+  height: 38px;
+  position: relative;
+  border-radius: 50%;
+  :hover {
+    background: rgba(200, 200, 200, 0.4);
+  }
+`;
+
+const BackIcon = styled.img`
+  width: 10px;
+  position: absolute;
+  top: 10px;
+  left: 12px;
+`;
+const Title = styled.div`
+  font-size: 24px;
+  font-weight: 500;
+  padding-left: 10px;
 `;
 
 const Center = styled.div`
@@ -172,6 +216,8 @@ const Center = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+
+  padding: 16px 8px 8px;
 `;
 
 const AvatarImgLabel = styled.label`
@@ -228,38 +274,89 @@ const UploadImgBtn = styled.div`
 
 const UnameWrapper = styled.div`
   display: flex;
-  border: 1px solid black;
+
   width: 130px;
-  height: 60px;
+  height: 38px;
   justify-content: center;
   align-items: center;
   position: relative;
+  margin: 16px 0px;
 `;
 
 const Username = styled.p<{ $isEdit: boolean }>`
   display: ${(props) => (props.$isEdit ? "none" : "block")};
   font-size: 20px;
-  border-bottom: 1px solid black;
-  overflow: scroll;
+  font-weight: 500;
+  overflow: overlay;
 `;
 
 const UsernameInput = styled.input<{ $isEdit: boolean }>`
   display: ${(props) => (props.$isEdit ? "block" : "none")};
   width: 130px;
-  height: 60px;
+  height: 38px;
+  font-size: 20px;
+  border-bottom: 1px solid gray;
+  color: gray;
+  text-align: center;
+`;
+const EditIconDiv = styled.div`
+  width: 38px;
+  height: 38px;
+  position: absolute;
+  bottom: 0px;
+  right: -38px;
+
+  border-radius: 50%;
+  :hover {
+    background: rgba(200, 200, 200, 0.4);
+  }
+`;
+const EditIcon = styled.img`
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 20px;
+`;
+
+const ConfirmBtn = styled.div<{ $imageFile: File | null; $isEdit: boolean }>`
+  background: #eff2f5;
+  width: 100px;
+  height: 38px;
+  display: ${(props) => (props.$imageFile || props.$isEdit ? "flex" : "none")};
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  :hover {
+    background: rgba(200, 200, 200, 0.4);
+  }
+`;
+
+const ReadCountWrapper = styled.div<{
+  $imageFile: File | null;
+  $isEdit: boolean;
+}>`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 200px;
+
+  margin-top: ${(props) =>
+    props.$imageFile || props.$isEdit ? "0px" : "54px"};
+  margin-bottom: 16px;
+`;
+const ReadCountP = styled.div`
   font-size: 20px;
 `;
+const WriteCountWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 200px;
 
-const EditIcon = styled.div`
-  position: absolute;
-
-  right: -30px;
-  width: 30px;
-  height: 30px;
-  border: 1px solid black;
+  margin-bottom: 16px;
 `;
-
-const ReadCountWrapper = styled.div``;
-const ReadCountP = styled.div``;
-const WriteCountWrapper = styled.div``;
-const WriteCountP = styled.div``;
+const WriteCountP = styled.div`
+  font-size: 20px;
+`;

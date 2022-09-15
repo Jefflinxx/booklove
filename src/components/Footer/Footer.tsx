@@ -10,7 +10,8 @@ const FooterP = styled.p`
   font-size: 10px;
 
   margin-left: 15px;
-  margin-bottom: 15px;
+  margin-top: 4px;
+  margin-bottom: 4px;
   color: gray;
   letter-spacing: 1px;
 `;

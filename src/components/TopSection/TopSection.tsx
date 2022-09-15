@@ -108,7 +108,7 @@ function TopSection() {
 
         <InfoDiv>
           <InfoLeft>
-            <Avatar src={user?.avatar || avatar} />
+            <Avatar src={user?.avatar} />
             <Username>{user?.uname}</Username>
           </InfoLeft>
           <InfoRight>
@@ -257,7 +257,7 @@ const BackgroundImgInput = styled.input`
 const Background = styled.img`
   width: 100%;
   height: 100%;
-  background: gray;
+  background: #eff2f5;
   object-fit: cover;
 `;
 
@@ -281,6 +281,7 @@ const Avatar = styled.img`
   border: 6px solid white;
   border-radius: 50%;
   z-index: 1;
+  background: #eff2f5;
 
   position: absolute;
   top: -100px;
@@ -315,6 +316,6 @@ const InfoRightP = styled.p<{ localPath: string; $uid: string }>`
 const Split = styled.div`
   width: 1218px;
   height: 24px;
-  border-bottom: 2px solid rgb(206, 208, 212);
-  margin-bottom: 80px;
+  border-bottom: 1px solid rgb(206, 208, 212);
+  margin-bottom: 60px;
 `;

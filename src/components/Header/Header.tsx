@@ -16,7 +16,13 @@ import {
 import search from "./search.svg";
 import alert from "./alert.svg";
 import arrow from "./arrow.svg";
-import { useState, useEffect } from "react";
+import logout from "./logout.svg";
+import account from "./account.svg";
+import friend from "./friend.svg";
+import theme from "./theme.svg";
+import rightarrow from "./rightarrow.svg";
+
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Friend from "../Friend/Friend";
 import Account from "../Account/Account";
@@ -40,6 +46,7 @@ function Header() {
   const [searchResultActive, setSearchResultActive] = useState<boolean>(false);
   const [followActive, setFollowActive] = useState<boolean>(false);
   const navigator = useNavigate();
+  const friendSearchRef = useRef<HTMLInputElement>(null);
 
   //登出
   function logOut() {
@@ -85,7 +92,7 @@ function Header() {
   //   f();
   // }, [searchResult]);
 
-  console.log(followActive);
+  console.log(active);
 
   return (
     <>
@@ -111,12 +118,20 @@ function Header() {
           <SearchWrapper>
             <SearchIconDiv
               onClick={() => {
-                setIsInputActive(!isInputActive);
+                if (isInputActive) {
+                  setIsInputActive(false);
+                  setInput("");
+                } else {
+                  setIsInputActive(true);
+                  friendSearchRef?.current?.focus();
+                }
               }}
             >
               <SearchIcon src={search} />
             </SearchIconDiv>
             <SearchInput
+              ref={friendSearchRef}
+              placeholder="搜尋 Booklover"
               isInputActive={isInputActive}
               onChange={(e) => {
                 setInput(e.target.value);
@@ -173,13 +188,17 @@ function Header() {
                       }}
                     >
                       {user?.followList?.find((k) => k.uid === i.uid)
-                        ? "unfollow"
-                        : "follow"}
+                        ? "取消追蹤"
+                        : "追蹤用戶"}
                     </SearchResultButton>
                   </SearchResultDiv>
                 );
               })}
-              {!searchResult && <SearchResultDiv>暫無結果</SearchResultDiv>}
+              {!searchResult && (
+                <SearchResultDiv>
+                  <NoResult>暫無搜尋結果 ...</NoResult>
+                </SearchResultDiv>
+              )}
             </SearchResultWrapper>
           </SearchWrapper>
         </LeftDiv>
@@ -215,10 +234,14 @@ function Header() {
             setFriendActive(true);
           }}
         >
-          <UserIconDiv>
-            <UserIcon />
-          </UserIconDiv>
-          <UserP>追蹤名單</UserP>
+          <UserDivLeft>
+            <FriendIconDiv>
+              <FriendIcon src={friend} />
+            </FriendIconDiv>
+            <UserP>追蹤名單</UserP>
+          </UserDivLeft>
+
+          <RightArrow src={rightarrow}></RightArrow>
         </UserDiv>
         <Friend friendActive={friendActive} setFriendActive={setFriendActive} />
 
@@ -228,10 +251,13 @@ function Header() {
             setIsEdit(false);
           }}
         >
-          <UserIconDiv>
-            <UserIcon />
-          </UserIconDiv>
-          <UserP>帳戶設定</UserP>
+          <UserDivLeft>
+            <AccountIconDiv>
+              <AccountIcon src={account} />
+            </AccountIconDiv>
+            <UserP>帳戶資訊</UserP>
+          </UserDivLeft>
+          <RightArrow src={rightarrow}></RightArrow>
         </UserDiv>
         <Account
           isEdit={isEdit}
@@ -245,18 +271,23 @@ function Header() {
             setThemeActive(true);
           }}
         >
-          <UserIconDiv>
-            <UserIcon />
-          </UserIconDiv>
-          <UserP>主題更換</UserP>
+          <UserDivLeft>
+            <ThemeIconDiv>
+              <ThemeIcon src={theme} />
+            </ThemeIconDiv>
+            <UserP>主題更換</UserP>
+          </UserDivLeft>
+          <RightArrow src={rightarrow}></RightArrow>
         </UserDiv>
         <Theme themeActive={themeActive} setThemeActive={setThemeActive} />
 
         <UserDiv onClick={logOut}>
-          <UserIconDiv>
-            <UserIcon />
-          </UserIconDiv>
-          <UserP>登出</UserP>
+          <UserDivLeft>
+            <LogoutIconDiv>
+              <LogoutIcon src={logout} />
+            </LogoutIconDiv>
+            <UserP>登出</UserP>
+          </UserDivLeft>
         </UserDiv>
       </UserWrapper>
     </>
@@ -297,7 +328,7 @@ const SearchIconDiv = styled.div`
   background: #eff2f5;
   border-radius: 50%;
   :hover {
-    background: rgb(200, 200, 200);
+    background: rgba(200, 200, 200, 0.4);
   }
 `;
 
@@ -306,27 +337,36 @@ const SearchIcon = styled.img`
   width: 18px;
   left: 10px;
   top: 10px;
+  z-index: 1;
 `;
 
 const SearchInput = styled.input<{ isInputActive: boolean }>`
   border: none;
   position: absolute;
-  font-size: 20px;
-  left: 60px;
-  top: 9px;
+  font-size: 16px;
+  left: 16px;
+  top: 0px;
   height: 20px;
-  width: ${(props) => (props.isInputActive ? "300px" : "0px")};
+  border-radius: 50px;
+  text-indent: 48px;
+  background: #eff2f5;
+  width: ${(props) => (props.isInputActive ? "320px" : "0px")};
+  height: ${(props) => (props.isInputActive ? "40px" : "0px")};
   border-bottom: ${(props) =>
-    props.isInputActive ? "1px solid black" : "0px solid black"};
+    props.isInputActive ? "0px solid black" : "0px solid black"};
 `;
 
 const SearchResultWrapper = styled.div<{ searchResultActive: boolean }>`
   position: absolute;
-  left: 60px;
+  left: 16px;
   top: 47px;
-  width: 300px;
-  height: 100px;
-  border: 1px solid black;
+  width: 320px;
+  max-height: 400px;
+  padding-bottom: 8px;
+  border-radius: 6px;
+  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  background: white;
+  z-index: 1;
   display: ${(props) => (props.searchResultActive ? "block" : "none")};
 `;
 
@@ -334,24 +374,39 @@ const SearchResultDiv = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid black;
+
+  width: 100%;
+  height: 52px;
+  padding: 0px 8px;
+  border-radius: 6px;
+  :hover {
+    background: #eff2f5;
+  }
 `;
 const SearchResultDivLeft = styled.div`
   display: flex;
   align-items: center;
-  border: 1px solid black;
 `;
 const SearchAvatar = styled.img`
   width: 38px;
   height: 38px;
   margin-right: 16px;
 
-  border: 1px solid black;
+  border: 2px solid white;
   border-radius: 50%;
 `;
 const SearchResultName = styled.p``;
 const SearchResultButton = styled.div`
-  border: 1px solid black;
+  width: 80px;
+  height: 30px;
+
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  :hover {
+    background: rgba(200, 200, 200, 0.4);
+  }
 `;
 
 const RightDiv = styled.div`
@@ -382,6 +437,7 @@ const Avatar = styled.img`
   margin-right: 16px;
   background: #ffffff;
   border-radius: 50%;
+  user-select: none;
 `;
 
 const AvatarArrowIconDiv = styled.div`
@@ -393,48 +449,130 @@ const AvatarArrowIconDiv = styled.div`
   background: #eff2f5;
   border: 1px solid white;
   border-radius: 50%;
+  user-select: none;
 `;
 
 const AvatarArrowIcon = styled.img`
   position: absolute;
-  width: 12px;
-  left: 1.5px;
+  width: 10px;
+  left: 2px;
   top: 4px;
 `;
 
 const UserWrapper = styled.div<{ $active: boolean }>`
-  display: ${(props) => (props.$active ? "block" : "none")};
+  display: ${(props) => (props.$active ? "flex" : "none")};
   position: absolute;
-  top: 47px;
+  top: 50px;
   right: 16px;
   z-index: 2;
-  width: 350px;
-  height: 450px;
-  border: 1px solid black;
+  width: 360px;
+  flex-direction: column;
+  align-items: center;
+
   background: white;
+  padding: 8px 0px;
+  border-radius: 6px;
+  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+`;
+
+const RightArrow = styled.img`
+  width: 40px;
+  height: 40px;
+  object-position: 12px;
 `;
 
 const UserDiv = styled.div`
-  width: 330px;
-  height: 100px;
-  border: 1px solid black;
+  width: 344px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  padding: 0px 8px;
+  border-radius: 6px;
+  justify-content: space-between;
+  :hover {
+    background: rgba(200, 200, 200, 0.4);
+  }
 `;
 
-const UserIconDiv = styled.div`
+const UserDivLeft = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const FriendIconDiv = styled.div`
   position: relative;
   width: 38px;
   height: 38px;
   margin-right: 8px;
+  background: #e4e6eb;
 
-  border: 1px solid black;
   border-radius: 50%;
 `;
 
-const UserIcon = styled.img`
+const FriendIcon = styled.img`
   position: absolute;
   width: 20px;
-  left: 8px;
+  left: 9px;
+  top: 10px;
+`;
+
+const AccountIconDiv = styled.div`
+  position: relative;
+  width: 38px;
+  height: 38px;
+  margin-right: 8px;
+  background: #e4e6eb;
+
+  border-radius: 50%;
+`;
+
+const AccountIcon = styled.img`
+  position: absolute;
+  width: 20px;
+  left: 10px;
   top: 8px;
 `;
 
-const UserP = styled.p``;
+const ThemeIconDiv = styled.div`
+  position: relative;
+  width: 38px;
+  height: 38px;
+  margin-right: 8px;
+  background: #e4e6eb;
+
+  border-radius: 50%;
+`;
+
+const ThemeIcon = styled.img`
+  position: absolute;
+  width: 20px;
+  left: 9px;
+  top: 9px;
+`;
+
+const LogoutIconDiv = styled.div`
+  position: relative;
+  width: 38px;
+  height: 38px;
+  margin-right: 8px;
+  background: #e4e6eb;
+
+  border-radius: 50%;
+`;
+
+const LogoutIcon = styled.img`
+  position: absolute;
+  width: 20px;
+  left: 8px;
+  top: 9px;
+`;
+
+const UserP = styled.p`
+  user-select: none;
+`;
+
+const NoResult = styled.p`
+  padding-left: 8px;
+  font-size: 16px;
+`;
