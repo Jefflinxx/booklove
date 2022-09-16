@@ -140,7 +140,7 @@ const FriendAvatar = styled.img`
   width: 38px;
   height: 38px;
   margin-right: 16px;
-
+  background: #eff2f5;
   border: 2px solid white;
   border-radius: 50%;
 `;

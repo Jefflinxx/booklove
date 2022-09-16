@@ -171,6 +171,7 @@ export const addSearchBookToUserLibrary = async (
       publisher: publisher,
       cover: cover,
       isPublic: true,
+      alreadyReadChapter: 0,
     }),
   });
 };

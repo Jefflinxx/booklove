@@ -206,7 +206,12 @@ const AvatarImgLabel = styled.label<{ confirmActive: boolean }>`
   background: white;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   display: ${(props) => (props.confirmActive ? "none" : "flex")};
+
+  :hover {
+    background: #e4e6eb;
+  }
 `;
 
 const CameraIcon = styled.img`
@@ -286,6 +291,7 @@ const Avatar = styled.img`
   position: absolute;
   top: -100px;
   left: 40px;
+  user-select: none;
 `;
 
 const Username = styled.p`
@@ -295,6 +301,7 @@ const Username = styled.p`
   position: absolute;
   top: -40px;
   left: 220px;
+  user-select: none;
 `;
 
 const InfoRight = styled.div`
@@ -314,7 +321,7 @@ const InfoRightP = styled.p<{ localPath: string; $uid: string }>`
 `;
 
 const Split = styled.div`
-  width: 1218px;
+  width: 1186px;
   height: 24px;
   border-bottom: 1px solid rgb(206, 208, 212);
   margin-bottom: 60px;

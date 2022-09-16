@@ -100,17 +100,17 @@ function Header() {
         <LeftDiv>
           <Logo
             onClick={() => {
-              getUserInfo(user.uid).then((v) => {
-                if (v?.library) {
-                  dispatch({
-                    type: actionType.LIBRARY.SETLIBRARY,
-                    value: v?.library,
-                  });
-                  navigator("./");
-                } else {
-                  window.alert("請先登入");
-                }
-              });
+              //這邊希望點擊後可以回到自己的主頁
+              navigator("./");
+              // getUserInfo(user.uid).then((v) => {
+              //   if (v?.library) {
+              //     dispatch({
+              //       type: actionType.LIBRARY.SETLIBRARY,
+              //       value: v?.library,
+              //     });
+
+              //   }
+              // });
             }}
           >
             booklove
@@ -314,6 +314,7 @@ const Logo = styled.p`
   font-size: 26px;
   font-weight: 700;
   color: #1a77f2;
+  cursor: pointer;
 `;
 
 const SearchWrapper = styled.div`
@@ -327,6 +328,7 @@ const SearchIconDiv = styled.div`
   margin-left: 16px;
   background: #eff2f5;
   border-radius: 50%;
+  cursor: pointer;
   :hover {
     background: rgba(200, 200, 200, 0.4);
   }

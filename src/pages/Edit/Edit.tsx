@@ -512,9 +512,6 @@ const Progress = styled.input`
 `;
 
 const ProgressWarn = styled.div<{ progressWarn: boolean }>`
-  width: 100px;
-
-  border: 1px solid black;
   display: ${(props) => (props.progressWarn ? "block" : "none")};
 `;
 

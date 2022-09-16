@@ -150,7 +150,7 @@ function Book() {
 
           <BottomSection>
             <SectionBItem>
-              <ProgressP>進度{`${currentBook.totalChapter}`}</ProgressP>
+              <ProgressP>進度</ProgressP>
               <ProgressWrapper>
                 {progressRows.map((i) => (
                   <Progress
@@ -216,6 +216,11 @@ function Book() {
                   ></Progress>
                 ))}
               </ProgressWrapper>
+              <ProgressPercent>
+                {(currentBook.alreadyReadChapter / currentBook.totalChapter) *
+                  100}
+                %
+              </ProgressPercent>
             </SectionBItem>
             <SectionBItem>
               <PlaceP>地點</PlaceP>
@@ -299,7 +304,6 @@ const EditIcon = styled.img`
 `;
 
 const TopSection = styled.div`
-  border: 1px solid black;
   display: flex;
   width: 720px;
   display: flex;
@@ -319,14 +323,15 @@ const TopRightSection = styled.div``;
 
 const SectionItem = styled.div`
   display: flex;
-  border: 1px solid black;
+
   margin: 24px 0px;
   width: 440px;
 `;
 
 const SectionBItem = styled.div`
   display: flex;
-  border: 1px solid black;
+  align-items: center;
+
   margin: 24px 0px 24px 54px;
 `;
 
@@ -352,19 +357,28 @@ const ProgressP = styled.div`
   width: 90px;
   color: gray;
 `;
-const ProgressWrapper = styled.div`
+const ProgressPercent = styled.div`
   display: flex;
-  border-radius: 20px;
-  border-left: 2px solid black;
-  border-right: 2px solid black;
+  width: 90px;
+  color: gray;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ProgressWrapper = styled.div`
+  width: 480px;
+  display: flex;
+  border-radius: 6px;
+
   overflow: hidden;
 `;
 const Progress = styled.div<{ progressArray: number[]; $i: number }>`
   width: 40px;
-  height: 40px;
-  border: 1px solid black;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid white;
   background: ${(props) =>
-    props.progressArray.find((j) => j === props.$i) ? "blue" : "white"};
+    props.progressArray.find((j) => j === props.$i) ? "#1A77F2" : "#eff2f5"};
 `;
 
 const PlaceP = styled.div`
@@ -385,12 +399,11 @@ const SummaryP = styled.div`
   margin: 24px 0px 12px 54px;
 `;
 const Summary = styled.div`
-  border: 1px solid black;
-  margin: 0px 0px 24px 54px;
+  margin: 0px 54px 24px 54px;
 `;
 
 const BottomSection = styled.div`
   width: 720px;
-  border: 1px solid black;
+
   margin-bottom: 54px;
 `;

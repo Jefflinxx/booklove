@@ -6,9 +6,6 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../utils/firebase";
 
-import plus from "./plus.svg";
-import plusGray from "./plus-gray.svg";
-
 import TopSection from "../../components/TopSection/TopSection";
 
 import { User } from "../../reducer/userReducer";
@@ -50,18 +47,10 @@ function Home() {
       console.log(user.library);
       if (localPath === user.uid || localPath === "") {
         getUserInfo(user.uid).then((v) => {
-          if (v?.library) {
-            let newLibrary: CurrentBook[] = [];
-            v?.library.forEach((i) => {
-              if (i?.isPublic) {
-                newLibrary.push(i);
-              }
-            });
-            dispatch({
-              type: actionType.LIBRARY.SETLIBRARY,
-              value: newLibrary,
-            });
-          }
+          dispatch({
+            type: actionType.LIBRARY.SETLIBRARY,
+            value: v!.library,
+          });
         });
       } else {
         getUserInfo(localPath).then((v) => {
@@ -79,10 +68,18 @@ function Home() {
               ],
             });
           } else if (v) {
-            dispatch({
-              type: actionType.LIBRARY.SETLIBRARY,
-              value: v.library,
-            });
+            if (v?.library) {
+              let newLibrary: CurrentBook[] = [];
+              v?.library.forEach((i) => {
+                if (i?.isPublic) {
+                  newLibrary.push(i);
+                }
+              });
+              dispatch({
+                type: actionType.LIBRARY.SETLIBRARY,
+                value: newLibrary,
+              });
+            }
           }
         });
       }
@@ -103,7 +100,7 @@ function Home() {
   //     }
   //   });
   // }, []);
-  console.log(user);
+  console.log(library);
 
   return (
     <>
@@ -126,176 +123,202 @@ function Home() {
             </Center>
             <Center>
               <Bookcase>
-                <TopTagWrapper>
-                  <TopTagLeftWrapper>
-                    <CategoryAll
-                      onClick={async () => {
-                        setCategoryAllActive(true);
-                        const a = await getUserInfo(user.uid);
-                        dispatch({
-                          type: actionType.LIBRARY.SETLIBRARY,
-                          value: a?.library || [],
-                        });
-                        setCategoryCurrent(null);
-                        setCategoryReadActive(false);
-                        setCategoryLendActive(false);
-                        setWishListActive(false);
-                      }}
-                    >
-                      全部{categoryAllActive && `(${library.length})`}
-                    </CategoryAll>
-
-                    <FinishRead
-                      onClick={async () => {
-                        setCategoryReadActive(true);
-                        let categoryResult: CurrentBook[] = [];
-
-                        const a = await getUserInfo(user.uid);
-
-                        a?.library?.forEach((j) => {
-                          if (j?.isFinishRead) {
-                            categoryResult = [...categoryResult, j];
-                          }
-                        });
-                        dispatch({
-                          type: actionType.LIBRARY.SETLIBRARY,
-                          value: categoryResult,
-                        });
-                        setCategoryCurrent(null);
-                        setCategoryAllActive(false);
-                        setCategoryLendActive(false);
-                        setWishListActive(false);
-                      }}
-                    >
-                      完成閱讀{categoryReadActive && `(${library.length})`}
-                    </FinishRead>
-
-                    <LendToOther
-                      onClick={async () => {
-                        setCategoryLendActive(true);
-                        let categoryResult: CurrentBook[] = [];
-
-                        const a = await getUserInfo(user.uid);
-
-                        a?.library?.forEach((j) => {
-                          if (j?.isLendTo) {
-                            categoryResult = [...categoryResult, j];
-                          }
-                        });
-                        dispatch({
-                          type: actionType.LIBRARY.SETLIBRARY,
-                          value: categoryResult,
-                        });
-                        setCategoryCurrent(null);
-                        setCategoryAllActive(false);
-                        setCategoryReadActive(false);
-                        setWishListActive(false);
-                      }}
-                    >
-                      出借中{categoryLendActive && `(${library.length})`}
-                    </LendToOther>
-                    <CategoryWholeWrapper>
-                      <CategoryButton
-                        onClick={() => {
-                          setCategorySelectActive(!categorySelectActive);
-                          setCategoryAllActive(false);
+                {library.length ? (
+                  <TopTagWrapper>
+                    <TopTagLeftWrapper>
+                      <CategoryAll
+                        onClick={async () => {
+                          setCategoryCurrent(null);
                           setCategoryReadActive(false);
                           setCategoryLendActive(false);
                           setWishListActive(false);
+                          setCategorySelectActive(false);
+                          const a = await getUserInfo(user.uid);
+                          dispatch({
+                            type: actionType.LIBRARY.SETLIBRARY,
+                            value: a?.library || [],
+                          });
+                          setCategoryAllActive(true);
                         }}
                       >
-                        類別
-                        {categoryCurrent &&
-                          `:${categoryCurrent}(${library?.length})`}
-                      </CategoryButton>
-                      <CategoryWrapper
-                        categorySelectActive={categorySelectActive}
+                        全部{categoryAllActive && `(${library.length})`}
+                      </CategoryAll>
+
+                      <FinishRead
+                        onClick={async () => {
+                          setCategoryCurrent(null);
+                          setCategoryAllActive(false);
+                          setCategoryLendActive(false);
+                          setWishListActive(false);
+                          setCategorySelectActive(false);
+                          let categoryResult: CurrentBook[] = [];
+
+                          const a = await getUserInfo(user.uid);
+
+                          a?.library?.forEach((j) => {
+                            if (j?.isFinishRead) {
+                              categoryResult = [...categoryResult, j];
+                            }
+                          });
+                          dispatch({
+                            type: actionType.LIBRARY.SETLIBRARY,
+                            value: categoryResult,
+                          });
+                          setCategoryReadActive(true);
+                        }}
                       >
-                        <CategoryInputWrapper>
-                          <CategoryInput
-                            placeholder="新增類別"
-                            onChange={(e) => {
-                              setCategoryInput(e.target.value);
-                            }}
-                          />
-                          <CategoryPlus
-                            onClick={() => {
-                              if (user?.category) {
-                                updateCategory(user.uid, [
-                                  ...user.category,
-                                  categoryInput,
-                                ]);
-                                dispatch({
-                                  type: actionType.USER.SETUSER,
-                                  value: {
-                                    ...user,
-                                    category: [...user.category, categoryInput],
-                                  },
-                                });
-                              } else {
-                                updateCategory(user.uid, [categoryInput]);
-                                dispatch({
-                                  type: actionType.USER.SETUSER,
-                                  value: { ...user, category: [categoryInput] },
-                                });
-                              }
-                            }}
-                          >
-                            +
-                          </CategoryPlus>
-                        </CategoryInputWrapper>
-                        {user?.category?.map((i) => {
-                          return (
-                            <CategoryDiv
-                              onClick={async () => {
-                                let categoryResult: CurrentBook[] = [];
+                        完成閱讀{categoryReadActive && `(${library.length})`}
+                      </FinishRead>
 
-                                const a = await getUserInfo(user.uid);
+                      <LendToOther
+                        onClick={async () => {
+                          setCategoryCurrent(null);
+                          setCategoryAllActive(false);
+                          setCategoryReadActive(false);
+                          setWishListActive(false);
+                          setCategorySelectActive(false);
+                          let categoryResult: CurrentBook[] = [];
 
-                                a?.library?.forEach((j) => {
-                                  console.log(j);
-                                  j?.category?.forEach((k) => {
-                                    if (k === i) {
-                                      categoryResult = [...categoryResult, j];
-                                    }
+                          const a = await getUserInfo(user.uid);
+
+                          a?.library?.forEach((j) => {
+                            if (j?.isLendTo) {
+                              categoryResult = [...categoryResult, j];
+                            }
+                          });
+                          dispatch({
+                            type: actionType.LIBRARY.SETLIBRARY,
+                            value: categoryResult,
+                          });
+
+                          setCategoryLendActive(true);
+                        }}
+                      >
+                        出借中{categoryLendActive && `(${library.length})`}
+                      </LendToOther>
+                      <CategoryWholeWrapper>
+                        <CategoryButton
+                          onClick={() => {
+                            setCategorySelectActive(!categorySelectActive);
+                            setCategoryAllActive(false);
+                            setCategoryReadActive(false);
+                            setCategoryLendActive(false);
+                            setWishListActive(false);
+                          }}
+                        >
+                          類別
+                          {categoryCurrent &&
+                            `:${categoryCurrent}(${library?.length})`}
+                        </CategoryButton>
+                        <CategoryWrapper
+                          categorySelectActive={categorySelectActive}
+                        >
+                          <CategoryInputWrapper>
+                            <CategoryInput
+                              placeholder="新增類別"
+                              onChange={(e) => {
+                                setCategoryInput(e.target.value);
+                              }}
+                            />
+                            <CategoryPlus
+                              onClick={() => {
+                                if (user?.category) {
+                                  updateCategory(user.uid, [
+                                    ...user.category,
+                                    categoryInput,
+                                  ]);
+                                  dispatch({
+                                    type: actionType.USER.SETUSER,
+                                    value: {
+                                      ...user,
+                                      category: [
+                                        ...user.category,
+                                        categoryInput,
+                                      ],
+                                    },
                                   });
-                                });
-                                dispatch({
-                                  type: actionType.LIBRARY.SETLIBRARY,
-                                  value: categoryResult,
-                                });
-                                setCategoryCurrent(i);
-                                setCategorySelectActive(false);
-                                setCategoryAllActive(false);
-                                setCategoryReadActive(false);
-                                setCategoryLendActive(false);
-                                setWishListActive(false);
+                                } else {
+                                  updateCategory(user.uid, [categoryInput]);
+                                  dispatch({
+                                    type: actionType.USER.SETUSER,
+                                    value: {
+                                      ...user,
+                                      category: [categoryInput],
+                                    },
+                                  });
+                                }
                               }}
                             >
-                              {i}
-                            </CategoryDiv>
-                          );
-                        })}
-                      </CategoryWrapper>
-                    </CategoryWholeWrapper>
-                  </TopTagLeftWrapper>
-                  <WishList
-                    onClick={async () => {
-                      setWishListActive(true);
-                      const a = await getUserInfo(user.uid);
-                      dispatch({
-                        type: actionType.LIBRARY.SETLIBRARY,
-                        value: a?.wishList || [],
-                      });
-                      setCategoryCurrent(null);
-                      setCategoryAllActive(false);
-                      setCategoryReadActive(false);
-                      setCategoryLendActive(false);
-                    }}
-                  >
-                    願望清單{categoryLendActive && `(${library.length})`}
-                  </WishList>
-                </TopTagWrapper>
+                              +
+                            </CategoryPlus>
+                          </CategoryInputWrapper>
+                          {user?.category?.map((i) => {
+                            return (
+                              <CategoryDiv
+                                onClick={async () => {
+                                  let categoryResult: CurrentBook[] = [];
+
+                                  const a = await getUserInfo(user.uid);
+
+                                  a?.library?.forEach((j) => {
+                                    console.log(j);
+                                    j?.category?.forEach((k) => {
+                                      if (k === i) {
+                                        categoryResult = [...categoryResult, j];
+                                      }
+                                    });
+                                  });
+                                  dispatch({
+                                    type: actionType.LIBRARY.SETLIBRARY,
+                                    value: categoryResult,
+                                  });
+                                  setCategoryCurrent(i);
+                                  setCategorySelectActive(false);
+                                  setCategoryAllActive(false);
+                                  setCategoryReadActive(false);
+                                  setCategoryLendActive(false);
+                                  setWishListActive(false);
+                                }}
+                              >
+                                {i}
+                              </CategoryDiv>
+                            );
+                          })}
+                        </CategoryWrapper>
+                      </CategoryWholeWrapper>
+                    </TopTagLeftWrapper>
+                    <WishList
+                      onClick={async () => {
+                        setCategoryCurrent(null);
+                        setCategoryAllActive(false);
+                        setCategoryReadActive(false);
+                        setCategoryLendActive(false);
+                        setCategorySelectActive(false);
+                        const a = await getUserInfo(user.uid);
+                        dispatch({
+                          type: actionType.LIBRARY.SETLIBRARY,
+                          value: a?.wishList || [],
+                        });
+
+                        setWishListActive(true);
+                      }}
+                    >
+                      願望清單{wishListActive && `(${library.length})`}
+                    </WishList>
+                  </TopTagWrapper>
+                ) : (
+                  <NoLibraryDiv>
+                    <NoLibrary>歡迎點擊</NoLibrary>
+                    <NoLibraryPlusIconDiv
+                      onClick={() => {
+                        navigator("./search");
+                      }}
+                    >
+                      +
+                    </NoLibraryPlusIconDiv>
+                    <NoLibrary>加入圖書</NoLibrary>
+                  </NoLibraryDiv>
+                )}
 
                 {library.map((i) => {
                   return (
@@ -389,7 +412,7 @@ const Center = styled.div`
 `;
 
 const PlusIconDivWrapper = styled.div`
-  width: 1218px;
+  width: 1186px;
   height: 36px;
   position: relative;
 `;
@@ -419,9 +442,9 @@ const PlusIconDiv = styled.div<{ localPath: string; $uid: string }>`
 
 //上面的標籤
 const TopTagWrapper = styled.div`
-  width: 902px;
+  width: 1172px;
   position: absolute;
-  top: -32px;
+  top: -36px;
   left: 0px;
   display: flex;
   justify-content: space-between;
@@ -438,7 +461,7 @@ const WishList = styled.div`
   cursor: pointer;
   user-select: none;
   width: 168px;
-  height: 32px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -454,7 +477,7 @@ const LendToOther = styled.div`
   cursor: pointer;
   user-select: none;
   width: 168px;
-  height: 32px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -470,7 +493,7 @@ const FinishRead = styled.div`
   cursor: pointer;
   user-select: none;
   width: 168px;
-  height: 32px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -485,7 +508,7 @@ const CategoryAll = styled.div`
   border: 1px solid #e4e6eb;
 
   width: 168px;
-  height: 32px;
+  height: 36px;
   cursor: pointer;
   user-select: none;
   display: flex;
@@ -507,7 +530,7 @@ const CategoryButton = styled.div`
   cursor: pointer;
   user-select: none;
   width: 168px;
-  height: 32px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -523,7 +546,7 @@ const CategoryWrapper = styled.div<{ categorySelectActive: boolean }>`
   height: auto;
 
   position: absolute;
-  top: 32px;
+  top: 36px;
   left: 0px;
   z-index: 1;
   background: white;
@@ -589,7 +612,7 @@ const Bookcase = styled.div`
   border: 1px solid #e4e6eb;
   position: relative;
   margin: 100px 0px;
-  width: 902px;
+  width: 1172px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -599,8 +622,9 @@ const Bookcase = styled.div`
 `;
 
 const BookDiv = styled.div`
-  width: 300px;
-  height: 340px;
+  width: 390px;
+
+  height: 400px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -638,4 +662,27 @@ const AddToLibrary = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+`;
+
+const NoLibraryDiv = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const NoLibrary = styled.div``;
+
+const NoLibraryPlusIconDiv = styled.div`
+  width: 48px;
+  height: 36px;
+  border-radius: 6px;
+  background: #eff2f5;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  :hover {
+    background: rgba(200, 200, 200, 0.4);
+  }
+  margin: 16px 16px;
+  display: flex;
 `;
