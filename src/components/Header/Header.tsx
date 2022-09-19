@@ -21,6 +21,7 @@ import account from "./account.svg";
 import friend from "./friend.svg";
 import theme from "./theme.svg";
 import rightarrow from "./rightarrow.svg";
+import grayBack from "../TopSection/grayBack.png";
 
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -55,6 +56,10 @@ function Header() {
         dispatch({
           type: actionType.USER.SETUSER,
           value: null,
+        });
+        dispatch({
+          type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
+          value: [],
         });
         setActive(false);
         navigator("./login");
@@ -207,7 +212,7 @@ function Header() {
             <AlertIcon src={alert} />
           </AlertIconDiv>
           <Avatar
-            src={user?.avatar}
+            src={user?.avatar || grayBack}
             onClick={() => {
               setActive(!active);
               setAccountActive(false);

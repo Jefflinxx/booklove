@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import avatar from "./avatar.svg";
 import camera from "./camera.svg";
+import grayBack from "./grayBack.png";
 import { User } from "../../reducer/userReducer";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -20,10 +21,25 @@ function TopSection() {
   const dispatch = useDispatch();
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
   const [followObj, setFollowObj] = useState<
-    { uid: string; uname: string; avatar: string } | undefined
+    | {
+        uid: string;
+        uname: string;
+        avatar: string;
+        background: string | undefined;
+      }
+    | undefined
   >(undefined);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [confirmActive, setConfirmActive] = useState<boolean>(false);
+  const [display, setDisplay] = useState<{
+    avatar: string;
+    uname: string;
+    background: string | undefined;
+  }>({
+    avatar: user?.avatar,
+    uname: user?.uname,
+    background: grayBack,
+  });
 
   const localPath = Location.pathname.split("/")[1];
 
@@ -36,33 +52,55 @@ function TopSection() {
   };
 
   useEffect(() => {
+    if (user && !localPath)
+      setDisplay({
+        avatar: user.avatar,
+        uname: user.uname,
+        background: user.background || grayBack,
+      });
     const getFollowObj = async () => {
-      const a = await getUserInfo(localPath);
-      console.log(a);
-      if (a) {
-        setFollowObj({ uid: a.uid, uname: a.uname, avatar: a.avatar });
+      console.log(localPath);
+      if (localPath) {
+        const a = await getUserInfo(localPath);
+        console.log(a);
+        if (a) {
+          setDisplay({
+            avatar: a.avatar,
+            uname: a.uname,
+            background: a.background || grayBack,
+          });
+          setFollowObj({
+            uid: a.uid,
+            uname: a.uname,
+            avatar: a.avatar,
+            background: a.background || grayBack,
+          });
+        }
       }
     };
     getFollowObj();
-  }, []);
+  }, [user, localPath]);
 
-  console.log(imageFile);
+  console.log(display);
+  console.log(followObj);
   return (
     <WholeWrapper>
       <CenterWrapper>
         <BgWrapper>
-          <AvatarImgLabel
-            confirmActive={confirmActive}
-            htmlFor="bg"
-            onClick={() => {
-              setConfirmActive(true);
-            }}
-          >
-            <EditImgBtn>
-              <CameraIcon src={camera} />
-              編輯封面相片
-            </EditImgBtn>
-          </AvatarImgLabel>
+          {!localPath && (
+            <AvatarImgLabel
+              confirmActive={confirmActive}
+              htmlFor="bg"
+              onClick={() => {
+                setConfirmActive(true);
+              }}
+            >
+              <EditImgBtn>
+                <CameraIcon src={camera} />
+                編輯封面相片
+              </EditImgBtn>
+            </AvatarImgLabel>
+          )}
 
           <ConfirmBtn
             onClick={async () => {
@@ -102,14 +140,16 @@ function TopSection() {
             }}
           />
           <Background
-            src={imageFile ? URL.createObjectURL(imageFile) : user?.background}
+            src={
+              imageFile ? URL.createObjectURL(imageFile) : display.background
+            }
           />
         </BgWrapper>
 
         <InfoDiv>
           <InfoLeft>
-            <Avatar src={user?.avatar} />
-            <Username>{user?.uname}</Username>
+            <Avatar src={display.avatar} />
+            <Username>{display.uname}</Username>
           </InfoLeft>
           <InfoRight>
             <InfoRightP
@@ -155,8 +195,8 @@ function TopSection() {
               }}
             >
               {user?.followList?.find((k) => k.uid === localPath)
-                ? "unfollow"
-                : "follow"}
+                ? "取消追蹤"
+                : "追蹤用戶"}
             </InfoRightP>
           </InfoRight>
         </InfoDiv>
@@ -310,13 +350,21 @@ const InfoRight = styled.div`
 `;
 
 const InfoRightP = styled.p<{ localPath: string; $uid: string }>`
-  font-size: 20px;
+  width: 106px;
+  height: 36px;
+  font-size: 16px;
+
+  align-items: center;
+  justify-content: center;
   margin-right: 30px;
   padding: 4px 20px;
-  border: 1px solid black;
+  background: #eff2f5;
+  border-radius: 6px;
+  user-select: none;
+  cursor: pointer;
   display: ${(props) => {
     if (props.localPath === props.$uid || props.localPath === "") return "none";
-    else return "block";
+    else return "flex";
   }};
 `;
 

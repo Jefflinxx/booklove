@@ -25,6 +25,10 @@ function Book() {
     (state: { currentLibraryReducer: CurrentBook[] }) =>
       state.currentLibraryReducer
   );
+  const displayLibrary = useSelector(
+    (state: { displayLibraryReducer: CurrentBook[] }) =>
+      state.displayLibraryReducer
+  );
   const [progressArray, setProgressArray] = useState<number[]>([0]);
   const [totalLike, setTotalLike] = useState<number | null>(null);
 
@@ -44,10 +48,10 @@ function Book() {
     console.log(userId);
     getUserInfo(userId).then((v) => {
       if (v) {
-        dispatch({
-          type: actionType.LIBRARY.SETLIBRARY,
-          value: v.library,
-        });
+        // dispatch({
+        //   type: actionType.LIBRARY.SETLIBRARY,
+        //   value: v.library,
+        // });
       }
     });
     setProgressArray(() => {
@@ -75,8 +79,8 @@ function Book() {
   }, []);
 
   useEffect(() => {
-    console.log(library);
-    library.forEach((i) => {
+    console.log(displayLibrary);
+    displayLibrary.forEach((i) => {
       if (i.isbn === bookId) {
         dispatch({
           type: actionType.BOOK.SETBOOKDATA,
@@ -84,7 +88,7 @@ function Book() {
         });
       }
     });
-  }, [library]);
+  }, [displayLibrary]);
 
   return (
     <>
@@ -98,27 +102,29 @@ function Book() {
             >
               <BackIcon src={back}></BackIcon>
             </BackIconDiv>
-            <EditIconDiv
-              onClick={() => {
-                getUserInfo(user.uid).then((v) => {
-                  dispatch({
-                    type: actionType.USER.SETUSER,
-                    value: v,
+            {userId === user?.uid && (
+              <EditIconDiv
+                onClick={() => {
+                  getUserInfo(user.uid).then((v) => {
+                    dispatch({
+                      type: actionType.USER.SETUSER,
+                      value: v,
+                    });
+                    v?.library.forEach((i) => {
+                      if (i.isbn === currentBook.isbn) {
+                        dispatch({
+                          type: actionType.BOOK.SETBOOKDATA,
+                          value: i,
+                        });
+                      }
+                    });
                   });
-                  v?.library.forEach((i) => {
-                    if (i.isbn === currentBook.isbn) {
-                      dispatch({
-                        type: actionType.BOOK.SETBOOKDATA,
-                        value: i,
-                      });
-                    }
-                  });
-                });
-                navigator(`../edit/${user.uid}${currentBook.isbn}`);
-              }}
-            >
-              <EditIcon src={edit}></EditIcon>
-            </EditIconDiv>
+                  navigator(`../edit/${user.uid}${currentBook.isbn}`);
+                }}
+              >
+                <EditIcon src={edit}></EditIcon>
+              </EditIconDiv>
+            )}
           </TopIconDivWrapper>
 
           <TopSection>

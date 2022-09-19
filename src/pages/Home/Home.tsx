@@ -24,9 +24,16 @@ function Home() {
   const dispatch = useDispatch();
   const navigator = useNavigate();
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
+  const displayUser = useSelector(
+    (state: { displayUserReducer: User }) => state.displayUserReducer
+  );
   const library = useSelector(
     (state: { currentLibraryReducer: CurrentBook[] }) =>
       state.currentLibraryReducer
+  );
+  const displayLibrary = useSelector(
+    (state: { displayLibraryReducer: CurrentBook[] }) =>
+      state.displayLibraryReducer
   );
   const [categorySelectActive, setCategorySelectActive] =
     useState<boolean>(false);
@@ -40,15 +47,22 @@ function Home() {
 
   useEffect(() => {
     console.log(user);
-    console.log(localPath);
-    console.log(localPath === "");
+    // console.log(localPath);
+    // console.log(localPath === "");
 
-    if (user?.library) {
+    if (user) {
       console.log(user.library);
+      getUserInfo(user.uid).then((v) => {
+        dispatch({
+          type: actionType.LIBRARY.SETLIBRARY,
+          value: v!.library,
+        });
+      });
       if (localPath === user.uid || localPath === "") {
+        console.log("改變display");
         getUserInfo(user.uid).then((v) => {
           dispatch({
-            type: actionType.LIBRARY.SETLIBRARY,
+            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
             value: v!.library,
           });
         });
@@ -56,7 +70,7 @@ function Home() {
         getUserInfo(localPath).then((v) => {
           if (!v) {
             dispatch({
-              type: actionType.LIBRARY.SETLIBRARY,
+              type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
               value: [
                 {
                   cover:
@@ -68,6 +82,10 @@ function Home() {
               ],
             });
           } else if (v) {
+            dispatch({
+              type: actionType.DISPLAYUSER.SETDISPLAYUSER,
+              value: v,
+            });
             if (v?.library) {
               let newLibrary: CurrentBook[] = [];
               v?.library.forEach((i) => {
@@ -76,7 +94,7 @@ function Home() {
                 }
               });
               dispatch({
-                type: actionType.LIBRARY.SETLIBRARY,
+                type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
                 value: newLibrary,
               });
             }
@@ -85,22 +103,16 @@ function Home() {
       }
     }
   }, [localPath, user]);
-  // useEffect(() => {
-  //   onAuthStateChanged(auth, async (u) => {
-  //     console.log("監聽登入變化");
-  //     if (u) {
-  //       const uid = u.uid;
-  //       const user = await getUserInfo(uid);
-  //       dispatch({
-  //         type: actionType.USER.SETUSER,
-  //         value: user || null,
-  //       });
-  //     } else {
-  //       navigator("../login");
-  //     }
-  //   });
-  // }, []);
-  console.log(library);
+  useEffect(() => {
+    if (user) {
+      getUserInfo(user.uid).then((v) => {
+        dispatch({
+          type: actionType.USER.SETUSER,
+          value: v,
+        });
+      });
+    }
+  }, []);
 
   return (
     <>
@@ -123,7 +135,7 @@ function Home() {
             </Center>
             <Center>
               <Bookcase>
-                {library.length ? (
+                {library.length || user?.wishList?.length ? (
                   <TopTagWrapper>
                     <TopTagLeftWrapper>
                       <CategoryAll
@@ -133,15 +145,32 @@ function Home() {
                           setCategoryLendActive(false);
                           setWishListActive(false);
                           setCategorySelectActive(false);
-                          const a = await getUserInfo(user.uid);
+
+                          let a;
+                          if (localPath === user.uid || localPath === "") {
+                            a = await getUserInfo(user.uid);
+                          } else {
+                            a = await getUserInfo(localPath);
+                            if (!a) return;
+                            if (a?.library) {
+                              let newLibrary: CurrentBook[] = [];
+                              a?.library.forEach((i) => {
+                                if (i?.isPublic) {
+                                  newLibrary.push(i);
+                                }
+                              });
+                              a = { ...a, library: newLibrary };
+                            }
+                          }
+
                           dispatch({
-                            type: actionType.LIBRARY.SETLIBRARY,
+                            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
                             value: a?.library || [],
                           });
                           setCategoryAllActive(true);
                         }}
                       >
-                        全部{categoryAllActive && `(${library.length})`}
+                        全部{categoryAllActive && `(${displayLibrary.length})`}
                       </CategoryAll>
 
                       <FinishRead
@@ -153,7 +182,22 @@ function Home() {
                           setCategorySelectActive(false);
                           let categoryResult: CurrentBook[] = [];
 
-                          const a = await getUserInfo(user.uid);
+                          let a;
+                          if (localPath === user.uid || localPath === "") {
+                            a = await getUserInfo(user.uid);
+                          } else {
+                            a = await getUserInfo(localPath);
+                            if (!a) return;
+                            if (a?.library) {
+                              let newLibrary: CurrentBook[] = [];
+                              a?.library.forEach((i) => {
+                                if (i?.isPublic) {
+                                  newLibrary.push(i);
+                                }
+                              });
+                              a = { ...a, library: newLibrary };
+                            }
+                          }
 
                           a?.library?.forEach((j) => {
                             if (j?.isFinishRead) {
@@ -161,13 +205,14 @@ function Home() {
                             }
                           });
                           dispatch({
-                            type: actionType.LIBRARY.SETLIBRARY,
+                            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
                             value: categoryResult,
                           });
                           setCategoryReadActive(true);
                         }}
                       >
-                        完成閱讀{categoryReadActive && `(${library.length})`}
+                        完成閱讀
+                        {categoryReadActive && `(${displayLibrary.length})`}
                       </FinishRead>
 
                       <LendToOther
@@ -179,7 +224,22 @@ function Home() {
                           setCategorySelectActive(false);
                           let categoryResult: CurrentBook[] = [];
 
-                          const a = await getUserInfo(user.uid);
+                          let a;
+                          if (localPath === user.uid || localPath === "") {
+                            a = await getUserInfo(user.uid);
+                          } else {
+                            a = await getUserInfo(localPath);
+                            if (!a) return;
+                            if (a?.library) {
+                              let newLibrary: CurrentBook[] = [];
+                              a?.library.forEach((i) => {
+                                if (i?.isPublic) {
+                                  newLibrary.push(i);
+                                }
+                              });
+                              a = { ...a, library: newLibrary };
+                            }
+                          }
 
                           a?.library?.forEach((j) => {
                             if (j?.isLendTo) {
@@ -187,14 +247,15 @@ function Home() {
                             }
                           });
                           dispatch({
-                            type: actionType.LIBRARY.SETLIBRARY,
+                            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
                             value: categoryResult,
                           });
 
                           setCategoryLendActive(true);
                         }}
                       >
-                        出借中{categoryLendActive && `(${library.length})`}
+                        出借中
+                        {categoryLendActive && `(${displayLibrary.length})`}
                       </LendToOther>
                       <CategoryWholeWrapper>
                         <CategoryButton
@@ -208,57 +269,78 @@ function Home() {
                         >
                           類別
                           {categoryCurrent &&
-                            `:${categoryCurrent}(${library?.length})`}
+                            `:${categoryCurrent}(${displayLibrary?.length})`}
                         </CategoryButton>
                         <CategoryWrapper
                           categorySelectActive={categorySelectActive}
                         >
-                          <CategoryInputWrapper>
-                            <CategoryInput
-                              placeholder="新增類別"
-                              onChange={(e) => {
-                                setCategoryInput(e.target.value);
-                              }}
-                            />
-                            <CategoryPlus
-                              onClick={() => {
-                                if (user?.category) {
-                                  updateCategory(user.uid, [
-                                    ...user.category,
-                                    categoryInput,
-                                  ]);
-                                  dispatch({
-                                    type: actionType.USER.SETUSER,
-                                    value: {
-                                      ...user,
-                                      category: [
-                                        ...user.category,
-                                        categoryInput,
-                                      ],
-                                    },
-                                  });
-                                } else {
-                                  updateCategory(user.uid, [categoryInput]);
-                                  dispatch({
-                                    type: actionType.USER.SETUSER,
-                                    value: {
-                                      ...user,
-                                      category: [categoryInput],
-                                    },
-                                  });
-                                }
-                              }}
-                            >
-                              +
-                            </CategoryPlus>
-                          </CategoryInputWrapper>
-                          {user?.category?.map((i) => {
+                          {!localPath && (
+                            <CategoryInputWrapper>
+                              <CategoryInput
+                                placeholder="新增類別"
+                                onChange={(e) => {
+                                  setCategoryInput(e.target.value);
+                                }}
+                              />
+                              <CategoryPlus
+                                onClick={() => {
+                                  if (user?.category) {
+                                    updateCategory(user.uid, [
+                                      ...user.category,
+                                      categoryInput,
+                                    ]);
+                                    dispatch({
+                                      type: actionType.USER.SETUSER,
+                                      value: {
+                                        ...user,
+                                        category: [
+                                          ...user.category,
+                                          categoryInput,
+                                        ],
+                                      },
+                                    });
+                                  } else {
+                                    updateCategory(user.uid, [categoryInput]);
+                                    dispatch({
+                                      type: actionType.USER.SETUSER,
+                                      value: {
+                                        ...user,
+                                        category: [categoryInput],
+                                      },
+                                    });
+                                  }
+                                }}
+                              >
+                                +
+                              </CategoryPlus>
+                            </CategoryInputWrapper>
+                          )}
+
+                          {displayUser?.category?.map((i) => {
                             return (
                               <CategoryDiv
                                 onClick={async () => {
                                   let categoryResult: CurrentBook[] = [];
 
-                                  const a = await getUserInfo(user.uid);
+                                  let a;
+                                  if (
+                                    localPath === user.uid ||
+                                    localPath === ""
+                                  ) {
+                                    a = await getUserInfo(user.uid);
+                                  } else {
+                                    a = await getUserInfo(localPath);
+                                    if (!a) return;
+                                    if (a?.library) {
+                                      let newLibrary: CurrentBook[] = [];
+                                      a?.library.forEach((i) => {
+                                        if (i?.isPublic) {
+                                          newLibrary.push(i);
+                                        }
+                                      });
+                                      a = { ...a, library: newLibrary };
+                                    }
+                                  }
 
                                   a?.library?.forEach((j) => {
                                     console.log(j);
@@ -269,7 +351,8 @@ function Home() {
                                     });
                                   });
                                   dispatch({
-                                    type: actionType.LIBRARY.SETLIBRARY,
+                                    type: actionType.DISPLAYLIBRARY
+                                      .SETDISPLAYLIBRARY,
                                     value: categoryResult,
                                   });
                                   setCategoryCurrent(i);
@@ -287,24 +370,27 @@ function Home() {
                         </CategoryWrapper>
                       </CategoryWholeWrapper>
                     </TopTagLeftWrapper>
-                    <WishList
-                      onClick={async () => {
-                        setCategoryCurrent(null);
-                        setCategoryAllActive(false);
-                        setCategoryReadActive(false);
-                        setCategoryLendActive(false);
-                        setCategorySelectActive(false);
-                        const a = await getUserInfo(user.uid);
-                        dispatch({
-                          type: actionType.LIBRARY.SETLIBRARY,
-                          value: a?.wishList || [],
-                        });
+                    {!localPath && (
+                      <WishList
+                        onClick={async () => {
+                          setCategoryCurrent(null);
+                          setCategoryAllActive(false);
+                          setCategoryReadActive(false);
+                          setCategoryLendActive(false);
+                          setCategorySelectActive(false);
+                          const a = await getUserInfo(user.uid);
+                          console.log(a?.wishList);
+                          dispatch({
+                            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
+                            value: a?.wishList || [],
+                          });
 
-                        setWishListActive(true);
-                      }}
-                    >
-                      願望清單{wishListActive && `(${library.length})`}
-                    </WishList>
+                          setWishListActive(true);
+                        }}
+                      >
+                        願望清單{wishListActive && `(${displayLibrary.length})`}
+                      </WishList>
+                    )}
                   </TopTagWrapper>
                 ) : (
                   <NoLibraryDiv>
@@ -320,34 +406,27 @@ function Home() {
                   </NoLibraryDiv>
                 )}
 
-                {library.map((i) => {
+                {displayLibrary.map((i) => {
                   return (
-                    <BookDiv>
-                      <BookImg
-                        src={i.cover}
-                        onClick={() => {
-                          if (!wishListActive) {
-                            dispatch({
-                              type: actionType.BOOK.SETBOOKDATA,
-                              value: i,
-                            });
+                    <BookDiv
+                      onClick={() => {
+                        if (!wishListActive) {
+                          dispatch({
+                            type: actionType.BOOK.SETBOOKDATA,
+                            value: i,
+                          });
+                          if (localPath) {
+                            console.log("有執行", localPath);
+
+                            navigator(`../book/${localPath}${i.isbn}`);
+                          } else {
                             navigator(`./book/${user.uid}${i.isbn}`);
                           }
-                        }}
-                      ></BookImg>
-                      <BookName
-                        onClick={() => {
-                          if (!wishListActive) {
-                            dispatch({
-                              type: actionType.BOOK.SETBOOKDATA,
-                              value: i,
-                            });
-                            navigator(`./book/${user.uid}${i.isbn}`);
-                          }
-                        }}
-                      >
-                        {i.bookname}
-                      </BookName>
+                        }
+                      }}
+                    >
+                      <BookImg src={i.cover}></BookImg>
+                      <BookName>{i.bookname}</BookName>
                       {wishListActive && (
                         <AddToLibrary
                           onClick={async () => {
@@ -366,7 +445,7 @@ function Home() {
                                 []
                             );
                             dispatch({
-                              type: actionType.LIBRARY.SETLIBRARY,
+                              type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
                               value:
                                 a?.wishList?.filter((j) => j.isbn !== i.isbn) ||
                                 [],

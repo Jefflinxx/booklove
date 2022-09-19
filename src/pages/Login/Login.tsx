@@ -67,10 +67,10 @@ const Login = () => {
                   .then((u) => {
                     console.log("註冊成功");
                     initUser(u.user.uid, u.user.email!, defaultAvatar);
-                    // getUserInfo(u.user.uid).then((v) => {
-                    //   dispatch({ type: actionType.USER.SETUSER, value: v });
-                    // });
-                    //navigator("../");
+                    getUserInfo(u.user.uid).then((v) => {
+                      dispatch({ type: actionType.USER.SETUSER, value: v });
+                    });
+                    navigator("../");
                   })
                   .catch((e) => {
                     console.log(e.code);
@@ -87,10 +87,10 @@ const Login = () => {
                 signInWithEmailAndPassword(auth, email, password)
                   .then((u) => {
                     console.log("登入成功");
-                    // getUserInfo(u.user.uid).then((v) => {
-                    //   dispatch({ type: actionType.USER.SETUSER, value: v });
-                    // });
-                    //navigator("../");
+                    getUserInfo(u.user.uid).then((v) => {
+                      dispatch({ type: actionType.USER.SETUSER, value: v });
+                    });
+                    navigator("../");
                   })
                   .catch((e) => {
                     if (e.code === "auth/invalid-email") {

@@ -1,7 +1,8 @@
 import search from "./search.svg";
 import back from "./back.svg";
 
-import { useSelector } from "react-redux";
+import { actionType } from "../../reducer/rootReducer";
+import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import { useEffect, useState, useRef } from "react";
 
@@ -11,6 +12,7 @@ import { CurrentBook } from "../../reducer/currentBookReducer";
 import {
   addSearchBookToUserLibrary,
   addSearchBookToUserWishList,
+  getUserInfo,
 } from "../../utils/firestore";
 import { stringify } from "querystring";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 const googleApi = `https://www.googleapis.com/books/v1/volumes?q=`;
 const esliteApi = `https://athena.eslite.com/api/v2/search?q=`;
 function Search() {
+  const dispatch = useDispatch();
   const navigator = useNavigate();
   const [input, setInput] = useState("");
   const [resultCountActive, setResultCountActive] = useState(false);
@@ -151,6 +154,14 @@ function Search() {
 
   useEffect(() => {
     friendSearchRef?.current?.focus();
+    if (user) {
+      getUserInfo(user.uid).then((v) => {
+        dispatch({
+          type: actionType.USER.SETUSER,
+          value: v,
+        });
+      });
+    }
   }, []);
 
   console.log(books);

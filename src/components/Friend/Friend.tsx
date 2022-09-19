@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { actionType } from "../../reducer/rootReducer";
 import styled from "styled-components";
 import { getUserInfo } from "../../utils/firestore";
 import { User } from "../../reducer/userReducer";
@@ -14,6 +15,7 @@ type FriendProps = {
 
 const Friend: React.FC<FriendProps> = ({ friendActive, setFriendActive }) => {
   const navigator = useNavigate();
+  const dispatch = useDispatch();
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
   const [followList, setFollowList] = useState<
     { uid: string; avatar: string; uname: string }[]
@@ -48,7 +50,12 @@ const Friend: React.FC<FriendProps> = ({ friendActive, setFriendActive }) => {
         {followList.map((i) => {
           return (
             <FriendDiv
-              onClick={() => {
+              onClick={async () => {
+                // const a = await getUserInfo(i.uid);
+                // dispatch({
+                //   type: actionType.DISPLAYUSER.SETDISPLAYUSER,
+                //   value: a,
+                // });
                 navigator(`./${i.uid}`);
               }}
             >
