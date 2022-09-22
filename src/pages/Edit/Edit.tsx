@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { actionType } from "../../reducer/rootReducer";
 import { useSelector, useDispatch } from "react-redux";
 import { getUserInfo, updateUserLibrary } from "../../utils/firestore";
 import { useNavigate } from "react-router-dom";
@@ -10,8 +11,10 @@ import { User } from "../../reducer/userReducer";
 import { CurrentBook } from "../../reducer/currentBookReducer";
 import back from "./back.svg";
 import deleteIcon from "./delete.svg";
+import Tiptap from "../../components/Tiptap/Tiptap";
 
 function Edit() {
+  const dispatch = useDispatch();
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
   const currentBook = useSelector(
     (state: { currentBookReducer: CurrentBook }) => state.currentBookReducer
@@ -28,6 +31,8 @@ function Edit() {
   const [progressWarn, setProgressWarn] = useState<boolean>(false);
   const [likeActive, setLikeActive] = useState<boolean>(false);
   const [publicActive, setPublicActive] = useState<boolean>(true);
+  const [isLendToActive, setIsLendToActive] = useState<boolean>(false);
+  const [summaryData, setSummaryData] = useState("");
 
   const uploadImage = async () => {
     if (imageFile === null) return;
@@ -43,22 +48,23 @@ function Edit() {
       getUserInfo(user.uid).then((v) => {
         v?.library.forEach((i) => {
           if (i.isbn === currentBook.isbn) {
-            console.log("public", i.isPublic);
             if (i.totalChapter) {
               setProgress(i.totalChapter);
             }
             if (i.like) {
               setLikeActive(i.like);
             }
+            if (i.summary) {
+              setSummaryData(i.summary);
+            }
             setPublicActive(i.isPublic);
+            setIsLendToActive(i.isLendTo);
           }
         });
       });
     }
   }, [user]);
 
-  console.log(publicActive);
-  console.log(progress);
   return (
     <>
       <WholeWrapper>
@@ -75,7 +81,7 @@ function Edit() {
             <DeleteIconDiv
               onClick={() => {
                 const a = library.filter((i) => i.isbn !== currentBook.isbn);
-                console.log(a);
+
                 updateUserLibrary(user.uid, a);
                 navigator("../../");
               }}
@@ -97,6 +103,8 @@ function Edit() {
                     totalChapter: progress,
                     like: likeActive,
                     isPublic: publicActive,
+                    isLendTo: isLendToActive,
+                    summary: summaryData,
                   };
                 } else {
                   submitData = {
@@ -107,10 +115,15 @@ function Edit() {
                     alreadyReadChapter: progress,
                     like: likeActive,
                     isPublic: publicActive,
+                    isLendTo: isLendToActive,
+                    summary: summaryData,
                   };
                 }
               } else {
-                console.log("v", currentBook.alreadyReadChapter <= progress);
+                // console.log(
+                //   currentBook.alreadyReadChapter,
+                //   currentBook.alreadyReadChapter <= progress
+                // );
                 if (currentBook.alreadyReadChapter <= progress) {
                   submitData = {
                     ...data,
@@ -118,6 +131,8 @@ function Edit() {
                     totalChapter: progress,
                     like: likeActive,
                     isPublic: publicActive,
+                    isLendTo: isLendToActive,
+                    summary: summaryData,
                   };
                 } else {
                   submitData = {
@@ -127,28 +142,35 @@ function Edit() {
                     alreadyReadChapter: progress,
                     like: likeActive,
                     isPublic: publicActive,
+                    isLendTo: isLendToActive,
+                    summary: summaryData,
                   };
                 }
               }
-              console.log(submitData);
-
-              let bookInfoAddSubmitData: object = {};
-              library.forEach((i) => {
-                if (i.isbn === currentBook.isbn) {
-                  bookInfoAddSubmitData = { ...i, ...submitData };
-                }
-              });
+              // console.log(submitData);
 
               const userData = await getUserInfo(user.uid);
               if (userData) {
+                let bookInfoAddSubmitData: object = {};
+                userData.library.forEach((i) => {
+                  if (i.isbn === currentBook.isbn) {
+                    bookInfoAddSubmitData = { ...i, ...submitData };
+                  }
+                });
+
+                dispatch({
+                  type: actionType.BOOK.SETBOOKDATA,
+                  value: bookInfoAddSubmitData,
+                });
+
                 const allBookExceptEditBook: object[] = userData.library.filter(
                   (i) => i.isbn !== currentBook.isbn
                 );
                 const allBookData: object[] = [
-                  ...allBookExceptEditBook,
                   bookInfoAddSubmitData,
+                  ...allBookExceptEditBook,
                 ];
-                console.log(allBookData);
+
                 updateUserLibrary(user.uid, allBookData);
                 navigator(-1);
               }
@@ -196,7 +218,7 @@ function Edit() {
                   },
                 ].map((i) => {
                   return (
-                    <SectionItem>
+                    <SectionItem key={i.key}>
                       <BooknameP>{i.tagName}</BooknameP>
                       <Bookname
                         defaultValue={i.value}
@@ -210,6 +232,7 @@ function Edit() {
                   <CategoryWrapper>
                     {user?.category?.map((i) => (
                       <CategoryDiv
+                        key={i}
                         $i={i}
                         categoryArray={categoryArray}
                         onClick={() => {
@@ -234,12 +257,12 @@ function Edit() {
                     likeActive={likeActive}
                     onClick={() => {
                       setLikeActive(!likeActive);
-                      updateUserLibrary(user.uid, [
-                        ...user.library.filter(
-                          (i) => i.isbn !== currentBook.isbn
-                        ),
-                        { ...currentBook, like: !likeActive },
-                      ]);
+                      // updateUserLibrary(user.uid, [
+                      //   ...user.library.filter(
+                      //     (i) => i.isbn !== currentBook.isbn
+                      //   ),
+                      //   { ...currentBook, like: !likeActive },
+                      // ]);
                     }}
                   >
                     <Like>愛心</Like>
@@ -251,12 +274,12 @@ function Edit() {
                     publicActive={publicActive}
                     onClick={() => {
                       setPublicActive(!publicActive);
-                      updateUserLibrary(user.uid, [
-                        ...user.library.filter(
-                          (i) => i.isbn !== currentBook.isbn
-                        ),
-                        { ...currentBook, like: !publicActive },
-                      ]);
+                      // updateUserLibrary(user.uid, [
+                      //   ...user.library.filter(
+                      //     (i) => i.isbn !== currentBook.isbn
+                      //   ),
+                      //   { ...currentBook, like: !publicActive },
+                      // ]);
                     }}
                   >
                     <Public>是公開</Public>
@@ -271,7 +294,7 @@ function Edit() {
                 <Progress
                   onChange={(e) => {
                     const a = Number(e.target.value);
-                    console.log(typeof a, a);
+
                     if (isNaN(a)) {
                       setProgressWarn(true);
                     } else {
@@ -293,18 +316,39 @@ function Edit() {
                   {...register("place")}
                 ></Place>
               </SectionBItem>
+
               <SectionBItem>
+                <IsLendToP>是否出借</IsLendToP>
+                <IsLendTo
+                  isLendToActive={isLendToActive}
+                  onClick={() => {
+                    setIsLendToActive(!isLendToActive);
+                    // updateUserLibrary(user.uid, [
+                    //   ...user.library.filter(
+                    //     (i) => i.isbn !== currentBook.isbn
+                    //   ),
+                    //   { ...currentBook, isLendTo: !isLendToActive },
+                    // ]);
+                  }}
+                ></IsLendTo>
+              </SectionBItem>
+
+              <LendToWrapper isLendToActive={isLendToActive}>
                 <LendToP>出借給</LendToP>
                 <LendTo
                   defaultValue={currentBook?.lendTo}
                   {...register("lendTo")}
                 ></LendTo>
-              </SectionBItem>
+              </LendToWrapper>
               <SummaryP>書摘</SummaryP>
-              <Summary
+              {summaryData && (
+                <Tiptap data={summaryData} setData={setSummaryData}></Tiptap>
+              )}
+
+              {/* <Summary
                 defaultValue={currentBook?.summary}
                 {...register("summary")}
-              ></Summary>
+              ></Summary> */}
             </BottomSection>
             <ModifyButtonDiv>
               <ModifyButton type="submit">修改</ModifyButton>
@@ -525,13 +569,29 @@ const Place = styled.input`
   border: 1px solid black;
 `;
 
+const IsLendToP = styled.div`
+  width: 90px;
+  color: gray;
+`;
+
+const IsLendTo = styled.div<{ isLendToActive: boolean }>`
+  width: 24px;
+  border: 1px solid black;
+  background: ${(props) => (props.isLendToActive ? "blue" : "white")};
+`;
+
+const LendToWrapper = styled.div<{ isLendToActive: boolean }>`
+  display: ${(props) => (props.isLendToActive ? "flex" : "none")};
+  border: 1px solid black;
+  margin: 24px 0px 24px 54px;
+`;
+
 const LendToP = styled.div`
   width: 90px;
   color: gray;
 `;
 const LendTo = styled.input`
   width: 160px;
-
   border: 1px solid black;
 `;
 

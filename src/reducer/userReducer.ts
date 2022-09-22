@@ -17,6 +17,8 @@ export type BookInfo = {
   place: string;
   lendTo: string;
   isLendTo: boolean;
+  lendFrom: string;
+  lendFromName: string;
   summary: string;
   uploadCover: string[];
   isPublic: boolean;
@@ -31,7 +33,15 @@ export type User = {
   category?: string[];
   library: BookInfo[];
   wishList?: BookInfo[];
-  Notification?: { follower: string }[];
+  lendFromList?: BookInfo[];
+  notification?: {
+    type: string;
+    avatar: string;
+    uid: string;
+    uname: string;
+    isbn: string;
+    bookname: string;
+  }[];
 };
 
 const userReducer = (

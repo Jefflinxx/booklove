@@ -66,7 +66,7 @@ const Account: React.FC<AccountProps> = ({
           counter += i.summary.length;
         }
       });
-      console.log(counter);
+
       setWriteCount(counter);
     };
 
@@ -131,7 +131,7 @@ const Account: React.FC<AccountProps> = ({
           onClick={async () => {
             const imageUrl = await uploadImage();
             const a = { cover: imageUrl, uname: input };
-            console.log(a);
+
             if (input && imageUrl) {
               updateUser(user.uid, input, imageUrl);
               dispatch({

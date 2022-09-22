@@ -52,7 +52,6 @@ function Search() {
       alert("有點異常");
     }
     const a = await response.json();
-    console.log(a);
 
     setBooks((prev) => []);
     a.items.forEach(
@@ -100,7 +99,6 @@ function Search() {
               return prev;
             }
             isbn = b[0].identifier;
-            console.log(isbn);
           } else {
             return prev;
           }
@@ -164,7 +162,6 @@ function Search() {
     }
   }, []);
 
-  console.log(books);
   return (
     <>
       <WholeWrapper>
@@ -212,19 +209,17 @@ function Search() {
 
           <Bookcase>
             {books.map((i) => {
+              //確認這本書是否已加入書櫃，加入了就不再顯示可加入的按鈕
               let a = 0;
               user.library?.forEach((j) => {
-                console.log(j.isbn, i.isbn);
                 if (j.isbn === i.isbn) {
-                  console.log("有一樣");
                   a += 1;
                 }
               });
+              //確認這本書是否已加入願望清單，加入了就不再顯示可加入的按鈕
               let b = 0;
               user.wishList?.forEach((j) => {
-                console.log(j.isbn, i.isbn);
                 if (j.isbn === i.isbn) {
-                  console.log("有一樣");
                   b += 1;
                 }
               });
@@ -450,7 +445,6 @@ const AddBookBtn = styled.div<{ $a: number }>`
   }
 
   display: ${(props) => {
-    console.log(props.$a);
     return props.$a ? "none" : "flex";
   }};
 `;

@@ -1,5 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import { actionType } from "../../reducer/rootReducer";
+import ReactLoading from "react-loading";
 
 import styled from "styled-components";
 import { useEffect, useState } from "react";
@@ -27,12 +28,18 @@ const Login = () => {
     (state: { currentLibraryReducer: CurrentBook[] }) =>
       state.currentLibraryReducer
   );
-  const [signState, setSignState] = useState("signin");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [signState, setSignState] = useState<string>("signin");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   return (
     <LoginPage>
+      {loading && (
+        <WholePageLoading>
+          <ReactLoading type="cylon" color="black" width={100} />
+        </WholePageLoading>
+      )}
       <TitleWrapper>
         <Title>Booklove</Title>
         <SubTitle>
@@ -62,6 +69,7 @@ const Login = () => {
           <Form
             onSubmit={(e) => {
               e.preventDefault();
+              setLoading(true);
               if (signState === "signup") {
                 createUserWithEmailAndPassword(auth, email, password)
                   .then((u) => {
@@ -71,10 +79,9 @@ const Login = () => {
                       dispatch({ type: actionType.USER.SETUSER, value: v });
                     });
                     navigator("../");
+                    setLoading(false);
                   })
                   .catch((e) => {
-                    console.log(e.code);
-
                     if (e.code === "auth/email-already-in-use") {
                       console.log("信箱已存在");
                     } else if (e.code === "auth/invalid-email") {
@@ -82,6 +89,7 @@ const Login = () => {
                     } else if (e.code === "auth/week-password") {
                       console.log("密碼強度不足");
                     }
+                    setLoading(false);
                   });
               } else if (signState === "signin") {
                 signInWithEmailAndPassword(auth, email, password)
@@ -91,6 +99,7 @@ const Login = () => {
                       dispatch({ type: actionType.USER.SETUSER, value: v });
                     });
                     navigator("../");
+                    setLoading(false);
                   })
                   .catch((e) => {
                     if (e.code === "auth/invalid-email") {
@@ -100,6 +109,7 @@ const Login = () => {
                     } else if (e.code === "auth/wrong-password") {
                       console.log("密碼錯誤");
                     }
+                    setLoading(false);
                   });
               }
             }}
@@ -147,6 +157,18 @@ const LoginPage = styled.div`
   background: #eff2f5;
   border: 1px solid black;
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const WholePageLoading = styled.div`
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+  background: white;
   display: flex;
   align-items: center;
   justify-content: center;

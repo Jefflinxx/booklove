@@ -14,7 +14,6 @@ import {
 import { actionType } from "../../reducer/rootReducer";
 import { storage } from "../../utils/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { async } from "@firebase/util";
 
 function TopSection() {
   const Location = useLocation();
@@ -30,17 +29,19 @@ function TopSection() {
     | undefined
   >(undefined);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [bSKT, setBSKT] = useState<boolean>(true);
   const [confirmActive, setConfirmActive] = useState<boolean>(false);
-  const [display, setDisplay] = useState<{
-    avatar: string;
-    uname: string;
-    background: string | undefined;
-  }>({
-    avatar: user?.avatar,
-    uname: user?.uname,
-    background: grayBack,
-  });
 
+  const topSDisplay = useSelector(
+    (state: {
+      topSDisplayReducer: {
+        avatar: string;
+        uname: string;
+        background: string | undefined;
+      };
+    }) => state.topSDisplayReducer
+  );
+  console.log(topSDisplay);
   const localPath = Location.pathname.split("/")[1];
 
   const uploadImage = async () => {
@@ -52,22 +53,30 @@ function TopSection() {
   };
 
   useEffect(() => {
-    if (user && !localPath)
-      setDisplay({
-        avatar: user.avatar,
-        uname: user.uname,
-        background: user.background || grayBack,
+    if (user && !localPath) {
+      console.log(user);
+      dispatch({
+        type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
+        value: {
+          avatar: user.avatar,
+          uname: user.uname,
+          background: user.background || grayBack,
+        },
       });
+    }
+
     const getFollowObj = async () => {
-      console.log(localPath);
       if (localPath) {
         const a = await getUserInfo(localPath);
-        console.log(a);
+
         if (a) {
-          setDisplay({
-            avatar: a.avatar,
-            uname: a.uname,
-            background: a.background || grayBack,
+          dispatch({
+            type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
+            value: {
+              avatar: a.avatar,
+              uname: a.uname,
+              background: a.background || grayBack,
+            },
           });
           setFollowObj({
             uid: a.uid,
@@ -81,8 +90,6 @@ function TopSection() {
     getFollowObj();
   }, [user, localPath]);
 
-  console.log(display);
-  console.log(followObj);
   return (
     <WholeWrapper>
       <CenterWrapper>
@@ -107,7 +114,7 @@ function TopSection() {
               setConfirmActive(false);
               const imageUrl = await uploadImage();
               const a = { cover: imageUrl };
-              console.log(a);
+
               if (imageUrl) {
                 updateBackground(user.uid, imageUrl);
                 dispatch({
@@ -141,15 +148,22 @@ function TopSection() {
           />
           <Background
             src={
-              imageFile ? URL.createObjectURL(imageFile) : display.background
+              imageFile
+                ? URL.createObjectURL(imageFile)
+                : topSDisplay.background
             }
+            onLoad={(e) => {
+              e.stopPropagation();
+              setBSKT(false);
+            }}
           />
+          {bSKT && <BackgroundSKT />}
         </BgWrapper>
 
         <InfoDiv>
           <InfoLeft>
-            <Avatar src={display.avatar} />
-            <Username>{display.uname}</Username>
+            <Avatar src={topSDisplay.avatar} />
+            <Username>{topSDisplay.uname}</Username>
           </InfoLeft>
           <InfoRight>
             <InfoRightP
@@ -304,6 +318,12 @@ const Background = styled.img`
   height: 100%;
   background: #eff2f5;
   object-fit: cover;
+`;
+
+const BackgroundSKT = styled.div`
+  width: 100%;
+  height: 100%;
+  background: #eff2f5;
 `;
 
 const InfoDiv = styled.div`

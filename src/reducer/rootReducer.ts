@@ -4,6 +4,7 @@ import currentBookReducer from "./currentBookReducer";
 import currentLibraryReducer from "./currentLibraryReducer";
 import displayUserReducer from "./displayUserReducer";
 import displayLibraryReducer from "./displayLibraryReducer";
+import topSDisplayReducer from "./topSDisplayReducer";
 
 export const actionType = {
   USER: { SETUSER: "setUser" },
@@ -12,6 +13,8 @@ export const actionType = {
 
   DISPLAYUSER: { SETDISPLAYUSER: "setDisplayUser" },
   DISPLAYLIBRARY: { SETDISPLAYLIBRARY: "setDisplayLibrary" },
+
+  TOPSDISPLAY: { SETTOPSDISPLAY: "setTopSDisplay" },
 };
 
 const rootReducer = combineReducers({
@@ -20,6 +23,7 @@ const rootReducer = combineReducers({
   currentLibraryReducer,
   displayUserReducer,
   displayLibraryReducer,
+  topSDisplayReducer,
 });
 
 export default rootReducer;

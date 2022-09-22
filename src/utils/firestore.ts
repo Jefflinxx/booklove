@@ -153,6 +153,36 @@ export const updateWishList = async (uid: string, wishList: CurrentBook[]) => {
   });
 };
 
+export const updatelendFromList = async (
+  uid: string,
+  lendFromList: CurrentBook[]
+) => {
+  console.log("editlendFromList");
+
+  const Ref = doc(db, "users", uid);
+  await updateDoc(Ref, {
+    lendFromList: lendFromList,
+  });
+};
+
+export const updateNotification = async (
+  uid: string,
+  notification: {
+    type: string;
+    avatar: string;
+    uid: string;
+    uname: string;
+    isbn: string;
+    bookname: string;
+  }[]
+) => {
+  console.log("editlendFromNotification");
+  const Ref = doc(db, "users", uid);
+  await updateDoc(Ref, {
+    notification: notification,
+  });
+};
+
 export const addSearchBookToUserLibrary = async (
   uid: string,
   isbn: string,
@@ -171,6 +201,7 @@ export const addSearchBookToUserLibrary = async (
       publisher: publisher,
       cover: cover,
       isPublic: true,
+      isLendTo: false,
       alreadyReadChapter: 0,
     }),
   });
@@ -204,7 +235,7 @@ export const getUserInfo = async (uid: string) => {
 
   if (docSnap.exists()) {
     const a = docSnap.data();
-    console.log(a);
+
     return a as User;
   } else {
     return null;
@@ -215,7 +246,7 @@ export const updateUserLibrary = async (
   uid: string,
   library: CurrentBook[] | object[]
 ) => {
-  console.log(library);
+  console.log("editlibrary");
   const Ref = doc(db, "users", uid);
   await updateDoc(Ref, {
     library: library,
@@ -254,8 +285,6 @@ export const getAllUserDoc = async () => {
   const querySnapshot = await getDocs(collection(db, "users"));
   const a: any = [];
   querySnapshot.forEach((doc) => {
-    // doc.data() is never undefined for query doc snapshots
-    //console.log(doc.id, " => ", doc.data());
     a.push(doc.data());
   });
   return a;

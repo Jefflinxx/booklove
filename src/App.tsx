@@ -16,21 +16,39 @@ function App() {
   const navigator = useNavigate();
   const Location = useLocation();
   const localPath = Location.pathname.split("/")[1];
+
   useEffect(() => {
     onAuthStateChanged(auth, async (u) => {
       console.log("監聽登入變化");
-      console.log(u);
-      console.log(localPath);
 
       if (u) {
         const uid = u.uid;
         const user = await getUserInfo(uid);
+
         dispatch({
           type: actionType.USER.SETUSER,
           value: user || null,
         });
+
         if (localPath === "login") {
           navigator("../");
+        } else if (localPath === "book" || localPath === "edit") {
+          const a = Location.pathname.split("/")[2];
+          const bookId = a.slice(-13);
+          const userId = a.split(bookId)[0];
+          getUserInfo(userId).then((v) => {
+            if (v) {
+              v.library.forEach((i) => {
+                if (i.isbn === bookId) {
+                  // console.log("進到book edit時dispatch資料 ");
+                  dispatch({
+                    type: actionType.BOOK.SETBOOKDATA,
+                    value: i,
+                  });
+                }
+              });
+            }
+          });
         }
       } else {
         navigator("../login");

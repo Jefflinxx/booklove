@@ -5,15 +5,23 @@ import { actionType } from "../../reducer/rootReducer";
 import styled from "styled-components";
 import { getUserInfo } from "../../utils/firestore";
 import { User } from "../../reducer/userReducer";
+import ReactLoading from "react-loading";
 
 import back from "../Header/back.svg";
 
 type FriendProps = {
   friendActive: boolean;
   setFriendActive: (value: boolean) => void;
+  friendLoading: boolean;
+  setFriendLoading: (value: boolean) => void;
 };
 
-const Friend: React.FC<FriendProps> = ({ friendActive, setFriendActive }) => {
+const Friend: React.FC<FriendProps> = ({
+  friendActive,
+  setFriendActive,
+  friendLoading,
+  setFriendLoading,
+}) => {
   const navigator = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
@@ -23,10 +31,11 @@ const Friend: React.FC<FriendProps> = ({ friendActive, setFriendActive }) => {
   useEffect(() => {
     const f = async () => {
       const a: User | null = await getUserInfo(user.uid);
-      console.log(a);
+
       if (a?.followList) {
         setFollowList(a.followList);
       }
+      setFriendLoading(false);
     };
     if (user) {
       f();
@@ -47,15 +56,29 @@ const Friend: React.FC<FriendProps> = ({ friendActive, setFriendActive }) => {
       </TitleWrapper>
 
       <FriendWrapper>
+        {friendLoading && (
+          <Loading>
+            <ReactLoading type="cylon" color="black" width={50} />
+          </Loading>
+        )}
         {followList.map((i) => {
           return (
             <FriendDiv
+              key={i.uid}
               onClick={async () => {
                 // const a = await getUserInfo(i.uid);
                 // dispatch({
                 //   type: actionType.DISPLAYUSER.SETDISPLAYUSER,
                 //   value: a,
                 // });
+                dispatch({
+                  type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
+                  value: {
+                    avatar: "",
+                    uname: "",
+                    background: "",
+                  },
+                });
                 navigator(`./${i.uid}`);
               }}
             >
@@ -128,6 +151,19 @@ const FriendWrapper = styled.div`
   justify-content: flex-start;
 
   overflow: overlay;
+  position: relative;
+`;
+
+const Loading = styled.div`
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const FriendDiv = styled.div`

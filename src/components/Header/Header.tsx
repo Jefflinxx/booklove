@@ -1,6 +1,7 @@
 import { useSelector, useDispatch } from "react-redux";
 import { actionType } from "../../reducer/rootReducer";
 import { User } from "../../reducer/userReducer";
+import { CurrentBook } from "../../reducer/currentBookReducer";
 
 import styled from "styled-components";
 
@@ -11,6 +12,10 @@ import {
   getUserInfo,
   searchFriend,
   updateFollowList,
+  updateUserLibrary,
+  updateWishList,
+  updatelendFromList,
+  updateNotification,
 } from "../../utils/firestore";
 
 import search from "./search.svg";
@@ -33,9 +38,10 @@ function Header() {
   const dispatch = useDispatch();
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
 
-  //console.log(user);
   const [active, setActive] = useState<boolean>(false);
+  const [alertActive, setAlertActive] = useState<boolean>(false);
   const [friendActive, setFriendActive] = useState<boolean>(false);
+  const [friendLoading, setFriendLoading] = useState<boolean>(false);
   const [accountActive, setAccountActive] = useState<boolean>(false);
   const [themeActive, setThemeActive] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
@@ -45,6 +51,16 @@ function Header() {
     { uid: string; uname: string; avatar: string }[] | null
   >(null);
   const [searchResultActive, setSearchResultActive] = useState<boolean>(false);
+  const [notification, setNotification] = useState<
+    | {
+        type: string;
+        avatar: string;
+        uid: string;
+        uname: string;
+        isbn: string;
+        bookname: string;
+      }[]
+  >([]);
   const [followActive, setFollowActive] = useState<boolean>(false);
   const navigator = useNavigate();
   const friendSearchRef = useRef<HTMLInputElement>(null);
@@ -72,7 +88,6 @@ function Header() {
     if (input !== "") {
       setSearchResultActive(true);
       searchFriend(input).then((r) => {
-        console.log(r);
         const a: { uid: string; uname: string; avatar: string }[] | undefined =
           r?.filter((i) => i.uid !== user.uid);
         if (a) {
@@ -86,18 +101,19 @@ function Header() {
     }
   }, [input]);
 
-  // useEffect(() => {
-  //   const f = async () => {
-  //     const a: User | null = await getUserInfo(user.uid);
-  //     console.log(a);
-  //     if (a?.followList) {
-
-  //     }
-  //   };
-  //   f();
-  // }, [searchResult]);
-
-  console.log(active);
+  useEffect(() => {
+    if (user) {
+      getUserInfo(user.uid).then((v) => {
+        dispatch({
+          type: actionType.USER.SETUSER,
+          value: v,
+        });
+      });
+      if (user.notification) {
+        setNotification(user?.notification);
+      }
+    }
+  }, [alertActive]);
 
   return (
     <>
@@ -105,17 +121,16 @@ function Header() {
         <LeftDiv>
           <Logo
             onClick={() => {
+              dispatch({
+                type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
+                value: {
+                  avatar: "",
+                  uname: "",
+                  background: "",
+                },
+              });
               //這邊希望點擊後可以回到自己的主頁
               navigator("./");
-              // getUserInfo(user.uid).then((v) => {
-              //   if (v?.library) {
-              //     dispatch({
-              //       type: actionType.LIBRARY.SETLIBRARY,
-              //       value: v?.library,
-              //     });
-
-              //   }
-              // });
             }}
           >
             booklove
@@ -146,7 +161,7 @@ function Header() {
             <SearchResultWrapper searchResultActive={searchResultActive}>
               {searchResult?.map((i) => {
                 return (
-                  <SearchResultDiv>
+                  <SearchResultDiv key={i.uid}>
                     <SearchResultDivLeft
                       onClick={() => {
                         navigator(`./${i.uid}`);
@@ -208,9 +223,232 @@ function Header() {
           </SearchWrapper>
         </LeftDiv>
         <RightDiv>
-          <AlertIconDiv>
+          <AlertIconDiv
+            onClick={() => {
+              setAlertActive(!alertActive);
+            }}
+          >
             <AlertIcon src={alert} />
           </AlertIconDiv>
+
+          <AlertWrapper $alertActive={alertActive}>
+            {notification.length ? <></> : <p>沒有通知</p>}
+            {notification.map((i) => {
+              let p;
+              let confirm;
+              let cancel;
+              if (i.type === "borrow") {
+                p = `想跟你借${i.bookname}`;
+                confirm = "借出";
+                cancel = "不借";
+              }
+              if (i.type === "lendFrom") {
+                p = `想借你${i.bookname}`;
+                confirm = "借入";
+                cancel = "不借";
+              }
+              if (i.type === "giveBack") {
+                p = `要歸還${i.bookname}`;
+                confirm = "確認";
+                cancel = "取消";
+              }
+              return (
+                <AlertDiv key={`${i.type}${i.uname}${i.bookname}`}>
+                  <AlertLeftWrapper>
+                    <AlertAvatar src={i.avatar} />
+                    <AlertP>
+                      <AlertPB>{i.uname}</AlertPB>
+                      {p}
+                    </AlertP>
+                  </AlertLeftWrapper>
+                  <AlertRightWrapper>
+                    <AlertConfirm
+                      onClick={() => {
+                        if (i.type === "borrow") {
+                          //請求確認的話會在確認端把書的狀態改變為借出，借給誰改成那個人
+                          let libraryExceptThisBook;
+                          let bookPutInOtherLendFromList;
+                          getUserInfo(user.uid).then((v) => {
+                            libraryExceptThisBook = v!.library.filter(
+                              (j) => j.isbn !== i.isbn
+                            );
+
+                            v!.library.forEach((j) => {
+                              if (j.isbn === i.isbn) {
+                                const thisbook: CurrentBook = {
+                                  ...j,
+                                  lendTo: i.uname,
+                                  isLendTo: true,
+                                };
+                                updateUserLibrary(user.uid, [
+                                  ...libraryExceptThisBook,
+                                  thisbook,
+                                ]);
+                              }
+                            });
+                            //更新要放到對方lendFromList的書資訊
+                            v?.library?.forEach((j) => {
+                              if (j.isbn === i.isbn) {
+                                bookPutInOtherLendFromList = {
+                                  ...j,
+                                  lendFrom: user.uid,
+                                  lendFromName: user.uname,
+                                };
+                              }
+                            });
+                          });
+                          //在請求借書端會把那本書放入自己的借入書籍區
+                          getUserInfo(i.uid).then((v) => {
+                            if (v?.lendFromList) {
+                              updatelendFromList(i.uid, [
+                                ...v.lendFromList,
+                                bookPutInOtherLendFromList,
+                              ]);
+                            } else {
+                              updatelendFromList(i.uid, [
+                                bookPutInOtherLendFromList,
+                              ]);
+                            }
+                            //也會檢查對方的願望清單去把他清除掉
+                            updateWishList(
+                              i.uid,
+                              v?.wishList?.filter((j) => j.isbn !== i.isbn) ||
+                                []
+                            );
+                          });
+                        }
+                        if (i.type === "lendFrom") {
+                          //把他的書改成出借狀態
+                          let libraryExceptThisBook;
+                          getUserInfo(i.uid).then((v) => {
+                            libraryExceptThisBook = v!.library.filter(
+                              (j) => j.isbn !== i.isbn
+                            );
+
+                            v!.library.forEach((j) => {
+                              if (j.isbn === i.isbn) {
+                                const thisbook: CurrentBook = {
+                                  ...j,
+                                  lendTo: user.uname,
+                                  isLendTo: true,
+                                };
+                                updateUserLibrary(i.uid, [
+                                  ...libraryExceptThisBook,
+                                  thisbook,
+                                ]);
+                              }
+                            });
+                          });
+                          //並加到我的lendFromList，並把lendFrom改成對方id 把name改成對方姓名，方便取出
+                          let b;
+                          user.wishList?.forEach((j) => {
+                            if (j.isbn === i.isbn) {
+                              b = {
+                                ...j,
+                                lendFrom: i.uid,
+                                lendFromName: i.uname,
+                              };
+                            }
+                          });
+                          if (user.lendFromList) {
+                            updatelendFromList(user.uid, [
+                              ...user.lendFromList,
+                              b,
+                            ]);
+                          } else {
+                            updatelendFromList(user.uid, [b]);
+                          }
+                          //把我的書從願望清單移出
+                          updateWishList(
+                            user.uid,
+                            user.wishList?.filter((j) => j.isbn !== i.isbn) ||
+                              []
+                          );
+                          dispatch({
+                            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
+                            value:
+                              user.wishList?.filter((j) => j.isbn !== i.isbn) ||
+                              [],
+                          });
+                        }
+                        if (i.type === "giveBack") {
+                          //把我的那本書的出借狀態改成flase 出借人清空
+                          let libraryExceptThisBook;
+                          getUserInfo(user.uid).then((v) => {
+                            libraryExceptThisBook = v!.library.filter(
+                              (j) => j.isbn !== i.isbn
+                            );
+
+                            v!.library.forEach((j) => {
+                              if (j.isbn === i.isbn) {
+                                const thisbook: CurrentBook = {
+                                  ...j,
+                                  lendTo: "",
+                                  isLendTo: false,
+                                };
+                                updateUserLibrary(user.uid, [
+                                  ...libraryExceptThisBook,
+                                  thisbook,
+                                ]);
+                              }
+                            });
+                          });
+                          //把對方的lendFrom庫裡的那本書清掉
+                          let lendFromListExceptThisBook;
+
+                          getUserInfo(i.uid).then((v) => {
+                            lendFromListExceptThisBook =
+                              v!.lendFromList!.filter((j) => j.isbn !== i.isbn);
+                            updatelendFromList(
+                              i.uid,
+                              lendFromListExceptThisBook
+                            );
+                          });
+                        }
+                        //把這則通知清除
+                        updateNotification(
+                          user.uid,
+                          notification?.filter((j) => j.isbn !== i.isbn) || []
+                        );
+                        setNotification(
+                          notification?.filter((j) => j.isbn !== i.isbn) || []
+                        );
+                        getUserInfo(user.uid).then((v) => {
+                          dispatch({
+                            type: actionType.USER.SETUSER,
+                            value: {
+                              ...v,
+                              notification:
+                                notification?.filter(
+                                  (j) => j.isbn !== i.isbn
+                                ) || [],
+                            },
+                          });
+                        });
+                      }}
+                    >
+                      {confirm}
+                    </AlertConfirm>
+                    <AlertCancel
+                      onClick={() => {
+                        //把這則通知清除
+                        updateNotification(
+                          user.uid,
+                          notification?.filter((j) => j.isbn !== i.isbn) || []
+                        );
+                        setNotification(
+                          notification?.filter((j) => j.isbn !== i.isbn) || []
+                        );
+                      }}
+                    >
+                      {cancel}
+                    </AlertCancel>
+                  </AlertRightWrapper>
+                </AlertDiv>
+              );
+            })}
+          </AlertWrapper>
+
           <Avatar
             src={user?.avatar || grayBack}
             onClick={() => {
@@ -237,6 +475,7 @@ function Header() {
         <UserDiv
           onClick={() => {
             setFriendActive(true);
+            setFriendLoading(true);
           }}
         >
           <UserDivLeft>
@@ -248,7 +487,12 @@ function Header() {
 
           <RightArrow src={rightarrow}></RightArrow>
         </UserDiv>
-        <Friend friendActive={friendActive} setFriendActive={setFriendActive} />
+        <Friend
+          friendActive={friendActive}
+          setFriendActive={setFriendActive}
+          friendLoading={friendLoading}
+          setFriendLoading={setFriendLoading}
+        />
 
         <UserDiv
           onClick={() => {
@@ -398,15 +642,17 @@ const SearchAvatar = styled.img`
   width: 38px;
   height: 38px;
   margin-right: 16px;
-
+  cursor: pointer;
   border: 2px solid white;
   border-radius: 50%;
 `;
-const SearchResultName = styled.p``;
+const SearchResultName = styled.p`
+  cursor: pointer;
+`;
 const SearchResultButton = styled.div`
   width: 80px;
   height: 30px;
-
+  cursor: pointer;
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -427,8 +673,13 @@ const AlertIconDiv = styled.div`
   height: 38px;
   margin-right: 8px;
 
-  border: 1px solid black;
   border-radius: 50%;
+
+  background: #eff2f5;
+  cursor: pointer;
+  :hover {
+    background: rgba(200, 200, 200, 0.4);
+  }
 `;
 
 const AlertIcon = styled.img`
@@ -436,6 +687,91 @@ const AlertIcon = styled.img`
   width: 20px;
   left: 8px;
   top: 8px;
+`;
+
+const AlertWrapper = styled.div<{ $alertActive: boolean }>`
+  display: ${(props) => (props.$alertActive ? "flex" : "none")};
+  position: absolute;
+  top: 50px;
+  right: 16px;
+  z-index: 2;
+  width: 360px;
+  flex-direction: column;
+  align-items: center;
+
+  background: white;
+  padding: 8px 0px;
+  border-radius: 6px;
+  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+`;
+
+const AlertDiv = styled.div`
+  width: 344px;
+  height: auto;
+  user-select: none;
+
+  align-items: center;
+  padding: 0px 8px;
+  border-radius: 6px;
+  justify-content: space-between;
+  :hover {
+    background: rgba(200, 200, 200, 0.4);
+  }
+`;
+
+const AlertAvatar = styled.img`
+  width: 38px;
+  height: 38px;
+  margin-right: 8px;
+
+  border: 2px solid white;
+  border-radius: 50%;
+`;
+
+const AlertP = styled.p`
+  width: 280px;
+`;
+
+const AlertPB = styled.span`
+  font-weight: 500;
+`;
+
+const AlertLeftWrapper = styled.div`
+  display: flex;
+  margin: 8px 0px;
+`;
+const AlertRightWrapper = styled.div`
+  display: flex;
+  margin: 8px 0px;
+`;
+
+const AlertConfirm = styled.div`
+  width: 80px;
+  height: 30px;
+  margin-left: 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff2f5;
+  cursor: pointer;
+  :hover {
+    background: rgba(200, 200, 200, 0.4);
+  }
+`;
+const AlertCancel = styled.div`
+  width: 80px;
+  height: 30px;
+  margin-left: 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff2f5;
+  cursor: pointer;
+  :hover {
+    background: rgba(200, 200, 200, 0.4);
+  }
 `;
 
 const Avatar = styled.img`

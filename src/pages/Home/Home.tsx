@@ -1,5 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import { actionType } from "../../reducer/rootReducer";
+import ReactLoading from "react-loading";
 
 import styled from "styled-components";
 import { useEffect, useState } from "react";
@@ -15,9 +16,11 @@ import {
   updateCategory,
   addSearchBookToUserLibrary,
   updateWishList,
+  updatelendFromList,
+  updateUserLibrary,
+  updateNotification,
 } from "../../utils/firestore";
 import { useNavigate, useLocation } from "react-router-dom";
-import { async } from "@firebase/util";
 
 function Home() {
   const Location = useLocation();
@@ -41,30 +44,65 @@ function Home() {
   const [categoryReadActive, setCategoryReadActive] = useState<boolean>(false);
   const [categoryLendActive, setCategoryLendActive] = useState<boolean>(false);
   const [wishListActive, setWishListActive] = useState<boolean>(false);
+  const [lendFromActive, setLendFromActive] = useState<boolean>(false);
+
+  const [barrierBGActive, setBarrierBGActive] = useState<boolean>(false);
+  const [notificationAlertActive, setNotificationAlertActive] =
+    useState<boolean>(false);
+  const [notification, setNotification] = useState<{
+    type: string;
+    avatar: string;
+    uid: string;
+    uname: string;
+    isbn: string;
+    bookname: string;
+  }>({ type: "", avatar: "", uid: "", uname: "", isbn: "", bookname: "" });
+  const [nAlendFrom, setNAlendFrom] = useState<{
+    id: string;
+    name: string;
+  }>({ id: "", name: "" });
+
   const [categoryInput, setCategoryInput] = useState<string>("");
   const [categoryCurrent, setCategoryCurrent] = useState<string | null>(null);
+  const [render, setRender] = useState<boolean>(false);
+  const [c, setC] = useState<boolean>(false);
+  const [d, setD] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [wholePageloading, setWholePageLoading] = useState<boolean>(true);
+
   const localPath = Location.pathname.split("/")[1];
 
   useEffect(() => {
-    console.log(user);
+    //console.log(user);
     // console.log(localPath);
     // console.log(localPath === "");
+    setWholePageLoading(true);
+    setCategoryCurrent(null);
+    setCategoryReadActive(false);
+    setCategoryLendActive(false);
+    setWishListActive(false);
+    setCategorySelectActive(false);
+    setLendFromActive(false);
+    setCategoryAllActive(false);
 
     if (user) {
-      console.log(user.library);
       getUserInfo(user.uid).then((v) => {
         dispatch({
           type: actionType.LIBRARY.SETLIBRARY,
-          value: v!.library,
+          value: v!.library || [],
         });
       });
       if (localPath === user.uid || localPath === "") {
-        console.log("改變display");
         getUserInfo(user.uid).then((v) => {
           dispatch({
-            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
-            value: v!.library,
+            type: actionType.DISPLAYUSER.SETDISPLAYUSER,
+            value: v,
           });
+          dispatch({
+            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
+            value: v!.library || [],
+          });
+          setWholePageLoading(false);
         });
       } else {
         getUserInfo(localPath).then((v) => {
@@ -81,6 +119,7 @@ function Home() {
                 },
               ],
             });
+            setWholePageLoading(false);
           } else if (v) {
             dispatch({
               type: actionType.DISPLAYUSER.SETDISPLAYUSER,
@@ -99,10 +138,12 @@ function Home() {
               });
             }
           }
+          setWholePageLoading(false);
         });
       }
     }
-  }, [localPath, user]);
+  }, [localPath, user, render]);
+
   useEffect(() => {
     if (user) {
       getUserInfo(user.uid).then((v) => {
@@ -116,6 +157,77 @@ function Home() {
 
   return (
     <>
+      {wholePageloading && (
+        <WholePageLoading>
+          <ReactLoading type="cylon" color="black" width={100} />
+        </WholePageLoading>
+      )}
+      <BarrierBG
+        barrierBGActive={barrierBGActive}
+        onClick={(e) => {
+          // e.stopPropagation();
+        }}
+      ></BarrierBG>
+      <NotificationAlert notificationAlertActive={notificationAlertActive}>
+        <NAP>
+          {notification.type === "borrow" &&
+            `向${displayUser.uname}發送借閱請求？`}
+          {notification.type === "lendFrom" &&
+            `向${displayUser.uname}發送出借邀請？`}
+          {notification.type === "giveBack" &&
+            `向${nAlendFrom.name}發送歸還通知？`}
+        </NAP>
+        <NABtnWrapper>
+          <NAConfirm
+            onClick={() => {
+              if (notification.type === "borrow") {
+                if (displayUser.notification) {
+                  updateNotification(localPath, [
+                    ...displayUser.notification,
+                    notification,
+                  ]);
+                } else {
+                  updateNotification(localPath, [notification]);
+                }
+              }
+              if (notification.type === "lendFrom") {
+                if (displayUser.notification) {
+                  updateNotification(localPath, [
+                    ...displayUser.notification,
+                    notification,
+                  ]);
+                } else {
+                  updateNotification(localPath, [notification]);
+                }
+              }
+              if (notification.type === "giveBack") {
+                if (displayUser.notification) {
+                  updateNotification(nAlendFrom.id, [
+                    ...displayUser.notification,
+                    notification,
+                  ]);
+                } else {
+                  updateNotification(nAlendFrom.id, [notification]);
+                }
+              }
+              setRender(!render);
+              setBarrierBGActive(false);
+              setNotificationAlertActive(false);
+            }}
+          >
+            確定
+          </NAConfirm>
+          <NACancel
+            onClick={() => {
+              setBarrierBGActive(false);
+              setNotificationAlertActive(false);
+            }}
+          >
+            取消
+          </NACancel>
+        </NABtnWrapper>
+      </NotificationAlert>
+
       <TopSection />
       {user ? (
         <WholeWrapper>
@@ -140,11 +252,14 @@ function Home() {
                     <TopTagLeftWrapper>
                       <CategoryAll
                         onClick={async () => {
+                          setLoading(true);
+
                           setCategoryCurrent(null);
                           setCategoryReadActive(false);
                           setCategoryLendActive(false);
                           setWishListActive(false);
                           setCategorySelectActive(false);
+                          setLendFromActive(false);
 
                           let a;
                           if (localPath === user.uid || localPath === "") {
@@ -167,6 +282,8 @@ function Home() {
                             type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
                             value: a?.library || [],
                           });
+
+                          setLoading(false);
                           setCategoryAllActive(true);
                         }}
                       >
@@ -175,11 +292,14 @@ function Home() {
 
                       <FinishRead
                         onClick={async () => {
+                          setLoading(true);
+
                           setCategoryCurrent(null);
                           setCategoryAllActive(false);
                           setCategoryLendActive(false);
                           setWishListActive(false);
                           setCategorySelectActive(false);
+                          setLendFromActive(false);
                           let categoryResult: CurrentBook[] = [];
 
                           let a;
@@ -208,6 +328,8 @@ function Home() {
                             type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
                             value: categoryResult,
                           });
+
+                          setLoading(false);
                           setCategoryReadActive(true);
                         }}
                       >
@@ -217,11 +339,14 @@ function Home() {
 
                       <LendToOther
                         onClick={async () => {
+                          setLoading(true);
+
                           setCategoryCurrent(null);
                           setCategoryAllActive(false);
                           setCategoryReadActive(false);
                           setWishListActive(false);
                           setCategorySelectActive(false);
+                          setLendFromActive(false);
                           let categoryResult: CurrentBook[] = [];
 
                           let a;
@@ -251,6 +376,7 @@ function Home() {
                             value: categoryResult,
                           });
 
+                          setLoading(false);
                           setCategoryLendActive(true);
                         }}
                       >
@@ -265,6 +391,7 @@ function Home() {
                             setCategoryReadActive(false);
                             setCategoryLendActive(false);
                             setWishListActive(false);
+                            setLendFromActive(false);
                           }}
                         >
                           類別
@@ -284,17 +411,25 @@ function Home() {
                               />
                               <CategoryPlus
                                 onClick={() => {
-                                  if (user?.category) {
+                                  if (
+                                    displayUser?.category &&
+                                    displayUser?.category.find(
+                                      (j) => j === categoryInput
+                                    )
+                                  ) {
+                                    return;
+                                  } else if (displayUser?.category) {
                                     updateCategory(user.uid, [
-                                      ...user.category,
+                                      ...displayUser.category,
                                       categoryInput,
                                     ]);
                                     dispatch({
-                                      type: actionType.USER.SETUSER,
+                                      type: actionType.DISPLAYUSER
+                                        .SETDISPLAYUSER,
                                       value: {
-                                        ...user,
+                                        ...displayUser,
                                         category: [
-                                          ...user.category,
+                                          ...displayUser.category,
                                           categoryInput,
                                         ],
                                       },
@@ -302,9 +437,10 @@ function Home() {
                                   } else {
                                     updateCategory(user.uid, [categoryInput]);
                                     dispatch({
-                                      type: actionType.USER.SETUSER,
+                                      type: actionType.DISPLAYUSER
+                                        .SETDISPLAYUSER,
                                       value: {
-                                        ...user,
+                                        ...displayUser,
                                         category: [categoryInput],
                                       },
                                     });
@@ -315,11 +451,27 @@ function Home() {
                               </CategoryPlus>
                             </CategoryInputWrapper>
                           )}
+                          {displayUser?.category?.length || !localPath ? (
+                            <></>
+                          ) : (
+                            <NoCategoryWrapper>
+                              <NoCategoryP>沒有類別</NoCategoryP>
+                            </NoCategoryWrapper>
+                          )}
 
                           {displayUser?.category?.map((i) => {
                             return (
                               <CategoryDiv
+                                key={i}
                                 onClick={async () => {
+                                  setLoading(true);
+                                  setCategorySelectActive(false);
+                                  setCategoryAllActive(false);
+                                  setCategoryReadActive(false);
+                                  setCategoryLendActive(false);
+                                  setWishListActive(false);
+                                  setLendFromActive(false);
+
                                   let categoryResult: CurrentBook[] = [];
 
                                   let a;
@@ -343,7 +495,6 @@ function Home() {
                                   }
 
                                   a?.library?.forEach((j) => {
-                                    console.log(j);
                                     j?.category?.forEach((k) => {
                                       if (k === i) {
                                         categoryResult = [...categoryResult, j];
@@ -355,42 +506,131 @@ function Home() {
                                       .SETDISPLAYLIBRARY,
                                     value: categoryResult,
                                   });
+
+                                  setLoading(false);
                                   setCategoryCurrent(i);
-                                  setCategorySelectActive(false);
-                                  setCategoryAllActive(false);
-                                  setCategoryReadActive(false);
-                                  setCategoryLendActive(false);
-                                  setWishListActive(false);
                                 }}
                               >
                                 {i}
+                                <DeleteCategory
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (displayUser?.category) {
+                                      //遍歷每本書去把這項類別清除
+                                      let libraryBook: CurrentBook[] = [];
+                                      getUserInfo(user.uid).then((v) => {
+                                        v?.library.forEach((k) => {
+                                          libraryBook.push({
+                                            ...k,
+                                            category:
+                                              k.category?.filter(
+                                                (l) => l !== i
+                                              ) || [],
+                                          });
+                                        });
+
+                                        updateUserLibrary(
+                                          user.uid,
+                                          libraryBook
+                                        );
+                                        dispatch({
+                                          type: actionType.DISPLAYLIBRARY
+                                            .SETDISPLAYLIBRARY,
+                                          value: libraryBook,
+                                        });
+                                      });
+
+                                      //刪除類別
+                                      updateCategory(
+                                        user.uid,
+                                        displayUser?.category.filter(
+                                          (j) => j !== i
+                                        )
+                                      );
+                                      dispatch({
+                                        type: actionType.DISPLAYUSER
+                                          .SETDISPLAYUSER,
+                                        value: {
+                                          ...displayUser,
+                                          category:
+                                            displayUser?.category.filter(
+                                              (j) => j !== i
+                                            ),
+                                        },
+                                      });
+                                    }
+                                  }}
+                                >
+                                  ✗
+                                </DeleteCategory>
                               </CategoryDiv>
                             );
                           })}
                         </CategoryWrapper>
                       </CategoryWholeWrapper>
                     </TopTagLeftWrapper>
-                    {!localPath && (
-                      <WishList
+                    <TopTagRightWrapper>
+                      <LendFromFriend
                         onClick={async () => {
+                          setLoading(true);
+
                           setCategoryCurrent(null);
                           setCategoryAllActive(false);
                           setCategoryReadActive(false);
                           setCategoryLendActive(false);
                           setCategorySelectActive(false);
-                          const a = await getUserInfo(user.uid);
-                          console.log(a?.wishList);
+                          setWishListActive(false);
+
+                          let a;
+                          if (localPath === user.uid || localPath === "") {
+                            a = await getUserInfo(user.uid);
+                          } else {
+                            a = await getUserInfo(localPath);
+                            if (!a) return;
+                          }
+
+                          dispatch({
+                            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
+                            value: a?.lendFromList || [],
+                          });
+
+                          setLoading(false);
+                          setLendFromActive(true);
+                        }}
+                      >
+                        借入書籍{lendFromActive && `(${displayLibrary.length})`}
+                      </LendFromFriend>
+                      <WishList
+                        onClick={async () => {
+                          setLoading(true);
+
+                          setCategoryCurrent(null);
+                          setCategoryAllActive(false);
+                          setCategoryReadActive(false);
+                          setCategoryLendActive(false);
+                          setCategorySelectActive(false);
+                          setLendFromActive(false);
+
+                          let a;
+                          if (localPath === user.uid || localPath === "") {
+                            a = await getUserInfo(user.uid);
+                          } else {
+                            a = await getUserInfo(localPath);
+                            if (!a) return;
+                          }
+
                           dispatch({
                             type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
                             value: a?.wishList || [],
                           });
 
+                          setLoading(false);
                           setWishListActive(true);
                         }}
                       >
                         願望清單{wishListActive && `(${displayLibrary.length})`}
                       </WishList>
-                    )}
+                    </TopTagRightWrapper>
                   </TopTagWrapper>
                 ) : (
                   <NoLibraryDiv>
@@ -405,19 +645,65 @@ function Home() {
                     <NoLibrary>加入圖書</NoLibrary>
                   </NoLibraryDiv>
                 )}
+                {loading && (
+                  <BookcaseLoading>
+                    <ReactLoading type="cylon" color="black" width={100} />
+                  </BookcaseLoading>
+                )}
+                {displayLibrary?.map((i) => {
+                  //去別人的願望清單借給別人書
+                  let a = false;
+                  //借出朋友用的，這邊是user沒錯
+                  user?.library?.forEach((j) => {
+                    if (j.isbn === i.isbn) {
+                      a = true;
+                    }
+                  });
+                  //去別人的書櫃跟別人借書 確認自己沒有這本書 且也沒有正在借同本書中
+                  let b = false;
+                  user?.library?.forEach((j) => {
+                    if (j.isbn === i.isbn) {
+                      b = true;
+                    }
+                  });
+                  user?.lendFromList?.forEach((j) => {
+                    if (j.isbn === i.isbn) {
+                      b = true;
+                    }
+                  });
+                  //比對 對方的 notification 有沒有這本書 有的話，按鈕改為 已送出請求
+                  //這個前提使 借入 出借這個使用流程裡不會出現同一本書
+                  let c = false;
+                  displayUser.notification?.forEach((j) => {
+                    if (
+                      j.isbn === i.isbn &&
+                      (j.type === "borrow" || j.type === "lendFrom")
+                    ) {
+                      c = true;
+                    }
+                  });
+                  //歸還的對象是對方
 
-                {displayLibrary.map((i) => {
+                  if (i.lendFrom) {
+                    getUserInfo(i.lendFrom).then((v) => {
+                      v?.notification?.forEach((j) => {
+                        if (j.isbn === i.isbn && j.type === "giveBack") {
+                          setD([...d, i.isbn]);
+                        }
+                      });
+                    });
+                  }
+
                   return (
                     <BookDiv
+                      key={i.isbn}
                       onClick={() => {
-                        if (!wishListActive) {
+                        if (!wishListActive && !lendFromActive) {
                           dispatch({
                             type: actionType.BOOK.SETBOOKDATA,
                             value: i,
                           });
                           if (localPath) {
-                            console.log("有執行", localPath);
-
                             navigator(`../book/${localPath}${i.isbn}`);
                           } else {
                             navigator(`./book/${user.uid}${i.isbn}`);
@@ -427,7 +713,60 @@ function Home() {
                     >
                       <BookImg src={i.cover}></BookImg>
                       <BookName>{i.bookname}</BookName>
-                      {wishListActive && (
+                      {localPath &&
+                        !wishListActive &&
+                        !lendFromActive &&
+                        !b &&
+                        !c && (
+                          <>
+                            <BorrowFrom
+                              $b={b}
+                              $c={c}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setBarrierBGActive(true);
+                                setNotificationAlertActive(true);
+                                setNotification({
+                                  type: "borrow",
+                                  avatar: user.avatar,
+                                  uid: user.uid,
+                                  uname: user.uname,
+                                  isbn: i.isbn,
+                                  bookname: i.bookname,
+                                });
+                              }}
+                            >
+                              借書
+                            </BorrowFrom>
+                          </>
+                        )}
+                      {localPath &&
+                        !wishListActive &&
+                        !lendFromActive &&
+                        !b &&
+                        c && (
+                          <BorrowFrom
+                            $b={b}
+                            $c={c}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                          >
+                            已送出請求
+                          </BorrowFrom>
+                        )}
+                      {localPath && !wishListActive && !lendFromActive && b && (
+                        <BorrowFrom
+                          $b={b}
+                          $c={c}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                        >
+                          已有此書
+                        </BorrowFrom>
+                      )}
+                      {wishListActive && !localPath && (
                         <AddToLibrary
                           onClick={async () => {
                             addSearchBookToUserLibrary(
@@ -455,6 +794,63 @@ function Home() {
                           加入書櫃
                         </AddToLibrary>
                       )}
+                      {wishListActive && localPath && a && !c && (
+                        <LendToFriend
+                          $a={a}
+                          $c={c}
+                          onClick={() => {
+                            setBarrierBGActive(true);
+                            setNotificationAlertActive(true);
+                            setNotification({
+                              type: "lendFrom",
+                              avatar: user.avatar,
+                              uid: user.uid,
+                              uname: user.uname,
+                              isbn: i.isbn,
+                              bookname: i.bookname,
+                            });
+                          }}
+                        >
+                          出借好友
+                        </LendToFriend>
+                      )}
+                      {wishListActive && localPath && a && c && (
+                        <LendToFriend $a={a} $c={c}>
+                          已送出請求
+                        </LendToFriend>
+                      )}
+                      {lendFromActive &&
+                        !localPath &&
+                        !d.find((j) => i.isbn === j) && (
+                          <GiveBackBtn
+                            $d={d.find((j) => i.isbn === j)}
+                            onClick={() => {
+                              setBarrierBGActive(true);
+                              setNotificationAlertActive(true);
+                              setNotification({
+                                type: "giveBack",
+                                avatar: user.avatar,
+                                uid: user.uid,
+                                uname: user.uname,
+                                isbn: i.isbn,
+                                bookname: i.bookname,
+                              });
+                              setNAlendFrom({
+                                id: i.lendFrom,
+                                name: i.lendFromName,
+                              });
+                            }}
+                          >
+                            歸還
+                          </GiveBackBtn>
+                        )}
+                      {lendFromActive &&
+                        !localPath &&
+                        d.find((j) => i.isbn === j) && (
+                          <GiveBackBtn $d={d.find((j) => i.isbn === j)}>
+                            已送出請求
+                          </GiveBackBtn>
+                        )}
                     </BookDiv>
                   );
                 })}
@@ -470,6 +866,57 @@ function Home() {
 }
 
 export default Home;
+
+const WholePageLoading = styled.div`
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+`;
+
+const BarrierBG = styled.div<{ barrierBGActive: boolean }>`
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 2;
+
+  display: ${(props) => (props.barrierBGActive ? "block" : "none")};
+`;
+
+const NotificationAlert = styled.div<{ notificationAlertActive: boolean }>`
+  width: 420px;
+  height: 360px;
+  border: 1px solid black;
+  background: white;
+  display: ${(props) => (props.notificationAlertActive ? "block" : "none")};
+
+  position: fixed;
+  top: 50vh;
+  left: 50vw;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+`;
+
+const NAP = styled.div``;
+const NABtnWrapper = styled.div`
+  display: flex;
+`;
+const NAConfirm = styled.div`
+  width: 100px;
+  border: 1px solid black;
+`;
+const NACancel = styled.div`
+  width: 100px;
+  border: 1px solid black;
+`;
 
 const WholeWrapper = styled.div`
   width: 100%;
@@ -512,7 +959,6 @@ const PlusIconDiv = styled.div<{ localPath: string; $uid: string }>`
   }
 
   display: ${(props) => {
-    console.log(props.localPath === "");
     if (props.localPath === props.$uid || props.localPath === "") {
       return "flex";
     } else return "none";
@@ -534,8 +980,28 @@ const TopTagLeftWrapper = styled.div`
   padding-left: 2px;
 `;
 
+const TopTagRightWrapper = styled.div`
+  display: flex;
+  padding-right: 2px;
+`;
+
+const LendFromFriend = styled.div`
+  border: 1px solid #e4e6eb;
+  cursor: pointer;
+  user-select: none;
+  width: 168px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 6px 6px 0px 0px;
+  :hover {
+    background: rgba(200, 200, 200, 0.4);
+  }
+`;
+
 const WishList = styled.div`
-  margin-right: 2px;
   border: 1px solid #e4e6eb;
   cursor: pointer;
   user-select: none;
@@ -636,7 +1102,15 @@ const CategoryWrapper = styled.div<{ categorySelectActive: boolean }>`
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
 `;
 
+const NoCategoryWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+const NoCategoryP = styled.p``;
+
 const CategoryDiv = styled.div`
+  position: relative;
   height: 26px;
   display: flex;
   align-items: center;
@@ -644,9 +1118,22 @@ const CategoryDiv = styled.div`
   border-radius: 6px;
   cursor: pointer;
   user-select: none;
+  margin: 0px 24px;
   :hover {
     background: rgba(200, 200, 200, 0.4);
   }
+`;
+
+const DeleteCategory = styled.div`
+  position: absolute;
+  right: -24px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid black;
+  background: white;
 `;
 
 const CategoryInputWrapper = styled.div`
@@ -700,6 +1187,18 @@ const Bookcase = styled.div`
   background: white;
 `;
 
+const BookcaseLoading = styled.div`
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const BookDiv = styled.div`
   width: 390px;
 
@@ -733,10 +1232,68 @@ const BookName = styled.p`
   justify-content: center;
 `;
 
+const BorrowFrom = styled.div<{ $b: boolean; $c: boolean }>`
+  margin-top: 16px;
+  width: 120px;
+  height: 36px;
+
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${(props) =>
+    props.$b || props.$c ? "rgba(200, 200, 200, 0.4)" : "#eff2f5"};
+  cursor: ${(props) => (props.$b || props.$c ? "not-allowed" : "point")};
+  :hover {
+    background: ${(props) =>
+      props.$b || props.$c ? "" : "rgba(200, 200, 200, 0.4)"};
+  }
+`;
+
 const AddToLibrary = styled.div`
-  width: 100px;
-  height: 30px;
-  border: 1px solid black;
+margin-top:16px;
+  width: 120px;
+  height: 36px;
+
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff2f5;
+}
+:hover {
+  background: rgba(200, 200, 200, 0.4);
+}
+`;
+
+const LendToFriend = styled.div<{ $a: boolean; $c: boolean }>`
+  margin-top: 16px;
+  width: 120px;
+  height: 36px;
+
+  border-radius: 6px;
+  background: ${(props) => (props.$c ? "rgba(200, 200, 200, 0.4)" : "#eff2f5")};
+  cursor: ${(props) => (props.$c ? "not-allowed" : "point")};
+  :hover {
+    background: ${(props) => (props.$c ? "" : "rgba(200, 200, 200, 0.4)")};
+  }
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const GiveBackBtn = styled.div<{ $d: string | undefined }>`
+  margin-top: 16px;
+  width: 120px;
+  height: 36px;
+
+  border-radius: 6px;
+  background: ${(props) => (props.$d ? "rgba(200, 200, 200, 0.4)" : "#eff2f5")};
+  cursor: ${(props) => (props.$d ? "not-allowed" : "point")};
+  :hover {
+    background: ${(props) => (props.$d ? "" : "rgba(200, 200, 200, 0.4)")};
+  }
 
   display: flex;
   align-items: center;

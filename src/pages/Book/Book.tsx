@@ -10,6 +10,7 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import parser from "html-react-parser";
 import edit from "./edit.svg";
 import back from "./back.svg";
 
@@ -29,42 +30,32 @@ function Book() {
     (state: { displayLibraryReducer: CurrentBook[] }) =>
       state.displayLibraryReducer
   );
+  //alreadyChapter
   const [progressArray, setProgressArray] = useState<number[]>([0]);
   const [totalLike, setTotalLike] = useState<number | null>(null);
-
+  //totalChapter
   const progressRows: number[] = [];
   for (let i = 1; i <= currentBook.totalChapter; i++) {
     progressRows.push(i);
   }
 
-  console.log(progressArray);
-
-  const a = Location.pathname.split("/")[2];
-  const bookId = a.slice(-13);
-  const userId = a.split(bookId)[0];
-  console.log(bookId);
+  const localPath = Location.pathname.split("/")[2];
+  const bookId = localPath.slice(-13);
+  const userId = localPath.split(bookId)[0];
 
   useEffect(() => {
-    console.log(userId);
-    getUserInfo(userId).then((v) => {
-      if (v) {
-        // dispatch({
-        //   type: actionType.LIBRARY.SETLIBRARY,
-        //   value: v.library,
-        // });
-      }
-    });
     setProgressArray(() => {
       const a: number[] = [];
-      for (let i = 1; i <= currentBook.alreadyReadChapter; i++) {
-        a.push(i);
+      for (let j = 1; j <= currentBook.alreadyReadChapter; j++) {
+        a.push(j);
       }
       return a;
     });
+
     let likeCounter: number = 0;
     const getTotalLike = async () => {
       const a = await getAllUserDoc();
-      console.log(a);
+
       a.forEach((i) => {
         i.library?.forEach((j) => {
           if (j.isbn === currentBook.isbn && j.like) {
@@ -78,17 +69,7 @@ function Book() {
     getTotalLike();
   }, []);
 
-  useEffect(() => {
-    console.log(displayLibrary);
-    displayLibrary.forEach((i) => {
-      if (i.isbn === bookId) {
-        dispatch({
-          type: actionType.BOOK.SETBOOKDATA,
-          value: i,
-        });
-      }
-    });
-  }, [displayLibrary]);
+  // useEffect(() => {}, [displayLibrary]);
 
   return (
     <>
@@ -136,7 +117,7 @@ function Book() {
                 { key: "出版", v: currentBook.publisher },
               ].map((i) => {
                 return (
-                  <SectionItem>
+                  <SectionItem key={i.key}>
                     <BooknameP>{i.key}</BooknameP>
                     <Bookname>{i.v}</Bookname>
                   </SectionItem>
@@ -166,67 +147,52 @@ function Book() {
                     onClick={async () => {
                       const userData = await getUserInfo(user.uid);
                       if (userData) {
-                        if (
-                          //刪掉
-                          progressArray.find((j) => j === i) &&
-                          Math.max(...progressArray) === i
-                        ) {
-                          setProgressArray((prev) => {
-                            prev.filter((k) => k !== i);
-                            return [...prev.filter((k) => k !== i)];
-                          });
-
+                        setProgressArray(() => {
+                          const a: number[] = [];
+                          for (let j = 1; j <= i; j++) {
+                            a.push(j);
+                          }
+                          return [...a];
+                        });
+                        if (i === currentBook.totalChapter) {
                           updateUserLibrary(user.uid, [
+                            {
+                              ...currentBook,
+                              alreadyReadChapter: i,
+                              isFinishRead: true,
+                            },
                             ...userData.library.filter(
                               (i) => i.isbn !== currentBook.isbn
                             ),
+                          ]);
+                        } else {
+                          updateUserLibrary(user.uid, [
                             {
                               ...currentBook,
-                              alreadyReadChapter: i - 1,
+                              alreadyReadChapter: i,
                               isFinishRead: false,
                             },
+                            ...userData.library.filter(
+                              (i) => i.isbn !== currentBook.isbn
+                            ),
                           ]);
-                        } else if (
-                          //增加
-                          Math.max(...progressArray) + 1 === i ||
-                          i === 1
-                        ) {
-                          setProgressArray((prev) => [...prev, i]);
-                          if (i === Number(currentBook.totalChapter)) {
-                            console.log("設為已讀完");
-                            updateUserLibrary(user.uid, [
-                              ...userData.library.filter(
-                                (i) => i.isbn !== currentBook.isbn
-                              ),
-                              {
-                                ...currentBook,
-                                alreadyReadChapter: i,
-                                isFinishRead: true,
-                              },
-                            ]);
-                          } else {
-                            updateUserLibrary(user.uid, [
-                              ...userData.library.filter(
-                                (i) => i.isbn !== currentBook.isbn
-                              ),
-                              {
-                                ...currentBook,
-                                alreadyReadChapter: i,
-                                isFinishRead: false,
-                              },
-                            ]);
-                          }
                         }
                       }
                     }}
                   ></Progress>
                 ))}
               </ProgressWrapper>
-              <ProgressPercent>
-                {(currentBook.alreadyReadChapter / currentBook.totalChapter) *
-                  100}
-                %
-              </ProgressPercent>
+              {progressArray.length ? (
+                <ProgressPercent>
+                  {Math.floor(
+                    (Math.max(...progressArray) / currentBook.totalChapter) *
+                      100
+                  )}
+                  %
+                </ProgressPercent>
+              ) : (
+                <ProgressTip>編輯/點擊輸入章節</ProgressTip>
+              )}
             </SectionBItem>
             <SectionBItem>
               <PlaceP>地點</PlaceP>
@@ -237,7 +203,7 @@ function Book() {
               <LendTo>{currentBook.lendTo}</LendTo>
             </SectionBItem>
             <SummaryP>書摘</SummaryP>
-            <Summary>{currentBook.summary}</Summary>
+            <Summary>{parser(currentBook.summary || "")}</Summary>
           </BottomSection>
         </WholeCenterWrapper>
       </WholeWrapper>
@@ -372,17 +338,22 @@ const ProgressPercent = styled.div`
 `;
 
 const ProgressWrapper = styled.div`
-  width: 480px;
+  width: 400px;
   display: flex;
   border-radius: 6px;
 
   overflow: hidden;
+`;
+const ProgressTip = styled.p`
+  margin-left: 8px;
+  color: gray;
 `;
 const Progress = styled.div<{ progressArray: number[]; $i: number }>`
   width: 40px;
   height: 32px;
   border-radius: 6px;
   border: 1px solid white;
+  transition: background 2s;
   background: ${(props) =>
     props.progressArray.find((j) => j === props.$i) ? "#1A77F2" : "#eff2f5"};
 `;
