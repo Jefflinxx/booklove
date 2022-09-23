@@ -42,6 +42,7 @@ export type User = {
     isbn: string;
     bookname: string;
   }[];
+  giveBackAlert: string[];
 };
 
 const userReducer = (

@@ -16,6 +16,7 @@ import {
   updateWishList,
   updatelendFromList,
   updateNotification,
+  updateGiveBackAlert,
 } from "../../utils/firestore";
 
 import search from "./search.svg";
@@ -37,6 +38,18 @@ import Theme from "../Theme/Theme";
 function Header() {
   const dispatch = useDispatch();
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
+  const notification = useSelector(
+    (state: {
+      notificationReducer: {
+        type: string;
+        avatar: string;
+        uid: string;
+        uname: string;
+        isbn: string;
+        bookname: string;
+      }[];
+    }) => state.notificationReducer
+  );
 
   const [active, setActive] = useState<boolean>(false);
   const [alertActive, setAlertActive] = useState<boolean>(false);
@@ -51,16 +64,7 @@ function Header() {
     { uid: string; uname: string; avatar: string }[] | null
   >(null);
   const [searchResultActive, setSearchResultActive] = useState<boolean>(false);
-  const [notification, setNotification] = useState<
-    | {
-        type: string;
-        avatar: string;
-        uid: string;
-        uname: string;
-        isbn: string;
-        bookname: string;
-      }[]
-  >([]);
+
   const [followActive, setFollowActive] = useState<boolean>(false);
   const navigator = useNavigate();
   const friendSearchRef = useRef<HTMLInputElement>(null);
@@ -105,13 +109,14 @@ function Header() {
     if (user) {
       getUserInfo(user.uid).then((v) => {
         dispatch({
-          type: actionType.USER.SETUSER,
-          value: v,
+          type: actionType.NOTIFICATION.SETNOTIFICATION,
+          value: v?.notification,
         });
+        // dispatch({
+        //   type: actionType.USER.SETUSER,
+        //   value: v,
+        // });
       });
-      if (user.notification) {
-        setNotification(user?.notification);
-      }
     }
   }, [alertActive]);
 
@@ -232,8 +237,8 @@ function Header() {
           </AlertIconDiv>
 
           <AlertWrapper $alertActive={alertActive}>
-            {notification.length ? <></> : <p>沒有通知</p>}
-            {notification.map((i) => {
+            {notification?.length ? <></> : <p>沒有通知</p>}
+            {notification?.map((i) => {
               let p;
               let confirm;
               let cancel;
@@ -403,6 +408,13 @@ function Header() {
                               i.uid,
                               lendFromListExceptThisBook
                             );
+                            //把對方的歸還通知清掉
+
+                            updateGiveBackAlert(
+                              i.uid,
+                              v?.giveBackAlert?.filter((j) => j !== i.isbn) ||
+                                []
+                            );
                           });
                         }
                         //把這則通知清除
@@ -410,21 +422,26 @@ function Header() {
                           user.uid,
                           notification?.filter((j) => j.isbn !== i.isbn) || []
                         );
-                        setNotification(
-                          notification?.filter((j) => j.isbn !== i.isbn) || []
-                        );
-                        getUserInfo(user.uid).then((v) => {
-                          dispatch({
-                            type: actionType.USER.SETUSER,
-                            value: {
-                              ...v,
-                              notification:
-                                notification?.filter(
-                                  (j) => j.isbn !== i.isbn
-                                ) || [],
-                            },
-                          });
+
+                        dispatch({
+                          type: actionType.NOTIFICATION.SETNOTIFICATION,
+                          value:
+                            notification?.filter((j) => j.isbn !== i.isbn) ||
+                            [],
                         });
+                        //這個目前是應該不用
+                        // getUserInfo(user.uid).then((v) => {
+                        //   dispatch({
+                        //     type: actionType.USER.SETUSER,
+                        //     value: {
+                        //       ...v,
+                        //       notification:
+                        //         notification?.filter(
+                        //           (j) => j.isbn !== i.isbn
+                        //         ) || [],
+                        //     },
+                        //   });
+                        // });
                       }}
                     >
                       {confirm}
@@ -436,9 +453,13 @@ function Header() {
                           user.uid,
                           notification?.filter((j) => j.isbn !== i.isbn) || []
                         );
-                        setNotification(
-                          notification?.filter((j) => j.isbn !== i.isbn) || []
-                        );
+
+                        dispatch({
+                          type: actionType.NOTIFICATION.SETNOTIFICATION,
+                          value:
+                            notification?.filter((j) => j.isbn !== i.isbn) ||
+                            [],
+                        });
                       }}
                     >
                       {cancel}

@@ -24,6 +24,12 @@ function Search() {
   const navigator = useNavigate();
   const [input, setInput] = useState("");
   const [resultCountActive, setResultCountActive] = useState(false);
+  const [bookAlreadyInLibrary, setBookAlreadyInLibrary] = useState<string[]>(
+    []
+  );
+  const [bookAlreadyInWishList, setBookAlreadyInWishList] = useState<string[]>(
+    []
+  );
   const [books, setBooks] = useState<
     {
       name: string;
@@ -162,6 +168,29 @@ function Search() {
     }
   }, []);
 
+  useEffect(() => {
+    //確認這本書是否已加入書櫃，加入了就不再顯示可加入的按鈕
+    let a: string[] = [];
+    //確認這本書是否已加入願望清單，加入了就不再顯示可加入的按鈕
+    let b: string[] = [];
+    books?.forEach((i) => {
+      user.library?.forEach((j) => {
+        if (j.isbn === i.isbn) {
+          a.push(i.isbn);
+        }
+      });
+      user.wishList?.forEach((j) => {
+        if (j.isbn === i.isbn) {
+          b.push(i.isbn);
+        }
+      });
+    });
+    setBookAlreadyInLibrary(a);
+    setBookAlreadyInWishList(b);
+  }, [books]);
+
+  console.log(bookAlreadyInLibrary);
+
   return (
     <>
       <WholeWrapper>
@@ -209,21 +238,6 @@ function Search() {
 
           <Bookcase>
             {books.map((i) => {
-              //確認這本書是否已加入書櫃，加入了就不再顯示可加入的按鈕
-              let a = 0;
-              user.library?.forEach((j) => {
-                if (j.isbn === i.isbn) {
-                  a += 1;
-                }
-              });
-              //確認這本書是否已加入願望清單，加入了就不再顯示可加入的按鈕
-              let b = 0;
-              user.wishList?.forEach((j) => {
-                if (j.isbn === i.isbn) {
-                  b += 1;
-                }
-              });
-
               return (
                 <BookDiv key={i.isbn}>
                   <BookImg src={i.picture_url}></BookImg>
@@ -241,36 +255,62 @@ function Search() {
                       <Publish>{i.publisher}</Publish>
                     </BookItem>
                     <AddWrapper>
-                      <AddBookBtn
-                        $a={a}
-                        onClick={() => {
-                          addSearchBookToUserLibrary(
-                            user.uid,
-                            i.isbn,
-                            i.name,
-                            i.author,
-                            i.publisher,
-                            i.picture_url
-                          );
-                        }}
-                      >
-                        加入書櫃
-                      </AddBookBtn>
-                      <AddToWishList
-                        $b={b}
-                        onClick={() => {
-                          addSearchBookToUserWishList(
-                            user.uid,
-                            i.isbn,
-                            i.name,
-                            i.author,
-                            i.publisher,
-                            i.picture_url
-                          );
-                        }}
-                      >
-                        加入願望清單
-                      </AddToWishList>
+                      {!bookAlreadyInLibrary.find((j) => i.isbn === j) && (
+                        <AddBookBtn
+                          $a={bookAlreadyInLibrary.find((j) => i.isbn === j)}
+                          onClick={() => {
+                            addSearchBookToUserLibrary(
+                              user.uid,
+                              i.isbn,
+                              i.name,
+                              i.author,
+                              i.publisher,
+                              i.picture_url
+                            );
+                            setBookAlreadyInLibrary([
+                              ...bookAlreadyInLibrary,
+                              i.isbn,
+                            ]);
+                          }}
+                        >
+                          加入書櫃
+                        </AddBookBtn>
+                      )}
+                      {bookAlreadyInLibrary.find((j) => i.isbn === j) && (
+                        <AddBookBtn
+                          $a={bookAlreadyInLibrary.find((j) => i.isbn === j)}
+                        >
+                          已加入書櫃
+                        </AddBookBtn>
+                      )}
+                      {!bookAlreadyInWishList.find((j) => i.isbn === j) && (
+                        <AddToWishList
+                          $b={bookAlreadyInWishList.find((j) => i.isbn === j)}
+                          onClick={() => {
+                            addSearchBookToUserWishList(
+                              user.uid,
+                              i.isbn,
+                              i.name,
+                              i.author,
+                              i.publisher,
+                              i.picture_url
+                            );
+                            setBookAlreadyInWishList([
+                              ...bookAlreadyInLibrary,
+                              i.isbn,
+                            ]);
+                          }}
+                        >
+                          加入願望清單
+                        </AddToWishList>
+                      )}
+                      {bookAlreadyInWishList.find((j) => i.isbn === j) && (
+                        <AddToWishList
+                          $b={bookAlreadyInWishList.find((j) => i.isbn === j)}
+                        >
+                          已加入願望清單
+                        </AddToWishList>
+                      )}
                     </AddWrapper>
                   </BookRightSection>
                 </BookDiv>
@@ -430,7 +470,7 @@ const AddWrapper = styled.div`
   display: flex;
 `;
 
-const AddBookBtn = styled.div<{ $a: number }>`
+const AddBookBtn = styled.div<{ $a: string | undefined }>`
   width: 100px;
   height: 36px;
 
@@ -438,31 +478,29 @@ const AddBookBtn = styled.div<{ $a: number }>`
   align-items: center;
   margin-right: 16px;
   border-radius: 6px;
-  background: #eff2f5;
-  cursor: pointer;
-  :hover {
-    background: rgba(200, 200, 200, 0.4);
-  }
+ 
 
-  display: ${(props) => {
-    return props.$a ? "none" : "flex";
+  display: flex;
   }};
+  background: ${(props) => (props.$a ? "rgba(200, 200, 200, 0.4)" : "#eff2f5")};
+  cursor: ${(props) => (props.$a ? "not-allowed" : "point")};
+  :hover {
+    background: ${(props) => (props.$a ? "" : "rgba(200, 200, 200, 0.4)")};
+  }
 `;
 
-const AddToWishList = styled.div<{ $b: number }>`
+const AddToWishList = styled.div<{ $b: string | undefined }>`
   width: 120px;
   height: 36px;
 
   justify-content: center;
   align-items: center;
   border-radius: 6px;
-  background: #eff2f5;
-  cursor: pointer;
-  :hover {
-    background: rgba(200, 200, 200, 0.4);
-  }
 
-  display: ${(props) => {
-    return props.$b ? "none" : "flex";
-  }};
+  display: flex;
+  background: ${(props) => (props.$b ? "rgba(200, 200, 200, 0.4)" : "#eff2f5")};
+  cursor: ${(props) => (props.$b ? "not-allowed" : "point")};
+  :hover {
+    background: ${(props) => (props.$b ? "" : "rgba(200, 200, 200, 0.4)")};
+  }
 `;

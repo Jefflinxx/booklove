@@ -41,7 +41,7 @@ function TopSection() {
       };
     }) => state.topSDisplayReducer
   );
-  console.log(topSDisplay);
+
   const localPath = Location.pathname.split("/")[1];
 
   const uploadImage = async () => {
@@ -54,7 +54,6 @@ function TopSection() {
 
   useEffect(() => {
     if (user && !localPath) {
-      console.log(user);
       dispatch({
         type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
         value: {

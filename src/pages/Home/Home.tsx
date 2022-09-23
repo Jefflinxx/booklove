@@ -19,6 +19,7 @@ import {
   updatelendFromList,
   updateUserLibrary,
   updateNotification,
+  updateGiveBackAlert,
 } from "../../utils/firestore";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -27,6 +28,9 @@ function Home() {
   const dispatch = useDispatch();
   const navigator = useNavigate();
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
+  const giveBackAlert = useSelector(
+    (state: { giveBackAlertReducer: string[] }) => state.giveBackAlertReducer
+  );
   const displayUser = useSelector(
     (state: { displayUserReducer: User }) => state.displayUserReducer
   );
@@ -65,7 +69,8 @@ function Home() {
   const [categoryInput, setCategoryInput] = useState<string>("");
   const [categoryCurrent, setCategoryCurrent] = useState<string | null>(null);
   const [render, setRender] = useState<boolean>(false);
-  const [c, setC] = useState<boolean>(false);
+
+  const [c, setC] = useState<string[]>([]);
   const [d, setD] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [wholePageloading, setWholePageLoading] = useState<boolean>(true);
@@ -142,7 +147,7 @@ function Home() {
         });
       }
     }
-  }, [localPath, user, render]);
+  }, [localPath, user]);
 
   useEffect(() => {
     if (user) {
@@ -151,9 +156,42 @@ function Home() {
           type: actionType.USER.SETUSER,
           value: v,
         });
+        dispatch({
+          type: actionType.GIVEBACK.SETGIVEBACK,
+          value: v?.giveBackAlert,
+        });
       });
     }
   }, []);
+
+  useEffect(() => {
+    console.log("執行");
+    //比對 對方的 notification 有沒有這本書 有的話，按鈕改為 已送出請求
+    let c: string[] = [];
+    let d: string[] = [];
+
+    displayLibrary?.forEach((i) => {
+      displayUser.notification?.forEach((j) => {
+        if (
+          j.isbn === i.isbn &&
+          (j.type === "borrow" || j.type === "lendFrom")
+        ) {
+          c.push(i.isbn);
+        }
+      });
+      if (giveBackAlert) {
+        giveBackAlert?.forEach((j) => {
+          if (j === i.isbn) {
+            d.push(j);
+          }
+        });
+      }
+    });
+    setC(c);
+    setD(d);
+  }, [displayLibrary, giveBackAlert]);
+
+  console.log(c, d);
 
   return (
     <>
@@ -189,6 +227,7 @@ function Home() {
                 } else {
                   updateNotification(localPath, [notification]);
                 }
+                setC([...c, notification.isbn]);
               }
               if (notification.type === "lendFrom") {
                 if (displayUser.notification) {
@@ -199,6 +238,7 @@ function Home() {
                 } else {
                   updateNotification(localPath, [notification]);
                 }
+                setC([...c, notification.isbn]);
               }
               if (notification.type === "giveBack") {
                 if (displayUser.notification) {
@@ -210,7 +250,25 @@ function Home() {
                   updateNotification(nAlendFrom.id, [notification]);
                 }
               }
-              setRender(!render);
+              //把歸還通知放入自己的資料庫
+              //之後對方按取消或確認再幫對方刪掉
+              if (user.giveBackAlert) {
+                updateGiveBackAlert(user.uid, [
+                  ...giveBackAlert,
+                  notification.isbn,
+                ]);
+                dispatch({
+                  type: actionType.GIVEBACK.SETGIVEBACK,
+                  value: [...giveBackAlert, notification.isbn],
+                });
+              } else {
+                updateGiveBackAlert(user.uid, [notification.isbn]);
+              }
+              dispatch({
+                type: actionType.GIVEBACK.SETGIVEBACK,
+                value: [notification.isbn],
+              });
+
               setBarrierBGActive(false);
               setNotificationAlertActive(false);
             }}
@@ -671,28 +729,6 @@ function Home() {
                       b = true;
                     }
                   });
-                  //比對 對方的 notification 有沒有這本書 有的話，按鈕改為 已送出請求
-                  //這個前提使 借入 出借這個使用流程裡不會出現同一本書
-                  let c = false;
-                  displayUser.notification?.forEach((j) => {
-                    if (
-                      j.isbn === i.isbn &&
-                      (j.type === "borrow" || j.type === "lendFrom")
-                    ) {
-                      c = true;
-                    }
-                  });
-                  //歸還的對象是對方
-
-                  if (i.lendFrom) {
-                    getUserInfo(i.lendFrom).then((v) => {
-                      v?.notification?.forEach((j) => {
-                        if (j.isbn === i.isbn && j.type === "giveBack") {
-                          setD([...d, i.isbn]);
-                        }
-                      });
-                    });
-                  }
 
                   return (
                     <BookDiv
@@ -717,11 +753,11 @@ function Home() {
                         !wishListActive &&
                         !lendFromActive &&
                         !b &&
-                        !c && (
+                        !c.find((j) => i.isbn === j) && (
                           <>
                             <BorrowFrom
                               $b={b}
-                              $c={c}
+                              $c={c.find((j) => i.isbn === j)}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setBarrierBGActive(true);
@@ -744,10 +780,10 @@ function Home() {
                         !wishListActive &&
                         !lendFromActive &&
                         !b &&
-                        c && (
+                        c.find((j) => i.isbn === j) && (
                           <BorrowFrom
                             $b={b}
-                            $c={c}
+                            $c={c.find((j) => i.isbn === j)}
                             onClick={(e) => {
                               e.stopPropagation();
                             }}
@@ -758,7 +794,7 @@ function Home() {
                       {localPath && !wishListActive && !lendFromActive && b && (
                         <BorrowFrom
                           $b={b}
-                          $c={c}
+                          $c={c.find((j) => i.isbn === j)}
                           onClick={(e) => {
                             e.stopPropagation();
                           }}
@@ -794,31 +830,37 @@ function Home() {
                           加入書櫃
                         </AddToLibrary>
                       )}
-                      {wishListActive && localPath && a && !c && (
-                        <LendToFriend
-                          $a={a}
-                          $c={c}
-                          onClick={() => {
-                            setBarrierBGActive(true);
-                            setNotificationAlertActive(true);
-                            setNotification({
-                              type: "lendFrom",
-                              avatar: user.avatar,
-                              uid: user.uid,
-                              uname: user.uname,
-                              isbn: i.isbn,
-                              bookname: i.bookname,
-                            });
-                          }}
-                        >
-                          出借好友
-                        </LendToFriend>
-                      )}
-                      {wishListActive && localPath && a && c && (
-                        <LendToFriend $a={a} $c={c}>
-                          已送出請求
-                        </LendToFriend>
-                      )}
+                      {wishListActive &&
+                        localPath &&
+                        a &&
+                        !c.find((j) => i.isbn === j) && (
+                          <LendToFriend
+                            $a={a}
+                            $c={c.find((j) => i.isbn === j)}
+                            onClick={() => {
+                              setBarrierBGActive(true);
+                              setNotificationAlertActive(true);
+                              setNotification({
+                                type: "lendFrom",
+                                avatar: user.avatar,
+                                uid: user.uid,
+                                uname: user.uname,
+                                isbn: i.isbn,
+                                bookname: i.bookname,
+                              });
+                            }}
+                          >
+                            出借好友
+                          </LendToFriend>
+                        )}
+                      {wishListActive &&
+                        localPath &&
+                        a &&
+                        c.find((j) => i.isbn === j) && (
+                          <LendToFriend $a={a} $c={c.find((j) => i.isbn === j)}>
+                            已送出請求
+                          </LendToFriend>
+                        )}
                       {lendFromActive &&
                         !localPath &&
                         !d.find((j) => i.isbn === j) && (
@@ -1232,7 +1274,7 @@ const BookName = styled.p`
   justify-content: center;
 `;
 
-const BorrowFrom = styled.div<{ $b: boolean; $c: boolean }>`
+const BorrowFrom = styled.div<{ $b: boolean; $c: string | undefined }>`
   margin-top: 16px;
   width: 120px;
   height: 36px;
@@ -1266,7 +1308,7 @@ margin-top:16px;
 }
 `;
 
-const LendToFriend = styled.div<{ $a: boolean; $c: boolean }>`
+const LendToFriend = styled.div<{ $a: boolean; $c: string | undefined }>`
   margin-top: 16px;
   width: 120px;
   height: 36px;

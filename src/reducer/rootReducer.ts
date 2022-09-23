@@ -5,6 +5,8 @@ import currentLibraryReducer from "./currentLibraryReducer";
 import displayUserReducer from "./displayUserReducer";
 import displayLibraryReducer from "./displayLibraryReducer";
 import topSDisplayReducer from "./topSDisplayReducer";
+import notificationReducer from "./notificationReducer";
+import giveBackAlertReducer from "./giveBackAlertReducer";
 
 export const actionType = {
   USER: { SETUSER: "setUser" },
@@ -15,6 +17,8 @@ export const actionType = {
   DISPLAYLIBRARY: { SETDISPLAYLIBRARY: "setDisplayLibrary" },
 
   TOPSDISPLAY: { SETTOPSDISPLAY: "setTopSDisplay" },
+  NOTIFICATION: { SETNOTIFICATION: "setNotification" },
+  GIVEBACK: { SETGIVEBACK: "setGiveBackAlert" },
 };
 
 const rootReducer = combineReducers({
@@ -24,6 +28,8 @@ const rootReducer = combineReducers({
   displayUserReducer,
   displayLibraryReducer,
   topSDisplayReducer,
+  notificationReducer,
+  giveBackAlertReducer,
 });
 
 export default rootReducer;

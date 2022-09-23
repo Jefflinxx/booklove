@@ -253,6 +253,17 @@ export const updateUserLibrary = async (
   });
 };
 
+export const updateGiveBackAlert = async (
+  uid: string,
+  giveBackAlert: string[]
+) => {
+  console.log("editlibrary");
+  const Ref = doc(db, "users", uid);
+  await updateDoc(Ref, {
+    giveBackAlert: giveBackAlert,
+  });
+};
+
 export const searchFriend = async (uname: string) => {
   const q = query(collection(db, "users"), where("uname", "==", uname));
   const querySnapshot = await getDocs(q);
