@@ -4,8 +4,6 @@ import ReactLoading from "react-loading";
 
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../utils/firebase";
 
 import TopSection from "../../components/TopSection/TopSection";
 
@@ -77,10 +75,24 @@ function Home() {
 
   const localPath = Location.pathname.split("/")[1];
 
+  //這個useeffect應該跟本就不需要
+  // useEffect(() => {
+  //   if (user) {
+  //     getUserInfo(user.uid).then((v) => {
+  //       dispatch({
+  //         type: actionType.USER.SETUSER,
+  //         value: v,
+  //       });
+  //       console.log(v?.giveBackAlert);
+  //       dispatch({
+  //         type: actionType.GIVEBACK.SETGIVEBACK,
+  //         value: v?.giveBackAlert,
+  //       });
+  //     });
+  //   }
+  // }, []);
+
   useEffect(() => {
-    //console.log(user);
-    // console.log(localPath);
-    // console.log(localPath === "");
     setWholePageLoading(true);
     setCategoryCurrent(null);
     setCategoryReadActive(false);
@@ -89,12 +101,17 @@ function Home() {
     setCategorySelectActive(false);
     setLendFromActive(false);
     setCategoryAllActive(false);
-
+    console.log(user, "56不能亡");
     if (user) {
       getUserInfo(user.uid).then((v) => {
         dispatch({
           type: actionType.LIBRARY.SETLIBRARY,
           value: v!.library || [],
+        });
+
+        dispatch({
+          type: actionType.GIVEBACK.SETGIVEBACK,
+          value: v?.giveBackAlert || [],
         });
       });
       if (localPath === user.uid || localPath === "") {
@@ -150,28 +167,13 @@ function Home() {
   }, [localPath, user]);
 
   useEffect(() => {
-    if (user) {
-      getUserInfo(user.uid).then((v) => {
-        dispatch({
-          type: actionType.USER.SETUSER,
-          value: v,
-        });
-        dispatch({
-          type: actionType.GIVEBACK.SETGIVEBACK,
-          value: v?.giveBackAlert,
-        });
-      });
-    }
-  }, []);
-
-  useEffect(() => {
     console.log("執行");
     //比對 對方的 notification 有沒有這本書 有的話，按鈕改為 已送出請求
     let c: string[] = [];
     let d: string[] = [];
 
     displayLibrary?.forEach((i) => {
-      displayUser.notification?.forEach((j) => {
+      displayUser?.notification?.forEach((j) => {
         if (
           j.isbn === i.isbn &&
           (j.type === "borrow" || j.type === "lendFrom")
@@ -190,8 +192,6 @@ function Home() {
     setC(c);
     setD(d);
   }, [displayLibrary, giveBackAlert]);
-
-  console.log(c, d);
 
   return (
     <>
@@ -219,40 +219,50 @@ function Home() {
           <NAConfirm
             onClick={() => {
               if (notification.type === "borrow") {
-                if (displayUser.notification) {
-                  updateNotification(localPath, [
-                    ...displayUser.notification,
-                    notification,
-                  ]);
-                } else {
-                  updateNotification(localPath, [notification]);
-                }
-                setC([...c, notification.isbn]);
+                getUserInfo(displayUser.uid).then((v) => {
+                  if (v?.notification) {
+                    updateNotification(localPath, [
+                      ...v?.notification,
+                      notification,
+                    ]);
+                  } else {
+                    updateNotification(localPath, [notification]);
+                  }
+                  setC([...c, notification.isbn]);
+                });
               }
               if (notification.type === "lendFrom") {
-                if (displayUser.notification) {
-                  updateNotification(localPath, [
-                    ...displayUser.notification,
-                    notification,
-                  ]);
-                } else {
-                  updateNotification(localPath, [notification]);
-                }
-                setC([...c, notification.isbn]);
+                getUserInfo(displayUser.uid).then((v) => {
+                  if (v?.notification) {
+                    updateNotification(localPath, [
+                      ...v?.notification,
+                      notification,
+                    ]);
+                  } else {
+                    updateNotification(localPath, [notification]);
+                  }
+                  setC([...c, notification.isbn]);
+                });
               }
+
               if (notification.type === "giveBack") {
-                if (displayUser.notification) {
-                  updateNotification(nAlendFrom.id, [
-                    ...displayUser.notification,
-                    notification,
-                  ]);
-                } else {
-                  updateNotification(nAlendFrom.id, [notification]);
-                }
+                console.log("giveBack Type");
+                getUserInfo(nAlendFrom.id).then((v) => {
+                  console.log("我要歸還的對象的通知列表", v?.notification);
+                  if (v?.notification) {
+                    updateNotification(nAlendFrom.id, [
+                      ...v?.notification,
+                      notification,
+                    ]);
+                  } else {
+                    updateNotification(nAlendFrom.id, [notification]);
+                  }
+                });
               }
+
               //把歸還通知放入自己的資料庫
               //之後對方按取消或確認再幫對方刪掉
-              if (user.giveBackAlert) {
+              if (giveBackAlert) {
                 updateGiveBackAlert(user.uid, [
                   ...giveBackAlert,
                   notification.isbn,
@@ -263,11 +273,11 @@ function Home() {
                 });
               } else {
                 updateGiveBackAlert(user.uid, [notification.isbn]);
+                dispatch({
+                  type: actionType.GIVEBACK.SETGIVEBACK,
+                  value: [notification.isbn],
+                });
               }
-              dispatch({
-                type: actionType.GIVEBACK.SETGIVEBACK,
-                value: [notification.isbn],
-              });
 
               setBarrierBGActive(false);
               setNotificationAlertActive(false);
@@ -304,405 +314,399 @@ function Home() {
               </PlusIconDivWrapper>
             </Center>
             <Center>
-              <Bookcase>
-                {library.length || user?.wishList?.length ? (
-                  <TopTagWrapper>
-                    <TopTagLeftWrapper>
-                      <CategoryAll
-                        onClick={async () => {
-                          setLoading(true);
+              {library.length || user?.wishList?.length ? (
+                <TopTagWrapper>
+                  <CategoryAll
+                    onClick={async () => {
+                      setLoading(true);
 
-                          setCategoryCurrent(null);
-                          setCategoryReadActive(false);
-                          setCategoryLendActive(false);
-                          setWishListActive(false);
-                          setCategorySelectActive(false);
-                          setLendFromActive(false);
+                      setCategoryCurrent(null);
+                      setCategoryReadActive(false);
+                      setCategoryLendActive(false);
+                      setWishListActive(false);
+                      setCategorySelectActive(false);
+                      setLendFromActive(false);
 
-                          let a;
-                          if (localPath === user.uid || localPath === "") {
-                            a = await getUserInfo(user.uid);
-                          } else {
-                            a = await getUserInfo(localPath);
-                            if (!a) return;
-                            if (a?.library) {
-                              let newLibrary: CurrentBook[] = [];
-                              a?.library.forEach((i) => {
-                                if (i?.isPublic) {
-                                  newLibrary.push(i);
-                                }
-                              });
-                              a = { ...a, library: newLibrary };
-                            }
-                          }
-
-                          dispatch({
-                            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
-                            value: a?.library || [],
-                          });
-
-                          setLoading(false);
-                          setCategoryAllActive(true);
-                        }}
-                      >
-                        全部{categoryAllActive && `(${displayLibrary.length})`}
-                      </CategoryAll>
-
-                      <FinishRead
-                        onClick={async () => {
-                          setLoading(true);
-
-                          setCategoryCurrent(null);
-                          setCategoryAllActive(false);
-                          setCategoryLendActive(false);
-                          setWishListActive(false);
-                          setCategorySelectActive(false);
-                          setLendFromActive(false);
-                          let categoryResult: CurrentBook[] = [];
-
-                          let a;
-                          if (localPath === user.uid || localPath === "") {
-                            a = await getUserInfo(user.uid);
-                          } else {
-                            a = await getUserInfo(localPath);
-                            if (!a) return;
-                            if (a?.library) {
-                              let newLibrary: CurrentBook[] = [];
-                              a?.library.forEach((i) => {
-                                if (i?.isPublic) {
-                                  newLibrary.push(i);
-                                }
-                              });
-                              a = { ...a, library: newLibrary };
-                            }
-                          }
-
-                          a?.library?.forEach((j) => {
-                            if (j?.isFinishRead) {
-                              categoryResult = [...categoryResult, j];
+                      let a;
+                      if (localPath === user.uid || localPath === "") {
+                        a = await getUserInfo(user.uid);
+                      } else {
+                        a = await getUserInfo(localPath);
+                        if (!a) return;
+                        if (a?.library) {
+                          let newLibrary: CurrentBook[] = [];
+                          a?.library.forEach((i) => {
+                            if (i?.isPublic) {
+                              newLibrary.push(i);
                             }
                           });
-                          dispatch({
-                            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
-                            value: categoryResult,
-                          });
+                          a = { ...a, library: newLibrary };
+                        }
+                      }
 
-                          setLoading(false);
-                          setCategoryReadActive(true);
-                        }}
-                      >
-                        完成閱讀
-                        {categoryReadActive && `(${displayLibrary.length})`}
-                      </FinishRead>
+                      dispatch({
+                        type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
+                        value: a?.library || [],
+                      });
 
-                      <LendToOther
-                        onClick={async () => {
-                          setLoading(true);
+                      setLoading(false);
+                      setCategoryAllActive(true);
+                    }}
+                  >
+                    全部{categoryAllActive && `(${displayLibrary.length})`}
+                  </CategoryAll>
+                  <Split />
+                  <FinishRead
+                    onClick={async () => {
+                      setLoading(true);
 
-                          setCategoryCurrent(null);
-                          setCategoryAllActive(false);
-                          setCategoryReadActive(false);
-                          setWishListActive(false);
-                          setCategorySelectActive(false);
-                          setLendFromActive(false);
-                          let categoryResult: CurrentBook[] = [];
+                      setCategoryCurrent(null);
+                      setCategoryAllActive(false);
+                      setCategoryLendActive(false);
+                      setWishListActive(false);
+                      setCategorySelectActive(false);
+                      setLendFromActive(false);
+                      let categoryResult: CurrentBook[] = [];
 
-                          let a;
-                          if (localPath === user.uid || localPath === "") {
-                            a = await getUserInfo(user.uid);
-                          } else {
-                            a = await getUserInfo(localPath);
-                            if (!a) return;
-                            if (a?.library) {
-                              let newLibrary: CurrentBook[] = [];
-                              a?.library.forEach((i) => {
-                                if (i?.isPublic) {
-                                  newLibrary.push(i);
-                                }
-                              });
-                              a = { ...a, library: newLibrary };
-                            }
-                          }
-
-                          a?.library?.forEach((j) => {
-                            if (j?.isLendTo) {
-                              categoryResult = [...categoryResult, j];
+                      let a;
+                      if (localPath === user.uid || localPath === "") {
+                        a = await getUserInfo(user.uid);
+                      } else {
+                        a = await getUserInfo(localPath);
+                        if (!a) return;
+                        if (a?.library) {
+                          let newLibrary: CurrentBook[] = [];
+                          a?.library.forEach((i) => {
+                            if (i?.isPublic) {
+                              newLibrary.push(i);
                             }
                           });
-                          dispatch({
-                            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
-                            value: categoryResult,
+                          a = { ...a, library: newLibrary };
+                        }
+                      }
+
+                      a?.library?.forEach((j) => {
+                        if (j?.isFinishRead) {
+                          categoryResult = [...categoryResult, j];
+                        }
+                      });
+                      dispatch({
+                        type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
+                        value: categoryResult,
+                      });
+
+                      setLoading(false);
+                      setCategoryReadActive(true);
+                    }}
+                  >
+                    完成閱讀
+                    {categoryReadActive && `(${displayLibrary.length})`}
+                  </FinishRead>
+                  <Split />
+                  <LendToOther
+                    onClick={async () => {
+                      setLoading(true);
+
+                      setCategoryCurrent(null);
+                      setCategoryAllActive(false);
+                      setCategoryReadActive(false);
+                      setWishListActive(false);
+                      setCategorySelectActive(false);
+                      setLendFromActive(false);
+                      let categoryResult: CurrentBook[] = [];
+
+                      let a;
+                      if (localPath === user.uid || localPath === "") {
+                        a = await getUserInfo(user.uid);
+                      } else {
+                        a = await getUserInfo(localPath);
+                        if (!a) return;
+                        if (a?.library) {
+                          let newLibrary: CurrentBook[] = [];
+                          a?.library.forEach((i) => {
+                            if (i?.isPublic) {
+                              newLibrary.push(i);
+                            }
                           });
+                          a = { ...a, library: newLibrary };
+                        }
+                      }
 
-                          setLoading(false);
-                          setCategoryLendActive(true);
-                        }}
-                      >
-                        出借中
-                        {categoryLendActive && `(${displayLibrary.length})`}
-                      </LendToOther>
-                      <CategoryWholeWrapper>
-                        <CategoryButton
-                          onClick={() => {
-                            setCategorySelectActive(!categorySelectActive);
-                            setCategoryAllActive(false);
-                            setCategoryReadActive(false);
-                            setCategoryLendActive(false);
-                            setWishListActive(false);
-                            setLendFromActive(false);
-                          }}
-                        >
-                          類別
-                          {categoryCurrent &&
-                            `:${categoryCurrent}(${displayLibrary?.length})`}
-                        </CategoryButton>
-                        <CategoryWrapper
-                          categorySelectActive={categorySelectActive}
-                        >
-                          {!localPath && (
-                            <CategoryInputWrapper>
-                              <CategoryInput
-                                placeholder="新增類別"
-                                onChange={(e) => {
-                                  setCategoryInput(e.target.value);
-                                }}
-                              />
-                              <CategoryPlus
-                                onClick={() => {
-                                  if (
-                                    displayUser?.category &&
-                                    displayUser?.category.find(
-                                      (j) => j === categoryInput
-                                    )
-                                  ) {
-                                    return;
-                                  } else if (displayUser?.category) {
-                                    updateCategory(user.uid, [
-                                      ...displayUser.category,
-                                      categoryInput,
-                                    ]);
-                                    dispatch({
-                                      type: actionType.DISPLAYUSER
-                                        .SETDISPLAYUSER,
-                                      value: {
-                                        ...displayUser,
-                                        category: [
-                                          ...displayUser.category,
-                                          categoryInput,
-                                        ],
-                                      },
-                                    });
-                                  } else {
-                                    updateCategory(user.uid, [categoryInput]);
-                                    dispatch({
-                                      type: actionType.DISPLAYUSER
-                                        .SETDISPLAYUSER,
-                                      value: {
-                                        ...displayUser,
-                                        category: [categoryInput],
-                                      },
-                                    });
-                                  }
-                                }}
-                              >
-                                +
-                              </CategoryPlus>
-                            </CategoryInputWrapper>
-                          )}
-                          {displayUser?.category?.length || !localPath ? (
-                            <></>
-                          ) : (
-                            <NoCategoryWrapper>
-                              <NoCategoryP>沒有類別</NoCategoryP>
-                            </NoCategoryWrapper>
-                          )}
+                      a?.library?.forEach((j) => {
+                        if (j?.isLendTo) {
+                          categoryResult = [...categoryResult, j];
+                        }
+                      });
+                      dispatch({
+                        type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
+                        value: categoryResult,
+                      });
 
-                          {displayUser?.category?.map((i) => {
-                            return (
-                              <CategoryDiv
-                                key={i}
-                                onClick={async () => {
-                                  setLoading(true);
-                                  setCategorySelectActive(false);
-                                  setCategoryAllActive(false);
-                                  setCategoryReadActive(false);
-                                  setCategoryLendActive(false);
-                                  setWishListActive(false);
-                                  setLendFromActive(false);
-
-                                  let categoryResult: CurrentBook[] = [];
-
-                                  let a;
-                                  if (
-                                    localPath === user.uid ||
-                                    localPath === ""
-                                  ) {
-                                    a = await getUserInfo(user.uid);
-                                  } else {
-                                    a = await getUserInfo(localPath);
-                                    if (!a) return;
-                                    if (a?.library) {
-                                      let newLibrary: CurrentBook[] = [];
-                                      a?.library.forEach((i) => {
-                                        if (i?.isPublic) {
-                                          newLibrary.push(i);
-                                        }
-                                      });
-                                      a = { ...a, library: newLibrary };
-                                    }
-                                  }
-
-                                  a?.library?.forEach((j) => {
-                                    j?.category?.forEach((k) => {
-                                      if (k === i) {
-                                        categoryResult = [...categoryResult, j];
-                                      }
-                                    });
-                                  });
-                                  dispatch({
-                                    type: actionType.DISPLAYLIBRARY
-                                      .SETDISPLAYLIBRARY,
-                                    value: categoryResult,
-                                  });
-
-                                  setLoading(false);
-                                  setCategoryCurrent(i);
-                                }}
-                              >
-                                {i}
-                                <DeleteCategory
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (displayUser?.category) {
-                                      //遍歷每本書去把這項類別清除
-                                      let libraryBook: CurrentBook[] = [];
-                                      getUserInfo(user.uid).then((v) => {
-                                        v?.library.forEach((k) => {
-                                          libraryBook.push({
-                                            ...k,
-                                            category:
-                                              k.category?.filter(
-                                                (l) => l !== i
-                                              ) || [],
-                                          });
-                                        });
-
-                                        updateUserLibrary(
-                                          user.uid,
-                                          libraryBook
-                                        );
-                                        dispatch({
-                                          type: actionType.DISPLAYLIBRARY
-                                            .SETDISPLAYLIBRARY,
-                                          value: libraryBook,
-                                        });
-                                      });
-
-                                      //刪除類別
-                                      updateCategory(
-                                        user.uid,
-                                        displayUser?.category.filter(
-                                          (j) => j !== i
-                                        )
-                                      );
-                                      dispatch({
-                                        type: actionType.DISPLAYUSER
-                                          .SETDISPLAYUSER,
-                                        value: {
-                                          ...displayUser,
-                                          category:
-                                            displayUser?.category.filter(
-                                              (j) => j !== i
-                                            ),
-                                        },
-                                      });
-                                    }
-                                  }}
-                                >
-                                  ✗
-                                </DeleteCategory>
-                              </CategoryDiv>
-                            );
-                          })}
-                        </CategoryWrapper>
-                      </CategoryWholeWrapper>
-                    </TopTagLeftWrapper>
-                    <TopTagRightWrapper>
-                      <LendFromFriend
-                        onClick={async () => {
-                          setLoading(true);
-
-                          setCategoryCurrent(null);
-                          setCategoryAllActive(false);
-                          setCategoryReadActive(false);
-                          setCategoryLendActive(false);
-                          setCategorySelectActive(false);
-                          setWishListActive(false);
-
-                          let a;
-                          if (localPath === user.uid || localPath === "") {
-                            a = await getUserInfo(user.uid);
-                          } else {
-                            a = await getUserInfo(localPath);
-                            if (!a) return;
-                          }
-
-                          dispatch({
-                            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
-                            value: a?.lendFromList || [],
-                          });
-
-                          setLoading(false);
-                          setLendFromActive(true);
-                        }}
-                      >
-                        借入書籍{lendFromActive && `(${displayLibrary.length})`}
-                      </LendFromFriend>
-                      <WishList
-                        onClick={async () => {
-                          setLoading(true);
-
-                          setCategoryCurrent(null);
-                          setCategoryAllActive(false);
-                          setCategoryReadActive(false);
-                          setCategoryLendActive(false);
-                          setCategorySelectActive(false);
-                          setLendFromActive(false);
-
-                          let a;
-                          if (localPath === user.uid || localPath === "") {
-                            a = await getUserInfo(user.uid);
-                          } else {
-                            a = await getUserInfo(localPath);
-                            if (!a) return;
-                          }
-
-                          dispatch({
-                            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
-                            value: a?.wishList || [],
-                          });
-
-                          setLoading(false);
-                          setWishListActive(true);
-                        }}
-                      >
-                        願望清單{wishListActive && `(${displayLibrary.length})`}
-                      </WishList>
-                    </TopTagRightWrapper>
-                  </TopTagWrapper>
-                ) : (
-                  <NoLibraryDiv>
-                    <NoLibrary>歡迎點擊</NoLibrary>
-                    <NoLibraryPlusIconDiv
+                      setLoading(false);
+                      setCategoryLendActive(true);
+                    }}
+                  >
+                    出借中
+                    {categoryLendActive && `(${displayLibrary.length})`}
+                  </LendToOther>
+                  <Split />
+                  <CategoryWholeWrapper>
+                    <CategoryButton
                       onClick={() => {
-                        navigator("./search");
+                        setCategorySelectActive(!categorySelectActive);
+                        setCategoryAllActive(false);
+                        setCategoryReadActive(false);
+                        setCategoryLendActive(false);
+                        setWishListActive(false);
+                        setLendFromActive(false);
                       }}
                     >
-                      +
-                    </NoLibraryPlusIconDiv>
-                    <NoLibrary>加入圖書</NoLibrary>
-                  </NoLibraryDiv>
-                )}
+                      類別
+                      {categoryCurrent &&
+                        `:${categoryCurrent}(${displayLibrary?.length})`}
+                    </CategoryButton>
+                    <CategoryWrapper
+                      categorySelectActive={categorySelectActive}
+                    >
+                      {!localPath && (
+                        <CategoryInputWrapper>
+                          <CategoryInput
+                            placeholder="新增類別"
+                            onChange={(e) => {
+                              setCategoryInput(e.target.value);
+                            }}
+                          />
+                          <CategoryPlus
+                            onClick={() => {
+                              if (
+                                displayUser?.category &&
+                                displayUser?.category.find(
+                                  (j) => j === categoryInput
+                                )
+                              ) {
+                                return;
+                              } else if (displayUser?.category) {
+                                updateCategory(user.uid, [
+                                  ...displayUser.category,
+                                  categoryInput,
+                                ]);
+                                dispatch({
+                                  type: actionType.DISPLAYUSER.SETDISPLAYUSER,
+                                  value: {
+                                    ...displayUser,
+                                    category: [
+                                      ...displayUser.category,
+                                      categoryInput,
+                                    ],
+                                  },
+                                });
+                              } else {
+                                updateCategory(user.uid, [categoryInput]);
+                                dispatch({
+                                  type: actionType.DISPLAYUSER.SETDISPLAYUSER,
+                                  value: {
+                                    ...displayUser,
+                                    category: [categoryInput],
+                                  },
+                                });
+                              }
+                            }}
+                          >
+                            +
+                          </CategoryPlus>
+                        </CategoryInputWrapper>
+                      )}
+                      {displayUser?.category?.length || !localPath ? (
+                        <></>
+                      ) : (
+                        <NoCategoryWrapper>
+                          <NoCategoryP>沒有類別</NoCategoryP>
+                        </NoCategoryWrapper>
+                      )}
+
+                      {displayUser?.category?.map((i) => {
+                        return (
+                          <CategoryDiv
+                            key={i}
+                            onClick={async () => {
+                              setLoading(true);
+                              setCategorySelectActive(false);
+                              setCategoryAllActive(false);
+                              setCategoryReadActive(false);
+                              setCategoryLendActive(false);
+                              setWishListActive(false);
+                              setLendFromActive(false);
+
+                              let categoryResult: CurrentBook[] = [];
+
+                              let a;
+                              if (localPath === user.uid || localPath === "") {
+                                a = await getUserInfo(user.uid);
+                              } else {
+                                a = await getUserInfo(localPath);
+                                if (!a) return;
+                                if (a?.library) {
+                                  let newLibrary: CurrentBook[] = [];
+                                  a?.library.forEach((i) => {
+                                    if (i?.isPublic) {
+                                      newLibrary.push(i);
+                                    }
+                                  });
+                                  a = { ...a, library: newLibrary };
+                                }
+                              }
+
+                              a?.library?.forEach((j) => {
+                                j?.category?.forEach((k) => {
+                                  if (k === i) {
+                                    categoryResult = [...categoryResult, j];
+                                  }
+                                });
+                              });
+                              dispatch({
+                                type: actionType.DISPLAYLIBRARY
+                                  .SETDISPLAYLIBRARY,
+                                value: categoryResult,
+                              });
+
+                              setLoading(false);
+                              setCategoryCurrent(i);
+                            }}
+                          >
+                            {i}
+                            <DeleteCategory
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (displayUser?.category) {
+                                  //遍歷每本書去把這項類別清除
+                                  let libraryBook: CurrentBook[] = [];
+                                  getUserInfo(user.uid).then((v) => {
+                                    v?.library.forEach((k) => {
+                                      libraryBook.push({
+                                        ...k,
+                                        category:
+                                          k.category?.filter((l) => l !== i) ||
+                                          [],
+                                      });
+                                    });
+
+                                    updateUserLibrary(user.uid, libraryBook);
+                                    dispatch({
+                                      type: actionType.DISPLAYLIBRARY
+                                        .SETDISPLAYLIBRARY,
+                                      value: libraryBook,
+                                    });
+                                  });
+
+                                  //刪除類別
+                                  updateCategory(
+                                    user.uid,
+                                    displayUser?.category.filter((j) => j !== i)
+                                  );
+                                  dispatch({
+                                    type: actionType.DISPLAYUSER.SETDISPLAYUSER,
+                                    value: {
+                                      ...displayUser,
+                                      category: displayUser?.category.filter(
+                                        (j) => j !== i
+                                      ),
+                                    },
+                                  });
+                                }
+                              }}
+                            >
+                              ✗
+                            </DeleteCategory>
+                          </CategoryDiv>
+                        );
+                      })}
+                    </CategoryWrapper>
+                  </CategoryWholeWrapper>
+                  <Split />
+                  <LendFromFriend
+                    onClick={async () => {
+                      setLoading(true);
+
+                      setCategoryCurrent(null);
+                      setCategoryAllActive(false);
+                      setCategoryReadActive(false);
+                      setCategoryLendActive(false);
+                      setCategorySelectActive(false);
+                      setWishListActive(false);
+
+                      let a;
+                      if (localPath === user.uid || localPath === "") {
+                        a = await getUserInfo(user.uid);
+                      } else {
+                        a = await getUserInfo(localPath);
+                        if (!a) return;
+                      }
+
+                      dispatch({
+                        type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
+                        value: a?.lendFromList || [],
+                      });
+                      if (localPath === user.uid || localPath === "") {
+                        dispatch({
+                          type: actionType.GIVEBACK.SETGIVEBACK,
+                          value: a?.giveBackAlert || [],
+                        });
+                      }
+
+                      setLoading(false);
+                      setLendFromActive(true);
+                    }}
+                  >
+                    借入書籍{lendFromActive && `(${displayLibrary.length})`}
+                  </LendFromFriend>
+                  <Split />
+                  <WishList
+                    onClick={async () => {
+                      setLoading(true);
+
+                      setCategoryCurrent(null);
+                      setCategoryAllActive(false);
+                      setCategoryReadActive(false);
+                      setCategoryLendActive(false);
+                      setCategorySelectActive(false);
+                      setLendFromActive(false);
+
+                      let a;
+                      if (localPath === user.uid || localPath === "") {
+                        a = await getUserInfo(user.uid);
+                      } else {
+                        a = await getUserInfo(localPath);
+                        if (!a) return;
+                      }
+
+                      dispatch({
+                        type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
+                        value: a?.wishList || [],
+                      });
+
+                      setLoading(false);
+                      setWishListActive(true);
+                    }}
+                  >
+                    願望清單{wishListActive && `(${displayLibrary.length})`}
+                  </WishList>
+                </TopTagWrapper>
+              ) : (
+                <NoLibraryDiv>
+                  <NoLibrary>歡迎點擊</NoLibrary>
+                  <NoLibraryPlusIconDiv
+                    onClick={() => {
+                      navigator("./search");
+                    }}
+                  >
+                    +
+                  </NoLibraryPlusIconDiv>
+                  <NoLibrary>加入圖書</NoLibrary>
+                </NoLibraryDiv>
+              )}
+            </Center>
+            <Center>
+              <Bookcase>
                 {loading && (
                   <BookcaseLoading>
                     <ReactLoading type="cylon" color="black" width={100} />
@@ -915,7 +919,7 @@ const WholePageLoading = styled.div`
   left: 0px;
   width: 100vw;
   height: 100vh;
-  background: white;
+  background: #f6d4ba;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -964,8 +968,8 @@ const WholeWrapper = styled.div`
   width: 100%;
   display: flex;
   justify-content: center;
-  background: #eff2f5;
-  border: 1px solid #e4e6eb;
+  background: #f6d4ba;
+  padding-top: 650px;
 `;
 
 const CenterWrapper = styled.div`
@@ -1009,12 +1013,16 @@ const PlusIconDiv = styled.div<{ localPath: string; $uid: string }>`
 
 //上面的標籤
 const TopTagWrapper = styled.div`
-  width: 1172px;
-  position: absolute;
-  top: -36px;
-  left: 0px;
+  width: 1250px;
+
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Split = styled.div`
+  border: 1px solid #3f612d;
+  height: 28px;
 `;
 
 const TopTagLeftWrapper = styled.div`
@@ -1028,15 +1036,15 @@ const TopTagRightWrapper = styled.div`
 `;
 
 const LendFromFriend = styled.div`
-  border: 1px solid #e4e6eb;
   cursor: pointer;
   user-select: none;
-  width: 168px;
+  width: 195px;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  font-size: 28px;
+  color: #3f612d;
   border-radius: 6px 6px 0px 0px;
   :hover {
     background: rgba(200, 200, 200, 0.4);
@@ -1044,15 +1052,15 @@ const LendFromFriend = styled.div`
 `;
 
 const WishList = styled.div`
-  border: 1px solid #e4e6eb;
   cursor: pointer;
   user-select: none;
-  width: 168px;
+  width: 195px;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  font-size: 28px;
+  color: #3f612d;
   border-radius: 6px 6px 0px 0px;
   :hover {
     background: rgba(200, 200, 200, 0.4);
@@ -1060,15 +1068,15 @@ const WishList = styled.div`
 `;
 
 const LendToOther = styled.div`
-  border: 1px solid #e4e6eb;
   cursor: pointer;
   user-select: none;
-  width: 168px;
+  width: 195px;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  font-size: 28px;
+  color: #3f612d;
   border-radius: 6px 6px 0px 0px;
   :hover {
     background: rgba(200, 200, 200, 0.4);
@@ -1076,15 +1084,15 @@ const LendToOther = styled.div`
 `;
 
 const FinishRead = styled.div`
-  border: 1px solid #e4e6eb;
   cursor: pointer;
   user-select: none;
-  width: 168px;
+  width: 195px;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  font-size: 28px;
+  color: #3f612d;
   border-radius: 6px 6px 0px 0px;
   :hover {
     background: rgba(200, 200, 200, 0.4);
@@ -1092,16 +1100,15 @@ const FinishRead = styled.div`
 `;
 
 const CategoryAll = styled.div`
-  border: 1px solid #e4e6eb;
-
-  width: 168px;
+  width: 195px;
   height: 36px;
   cursor: pointer;
   user-select: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  font-size: 28px;
+  color: #3f612d;
   border-radius: 6px 6px 0px 0px;
   :hover {
     background: rgba(200, 200, 200, 0.4);
@@ -1113,15 +1120,15 @@ const CategoryWholeWrapper = styled.div`
 `;
 
 const CategoryButton = styled.div`
-  border: 1px solid #e4e6eb;
   cursor: pointer;
   user-select: none;
-  width: 168px;
+  width: 195px;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  font-size: 28px;
+  color: #3f612d;
   border-radius: 6px 6px 0px 0px;
   :hover {
     background: rgba(200, 200, 200, 0.4);
@@ -1129,7 +1136,7 @@ const CategoryButton = styled.div`
 `;
 
 const CategoryWrapper = styled.div<{ categorySelectActive: boolean }>`
-  width: 200px;
+  width: 195px;
   height: auto;
 
   position: absolute;
@@ -1217,16 +1224,14 @@ const CategoryPlus = styled.div`
 `;
 
 const Bookcase = styled.div`
-  border: 1px solid #e4e6eb;
   position: relative;
-  margin: 100px 0px;
-  width: 1172px;
+  margin: 0px 0px 100px 0px;
+  width: auto;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
   border-radius: 6px;
-  background: white;
 `;
 
 const BookcaseLoading = styled.div`
@@ -1242,7 +1247,7 @@ const BookcaseLoading = styled.div`
 `;
 
 const BookDiv = styled.div`
-  width: 390px;
+  width: 320px;
 
   height: 400px;
   cursor: pointer;
@@ -1262,6 +1267,7 @@ const BookDiv = styled.div`
 const BookImg = styled.img`
   width: 160px;
   height: 200px;
+  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
 `;
 
 const BookName = styled.p`

@@ -11,6 +11,7 @@ import {
   updateBackground,
   updateFollowList,
 } from "../../utils/firestore";
+import { CurrentBook } from "../../reducer/currentBookReducer";
 import { actionType } from "../../reducer/rootReducer";
 import { storage } from "../../utils/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -19,6 +20,7 @@ function TopSection() {
   const Location = useLocation();
   const dispatch = useDispatch();
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
+
   const [followObj, setFollowObj] = useState<
     | {
         uid: string;
@@ -31,7 +33,11 @@ function TopSection() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [bSKT, setBSKT] = useState<boolean>(true);
   const [confirmActive, setConfirmActive] = useState<boolean>(false);
-
+  const [libraryCount, setLibraryCount] = useState<number | null>(null);
+  const library = useSelector(
+    (state: { currentLibraryReducer: CurrentBook[] }) =>
+      state.currentLibraryReducer
+  );
   const topSDisplay = useSelector(
     (state: {
       topSDisplayReducer: {
@@ -62,6 +68,7 @@ function TopSection() {
           background: user.background || grayBack,
         },
       });
+      setLibraryCount(library.length);
     }
 
     const getFollowObj = async () => {
@@ -77,6 +84,7 @@ function TopSection() {
               background: a.background || grayBack,
             },
           });
+          setLibraryCount(a.library.length);
           setFollowObj({
             uid: a.uid,
             uname: a.uname,
@@ -103,7 +111,6 @@ function TopSection() {
             >
               <EditImgBtn>
                 <CameraIcon src={camera} />
-                編輯封面相片
               </EditImgBtn>
             </AvatarImgLabel>
           )}
@@ -163,6 +170,7 @@ function TopSection() {
           <InfoLeft>
             <Avatar src={topSDisplay.avatar} />
             <Username>{topSDisplay.uname}</Username>
+            <LibraryCount>{`${libraryCount} books`}</LibraryCount>
           </InfoLeft>
           <InfoRight>
             <InfoRightP
@@ -213,9 +221,6 @@ function TopSection() {
             </InfoRightP>
           </InfoRight>
         </InfoDiv>
-        <Center>
-          <Split />
-        </Center>
       </CenterWrapper>
     </WholeWrapper>
   );
@@ -229,34 +234,35 @@ const Center = styled.div`
 `;
 
 const WholeWrapper = styled.div`
+  position: absolute;
+  top: 56px;
+  left: 0px;
   width: 100%;
   display: flex;
   justify-content: center;
-  background: white;
-  border: 1px solid #e4e6eb;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 `;
 
 const CenterWrapper = styled.div`
   width: 1250px;
+  border-radius: 6px;
+  background: #fefadc;
 `;
 
 const BgWrapper = styled.div`
   position: relative;
   height: 460px;
-  border-radius: 6px;
+  border-radius: 6px 6px 0px 0px;
   overflow: hidden;
-  border: 1px solid #e4e6eb;
 `;
 
 const AvatarImgLabel = styled.label<{ confirmActive: boolean }>`
   position: absolute;
   bottom: 20px;
   right: 36px;
-  width: 136px;
-  height: 36px;
+  width: 50px;
+  height: 50px;
   border-radius: 6px;
-  background: white;
+
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -269,12 +275,18 @@ const AvatarImgLabel = styled.label<{ confirmActive: boolean }>`
 
 const CameraIcon = styled.img`
   position: relative;
-  top: 1px;
-  left: -4px;
-  width: 16px;
+  top: 0px;
+  left: 0px;
+  width: 40px;
 `;
 const EditImgBtn = styled.div`
   font-size: 15px;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+
+  width: 50px;
+  height: 50px;
 `;
 
 const ConfirmBtn = styled.div<{ confirmActive: boolean }>`
@@ -326,7 +338,7 @@ const BackgroundSKT = styled.div`
 `;
 
 const InfoDiv = styled.div`
-  height: 130px;
+  height: 190px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -338,17 +350,17 @@ const InfoLeft = styled.div`
 `;
 
 const Avatar = styled.img`
-  width: 168px;
-  height: 168px;
+  width: 240px;
+  height: 240px;
   margin-right: 16px;
 
-  border: 6px solid white;
+  border: 6px solid #fefadc;
   border-radius: 50%;
   z-index: 1;
-  background: #eff2f5;
+  background: #fefadc;
 
   position: absolute;
-  top: -100px;
+  top: -160px;
   left: 40px;
   user-select: none;
 `;
@@ -356,11 +368,23 @@ const Avatar = styled.img`
 const Username = styled.p`
   width: 228px;
   font-weight: 700;
-  font-size: 32px;
+  font-size: 36px;
   position: absolute;
-  top: -40px;
-  left: 220px;
+  top: -60px;
+  left: 310px;
   user-select: none;
+  color: #3f612d;
+`;
+
+const LibraryCount = styled.p`
+  width: 228px;
+
+  font-size: 28px;
+  position: absolute;
+  top: -10px;
+  left: 310px;
+  user-select: none;
+  color: #3f612d;
 `;
 
 const InfoRight = styled.div`

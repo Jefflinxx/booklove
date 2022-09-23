@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { actionType } from "../../reducer/rootReducer";
 import styled from "styled-components";
 import { getUserInfo } from "../../utils/firestore";
@@ -22,12 +22,14 @@ const Friend: React.FC<FriendProps> = ({
   friendLoading,
   setFriendLoading,
 }) => {
+  const Location = useLocation();
   const navigator = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
   const [followList, setFollowList] = useState<
     { uid: string; avatar: string; uname: string }[]
   >([]);
+  const localPath = Location.pathname.split("/")[1];
   useEffect(() => {
     const f = async () => {
       const a: User | null = await getUserInfo(user.uid);
@@ -71,14 +73,17 @@ const Friend: React.FC<FriendProps> = ({
                 //   type: actionType.DISPLAYUSER.SETDISPLAYUSER,
                 //   value: a,
                 // });
-                dispatch({
-                  type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
-                  value: {
-                    avatar: "",
-                    uname: "",
-                    background: "",
-                  },
-                });
+                if (!localPath) {
+                  dispatch({
+                    type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
+                    value: {
+                      avatar: "",
+                      uname: "",
+                      background: "",
+                    },
+                  });
+                }
+
                 navigator(`./${i.uid}`);
               }}
             >

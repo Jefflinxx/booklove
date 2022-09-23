@@ -257,7 +257,7 @@ export const updateGiveBackAlert = async (
   uid: string,
   giveBackAlert: string[]
 ) => {
-  console.log("editlibrary");
+  console.log("editGiveBackAlert");
   const Ref = doc(db, "users", uid);
   await updateDoc(Ref, {
     giveBackAlert: giveBackAlert,

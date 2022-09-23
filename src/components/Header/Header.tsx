@@ -30,12 +30,13 @@ import rightarrow from "./rightarrow.svg";
 import grayBack from "../TopSection/grayBack.png";
 
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Friend from "../Friend/Friend";
 import Account from "../Account/Account";
 import Theme from "../Theme/Theme";
 
 function Header() {
+  const Location = useLocation();
   const dispatch = useDispatch();
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
   const notification = useSelector(
@@ -68,6 +69,8 @@ function Header() {
   const [followActive, setFollowActive] = useState<boolean>(false);
   const navigator = useNavigate();
   const friendSearchRef = useRef<HTMLInputElement>(null);
+  const localPath = Location.pathname.split("/")[1];
+  console.log(localPath);
 
   //登出
   function logOut() {
@@ -126,14 +129,17 @@ function Header() {
         <LeftDiv>
           <Logo
             onClick={() => {
-              dispatch({
-                type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
-                value: {
-                  avatar: "",
-                  uname: "",
-                  background: "",
-                },
-              });
+              if (localPath) {
+                dispatch({
+                  type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
+                  value: {
+                    avatar: "",
+                    uname: "",
+                    background: "",
+                  },
+                });
+              }
+
               //這邊希望點擊後可以回到自己的主頁
               navigator("./");
             }}
@@ -460,6 +466,17 @@ function Header() {
                             notification?.filter((j) => j.isbn !== i.isbn) ||
                             [],
                         });
+                        if (i.type === "giveBack") {
+                          getUserInfo(i.uid).then((v) => {
+                            //把對方的歸還通知清掉
+
+                            updateGiveBackAlert(
+                              i.uid,
+                              v?.giveBackAlert?.filter((j) => j !== i.isbn) ||
+                                []
+                            );
+                          });
+                        }
                       }}
                     >
                       {cancel}
