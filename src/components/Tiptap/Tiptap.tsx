@@ -131,19 +131,22 @@ const Tiptap: React.FC<TiptapProps> = ({ data, setData }) => {
 export default Tiptap;
 
 const Wrapper = styled.div`
-  margin: 0px 0px 24px 54px;
+  margin: 16px 0px 24px 48px;
 `;
 
 const ContentWrapper = styled.div`
-  width: 612px;
+  width: 780px;
   height: 200px;
 
   display: flex;
   justify-content: center;
   .ProseMirror {
-    width: 612px;
-    border: 1px solid black;
+    color: #3f612d;
+    border-radius: 0px 0px 6px 6px;
+    width: 780px;
+    border: 1px solid #3f612d;
     min-height: 200px;
+    background: #fefadc;
 
     padding: 8px;
     outline: none;
@@ -177,17 +180,19 @@ const ContentWrapper = styled.div`
 
 const BtnWrapper = styled.div`
   display: flex;
-  width: 612px;
+  width: 780px;
+  border-radius: 6px 6px 0px 0px;
+  border: 1px solid #3f612d;
+  background: #f3b391;
 `;
 const Button = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 50px;
-  border: 1px solid black;
+  width: 60px;
 `;
 const BiBoldW = styled.div`
   line-height: 0px;
   font-size: 20px;
-  color: blue;
+  color: black;
 `;

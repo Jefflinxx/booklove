@@ -1,5 +1,6 @@
 import search from "./search.svg";
 import back from "./back.svg";
+import bg from "./search.jpeg";
 
 import { actionType } from "../../reducer/rootReducer";
 import { useSelector, useDispatch } from "react-redux";
@@ -195,7 +196,7 @@ function Search() {
     <>
       <WholeWrapper>
         <Center>
-          <TopIconDivWrapper>
+          <SearchIconDiv $active={resultCountActive}>
             <BackIconDiv
               onClick={() => {
                 navigator(-1);
@@ -203,12 +204,10 @@ function Search() {
             >
               <BackIcon src={back}></BackIcon>
             </BackIconDiv>
-          </TopIconDivWrapper>
-
-          <SearchIconDiv>
             <SearchIcon src={search} />
             <Input
               ref={friendSearchRef}
+              placeholder="Search books,add to bookshelf"
               onKeyPress={(e) => {
                 if (e.key === "Enter") {
                   //fetchEsliteBooksData(input);
@@ -228,13 +227,9 @@ function Search() {
               </SplitDiv>
             </>
           ) : (
-            <>
-              <SearchCount>搜尋書籍 加入書櫃</SearchCount>
-              <SplitDiv>
-                <Split />
-              </SplitDiv>
-            </>
+            <></>
           )}
+          <BackgroundDiv $active={resultCountActive}></BackgroundDiv>
 
           <Bookcase>
             {books.map((i) => {
@@ -244,7 +239,11 @@ function Search() {
                   <BookRightSection>
                     <BookItem>
                       <BookNameP>書名</BookNameP>
-                      <BookName>{i.name}</BookName>
+
+                      {i.name.length > 36 && (
+                        <BookName>{`${i.name.slice(0, 37)}...`}</BookName>
+                      )}
+                      {i.name.length <= 36 && <BookName>{i.name}</BookName>}
                     </BookItem>
                     <BookItem>
                       <AuthorP>作者</AuthorP>
@@ -283,6 +282,7 @@ function Search() {
                           已加入書櫃
                         </AddBookBtn>
                       )}
+                      <SplitBtn />
                       {!bookAlreadyInWishList.find((j) => i.isbn === j) && (
                         <AddToWishList
                           $b={bookAlreadyInWishList.find((j) => i.isbn === j)}
@@ -328,15 +328,16 @@ export default Search;
 const WholeWrapper = styled.div`
   width: 100%;
   min-height: ${() => `calc(100vh - 82px)`};
+  min-height: 100vh;
   display: flex;
   align-items: center;
   flex-direction: column;
 
-  background: #eff2f5;
+  background: #f6d4ba;
 `;
 
 const TopIconDivWrapper = styled.div`
-  width: 1172px;
+  width: 1080px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -345,7 +346,9 @@ const TopIconDivWrapper = styled.div`
 `;
 
 const BackIconDiv = styled.div`
-  position: relative;
+  position: absolute;
+  top: 8px;
+  left: 240px;
   width: 38px;
   height: 38px;
   border-radius: 50%;
@@ -361,45 +364,49 @@ const BackIcon = styled.img`
 `;
 
 const Center = styled.div`
-  border: 1px solid #e4e6eb;
-  background: white;
   border-radius: 6px;
   margin: 120px 0px;
 `;
 
-const SearchIconDiv = styled.div`
+const SearchIconDiv = styled.div<{ $active: boolean }>`
   position: relative;
-  width: 1172px;
-
+  top: ${(props) => (props.$active ? "0px" : "30vh")};
+  right: ${(props) => (props.$active ? "0px" : "-200px")};
+  width: 1080px;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 100px;
+  margin-bottom: 50px;
 `;
 
 const SearchIcon = styled.img`
   position: absolute;
   width: 24px;
-  left: 140px;
-  top: 12px;
+  left: 292px;
+  top: 16px;
 `;
 
 const Input = styled.input`
-  width: 902px;
-  height: 48px;
-  text-indent: 42px;
-  border-bottom: 1px solid black;
+  width: 500px;
+  height: 56px;
+  text-indent: 56px;
+  border-bottom: 3px solid #f3b391;
 
   font-size: 24px;
+  ::placeholder {
+    color: #3f612d;
+  }
 `;
 
 const SearchCount = styled.div`
-  width: 1172px;
+  width: 1080px;
+  color: #3f612d;
 
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 28px;
 `;
 
 const SplitDiv = styled.div`
@@ -409,14 +416,28 @@ const SplitDiv = styled.div`
 `;
 
 const Split = styled.div`
-  width: 802px;
+  width: 1080px;
   height: 20px;
-  border-bottom: 1px solid rgb(206, 208, 212);
+  border-bottom: 3px solid #f3b391;
 `;
+const BackgroundDiv = styled.div<{ $active: boolean }>`
+  position: absolute;
+  opacity: ${(props) => (props.$active ? "0" : "1")};
+  top: 0px;
+  left: 0px;
+  width: 50vw;
+  height: ${() => `calc(100vh + 25.5px)`};
 
+  background-image: linear-gradient(to right, #f6d4ba00 60%, #f6d4ba 100%),
+    url(${bg});
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  transition: all 1s;
+`;
 const Bookcase = styled.div`
   margin: 0px 0px 100px 0px;
-  width: 1172px;
+  width: 1080px;
   display: flex;
   align-items: center;
   ${"" /* justify-content: center; */}
@@ -424,7 +445,7 @@ const Bookcase = styled.div`
 `;
 
 const BookDiv = styled.div`
-  width: 585px;
+  width: 540px;
   height: 400px;
 
   display: flex;
@@ -433,8 +454,8 @@ const BookDiv = styled.div`
 `;
 
 const BookImg = styled.img`
-  width: 160px;
-  height: 200px;
+  width: 200px;
+  height: 280px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
 `;
 
@@ -444,21 +465,27 @@ const BookRightSection = styled.div`
 `;
 
 const BookItem = styled.div`
+  font-size: 20px;
+  color: #3f612d;
   display: flex;
-  margin-bottom: 16px;
+  min-height: 56px;
 `;
 
 const BookNameP = styled.p`
   width: 70px;
   font-weight: 700;
 `;
-const BookName = styled.p``;
+const BookName = styled.p`
+  width: 200px;
+`;
 
 const AuthorP = styled.p`
   width: 70px;
   font-weight: 700;
 `;
-const Author = styled.p``;
+const Author = styled.p`
+  width: 200px;
+`;
 
 const PublishP = styled.p`
   width: 70px;
@@ -467,40 +494,50 @@ const PublishP = styled.p`
 const Publish = styled.p``;
 
 const AddWrapper = styled.div`
+  position: relative;
+  right: 20px;
   display: flex;
+  align-items: center;
 `;
 
 const AddBookBtn = styled.div<{ $a: string | undefined }>`
-  width: 100px;
+  width: 120px;
   height: 36px;
-
+font-size:16px;
   justify-content: center;
   align-items: center;
-  margin-right: 16px;
+ 
   border-radius: 6px;
  
 
   display: flex;
   }};
-  background: ${(props) => (props.$a ? "rgba(200, 200, 200, 0.4)" : "#eff2f5")};
+  color:${(props) => (props.$a ? "gray" : "#3f612d")};
+  background: ${(props) => (props.$a ? "" : "")};
   cursor: ${(props) => (props.$a ? "not-allowed" : "point")};
   :hover {
-    background: ${(props) => (props.$a ? "" : "rgba(200, 200, 200, 0.4)")};
+    background: ${(props) => (props.$a ? "" : "#fefadc")};
   }
 `;
 
-const AddToWishList = styled.div<{ $b: string | undefined }>`
-  width: 120px;
-  height: 36px;
+const SplitBtn = styled.div`
+  border: 1px solid #3f612d;
+  height: 24px;
+`;
 
+const AddToWishList = styled.div<{ $b: string | undefined }>`
+  width: 140px;
+  height: 36px;
+  font-size: 16px;
   justify-content: center;
   align-items: center;
   border-radius: 6px;
 
   display: flex;
-  background: ${(props) => (props.$b ? "rgba(200, 200, 200, 0.4)" : "#eff2f5")};
+  color: ${(props) => (props.$b ? "#b4b7bc" : "#3f612d")};
+  background: ${(props) => (props.$b ? "" : "")};
   cursor: ${(props) => (props.$b ? "not-allowed" : "point")};
   :hover {
-    background: ${(props) => (props.$b ? "" : "rgba(200, 200, 200, 0.4)")};
+    background: ${(props) => (props.$b ? "" : "#fefadc")};
   }
 `;

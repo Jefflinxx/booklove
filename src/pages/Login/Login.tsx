@@ -4,6 +4,7 @@ import ReactLoading from "react-loading";
 
 import styled from "styled-components";
 import { useEffect, useState } from "react";
+import pic from "./login.jpeg";
 
 import TopSection from "../../components/TopSection/TopSection";
 import { auth } from "../../utils/firebase";
@@ -35,18 +36,19 @@ const Login = () => {
 
   return (
     <LoginPage>
+      <PicWrapper>
+        <Pic src={pic}></Pic>
+      </PicWrapper>
       {loading && (
         <WholePageLoading>
           <ReactLoading type="cylon" color="black" width={100} />
         </WholePageLoading>
       )}
       <TitleWrapper>
-        <Title>Booklove</Title>
-        <SubTitle>
-          Booklove，讓你和親朋好友保持聯繫，隨時分享生活中的每一刻。
-        </SubTitle>
+        <Title>BOOKLOVE</Title>
+        <SubTitle>陪伴您閱讀的好朋友</SubTitle>
       </TitleWrapper>
-      <div>
+      <LW>
         <LoginWrapper>
           <LoginButtonDiv>
             <Signup
@@ -135,11 +137,13 @@ const Login = () => {
             </Button>
           </Form>
         </LoginWrapper>
-        <TestP>jeffxxtest@gmail.com</TestP>
-        <TestP>12345678</TestP>
-        <TestP>xxxx55554@gmail.com</TestP>
-        <TestP>123456</TestP>
-      </div>
+        <TW>
+          <TestP>jeffxxtest@gmail.com</TestP>
+          <TestP>12345678</TestP>
+          <TestP>xxxx55554@gmail.com</TestP>
+          <TestP>123456</TestP>
+        </TW>
+      </LW>
     </LoginPage>
   );
 };
@@ -147,14 +151,14 @@ const Login = () => {
 export default Login;
 
 const LoginPage = styled.div`
-  z-index: 3;
+  z-index: 16;
   position: fixed;
   top: 0px;
   left: 0px;
 
   width: 100vw;
   height: 100vh;
-  background: #eff2f5;
+  background: #f6d4ba;
   border: 1px solid black;
 
   display: flex;
@@ -162,13 +166,28 @@ const LoginPage = styled.div`
   justify-content: center;
 `;
 
+const PicWrapper = styled.div`
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 500px;
+  height: 100vh;
+  background: green;
+`;
+const Pic = styled.img`
+  width: 500px;
+  height: 100vh;
+  object-fit: cover;
+`;
+
 const WholePageLoading = styled.div`
+  z-index: 20;
   position: fixed;
   top: 0px;
   left: 0px;
   width: 100vw;
   height: 100vh;
-  background: white;
+  background: #f6d4ba;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -178,24 +197,36 @@ const TitleWrapper = styled.div`
   width: 580px;
   height: 300px;
   margin-right: ;
+
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
 `;
 const Title = styled.p`
-  font-size: 54px;
-  font-weight: 700;
-  color: #1a77f2;
+  font-size: 70px;
+  font-weight: 600;
+  color: #3f612d;
 `;
 const SubTitle = styled.p`
   width: 500px;
   height: 84px;
-  font-size: 29px;
+  font-size: 28px;
+`;
+const LW = styled.div`
+  z-index: 17;
 `;
 
+const TW = styled.div`
+  position: absolute;
+  top: 0px;
+  left: 0px;
+`;
 const LoginWrapper = styled.div`
   border-radius: 6px;
   overflow: hidden;
 
   box-shadow: 0 2px 4px rgb(0 0 0 / 10%), 0 8px 16px rgb(0 0 0 / 10%);
-  background: #ffffff;
+  background: #f3b391;
 
   display: flex;
   align-items: center;
@@ -209,7 +240,7 @@ const LoginButtonDiv = styled.div`
   align-items: center;
   justify-content: center;
   margin: 16px 0px;
-  border: 1px solid #dddfe2;
+  border: 1px solid #f6d4ba;
   border-radius: 6px;
 `;
 
@@ -222,7 +253,7 @@ const Signup = styled.div<{ signState: string }>`
   justify-content: center;
   font-size: 21px;
   border-radius: 6px;
-  background: ${(props) => (props.signState === "signup" ? "#44B729" : "none")};
+  background: ${(props) => (props.signState === "signup" ? "#3f612d" : "none")};
 `;
 
 const Signin = styled.div<{ signState: string }>`
@@ -234,7 +265,7 @@ const Signin = styled.div<{ signState: string }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${(props) => (props.signState === "signin" ? "#44B729" : "none")};
+  background: ${(props) => (props.signState === "signin" ? "#3f612d" : "none")};
 `;
 
 const Form = styled.form`
@@ -249,13 +280,14 @@ const Input = styled.input`
   display: block;
   width: 364px;
   height: 52px;
-  border: 1px solid #dddfe2;
+
+  background: #fefadc;
   font-size: 21px;
   border-radius: 6px;
   margin-bottom: 16px;
   text-indent: 16px;
   ::placeholder {
-    color: #b4b7bc;
+    color: gray;
   }
 `;
 
@@ -264,12 +296,13 @@ const Button = styled.button`
   height: 52px;
   border: none;
   font-size: 21px;
-  background: #1a77f2;
-  color: white;
+  background: #feea00;
+  color: black;
   border-radius: 6px;
-  margin-bottom: 66px;
+  margin-bottom: 36px;
 `;
 
 const TestP = styled.p`
   text-align: center;
+  user-select: all;
 `;

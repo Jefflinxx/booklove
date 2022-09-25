@@ -144,7 +144,7 @@ function Header() {
               navigator("./");
             }}
           >
-            booklove
+            BOOKLOVE
           </Logo>
           <SearchWrapper>
             <SearchIconDiv
@@ -162,7 +162,7 @@ function Header() {
             </SearchIconDiv>
             <SearchInput
               ref={friendSearchRef}
-              placeholder="搜尋 Booklover"
+              placeholder="Search booklovers"
               isInputActive={isInputActive}
               onChange={(e) => {
                 setInput(e.target.value);
@@ -553,7 +553,7 @@ function Header() {
           setAccountActive={setAccountActive}
         />
 
-        <UserDiv
+        {/* <UserDiv
           onClick={() => {
             setThemeActive(true);
           }}
@@ -566,7 +566,7 @@ function Header() {
           </UserDivLeft>
           <RightArrow src={rightarrow}></RightArrow>
         </UserDiv>
-        <Theme themeActive={themeActive} setThemeActive={setThemeActive} />
+        <Theme themeActive={themeActive} setThemeActive={setThemeActive} /> */}
 
         <UserDiv onClick={logOut}>
           <UserDivLeft>
@@ -588,19 +588,22 @@ const HeaderDiv = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid #e4e6eb;
+  position: fixed;
+  width: 100vw;
+  background: #f3b391;
+  z-index: 10;
 `;
 
 const LeftDiv = styled.div`
   display: flex;
   align-items: center;
+  padding-left: 20px;
 `;
 
 const Logo = styled.p`
-  margin-left: 16px;
-  font-size: 26px;
-  font-weight: 700;
-  color: #1a77f2;
+  font-size: 28px;
+  font-weight: 600;
+  color: #3f612d;
   cursor: pointer;
 `;
 
@@ -613,11 +616,11 @@ const SearchIconDiv = styled.div`
   width: 40px;
   height: 40px;
   margin-left: 16px;
-  background: #eff2f5;
+  background: #fefadc;
   border-radius: 50%;
   cursor: pointer;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3eec8;
   }
 `;
 
@@ -626,7 +629,7 @@ const SearchIcon = styled.img`
   width: 18px;
   left: 10px;
   top: 10px;
-  z-index: 1;
+  z-index: 11;
 `;
 
 const SearchInput = styled.input<{ isInputActive: boolean }>`
@@ -638,11 +641,11 @@ const SearchInput = styled.input<{ isInputActive: boolean }>`
   height: 20px;
   border-radius: 50px;
   text-indent: 48px;
-  background: #eff2f5;
+  background: #fefadc;
+  color: #3f612d;
   width: ${(props) => (props.isInputActive ? "320px" : "0px")};
   height: ${(props) => (props.isInputActive ? "40px" : "0px")};
-  border-bottom: ${(props) =>
-    props.isInputActive ? "0px solid black" : "0px solid black"};
+  display: ${(props) => (props.isInputActive ? "block" : "none")};
 `;
 
 const SearchResultWrapper = styled.div<{ searchResultActive: boolean }>`
@@ -654,8 +657,9 @@ const SearchResultWrapper = styled.div<{ searchResultActive: boolean }>`
   padding-bottom: 8px;
   border-radius: 6px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
-  background: white;
-  z-index: 1;
+  background: #f6d4ba;
+  z-index: 11;
+  color: #3f612d;
   display: ${(props) => (props.searchResultActive ? "block" : "none")};
 `;
 
@@ -668,9 +672,6 @@ const SearchResultDiv = styled.div`
   height: 52px;
   padding: 0px 8px;
   border-radius: 6px;
-  :hover {
-    background: #eff2f5;
-  }
 `;
 const SearchResultDivLeft = styled.div`
   display: flex;
@@ -681,7 +682,7 @@ const SearchAvatar = styled.img`
   height: 38px;
   margin-right: 16px;
   cursor: pointer;
-  border: 2px solid white;
+  border: 2px solid #fefadc;
   border-radius: 50%;
 `;
 const SearchResultName = styled.p`
@@ -695,14 +696,16 @@ const SearchResultButton = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #fefadc;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3eec8;
   }
 `;
 
 const RightDiv = styled.div`
   display: flex;
   align-items: center;
+  padding-right: 32px;
 `;
 
 const AlertIconDiv = styled.div`
@@ -713,10 +716,11 @@ const AlertIconDiv = styled.div`
 
   border-radius: 50%;
 
-  background: #eff2f5;
+  background: #fefadc;
   cursor: pointer;
+  user-select: none;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3eec8;
   }
 `;
 
@@ -731,13 +735,14 @@ const AlertWrapper = styled.div<{ $alertActive: boolean }>`
   display: ${(props) => (props.$alertActive ? "flex" : "none")};
   position: absolute;
   top: 50px;
-  right: 16px;
-  z-index: 2;
+  right: 32px;
+  z-index: 12;
   width: 360px;
   flex-direction: column;
   align-items: center;
 
-  background: white;
+  background: #f6d4ba;
+  color: #3f612d;
   padding: 8px 0px;
   border-radius: 6px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
@@ -752,9 +757,6 @@ const AlertDiv = styled.div`
   padding: 0px 8px;
   border-radius: 6px;
   justify-content: space-between;
-  :hover {
-    background: rgba(200, 200, 200, 0.4);
-  }
 `;
 
 const AlertAvatar = styled.img`
@@ -762,7 +764,7 @@ const AlertAvatar = styled.img`
   height: 38px;
   margin-right: 8px;
 
-  border: 2px solid white;
+  border: 2px solid #fefadc;
   border-radius: 50%;
 `;
 
@@ -791,10 +793,10 @@ const AlertConfirm = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #eff2f5;
+  background: #fefadc;
   cursor: pointer;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3eec8;
   }
 `;
 const AlertCancel = styled.div`
@@ -805,17 +807,17 @@ const AlertCancel = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #eff2f5;
+  background: #fefadc;
   cursor: pointer;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3eec8;
   }
 `;
 
 const Avatar = styled.img`
   width: 38px;
   height: 38px;
-  margin-right: 16px;
+
   background: #ffffff;
   border-radius: 50%;
   user-select: none;
@@ -823,14 +825,17 @@ const Avatar = styled.img`
 
 const AvatarArrowIconDiv = styled.div`
   position: absolute;
-  right: 16px;
+  right: 28px;
   top: 30px;
   width: 16px;
   height: 16px;
-  background: #eff2f5;
-  border: 1px solid white;
+  background: #fefadc;
+  border: 1px solid #f3eec8;
   border-radius: 50%;
   user-select: none;
+  :hover {
+    background: #f3eec8;
+  }
 `;
 
 const AvatarArrowIcon = styled.img`
@@ -842,15 +847,16 @@ const AvatarArrowIcon = styled.img`
 
 const UserWrapper = styled.div<{ $active: boolean }>`
   display: ${(props) => (props.$active ? "flex" : "none")};
-  position: absolute;
+  position: fixed;
   top: 50px;
   right: 16px;
-  z-index: 2;
+  z-index: 12;
   width: 360px;
   flex-direction: column;
   align-items: center;
 
-  background: white;
+  background: #f6d4ba;
+  color: #3f612d;
   padding: 8px 0px;
   border-radius: 6px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
@@ -886,7 +892,7 @@ const FriendIconDiv = styled.div`
   width: 38px;
   height: 38px;
   margin-right: 8px;
-  background: #e4e6eb;
+  background: #f3b391;
 
   border-radius: 50%;
 `;
@@ -903,7 +909,7 @@ const AccountIconDiv = styled.div`
   width: 38px;
   height: 38px;
   margin-right: 8px;
-  background: #e4e6eb;
+  background: #f3b391;
 
   border-radius: 50%;
 `;
@@ -920,7 +926,7 @@ const ThemeIconDiv = styled.div`
   width: 38px;
   height: 38px;
   margin-right: 8px;
-  background: #e4e6eb;
+  background: #f3b391;
 
   border-radius: 50%;
 `;
@@ -937,7 +943,7 @@ const LogoutIconDiv = styled.div`
   width: 38px;
   height: 38px;
   margin-right: 8px;
-  background: #e4e6eb;
+  background: #f3b391;
 
   border-radius: 50%;
 `;

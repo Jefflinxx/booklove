@@ -77,6 +77,7 @@ const GlobalStyle = createGlobalStyle`
     margin:0;
     font-family: 'Noto Sans TC', sans-serif;
     font-family: 'Poppins', sans-serif;
+    user-select:none;
   }
   input{
     background:none;  	

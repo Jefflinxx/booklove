@@ -243,14 +243,14 @@ const WholeWrapper = styled.div`
 `;
 
 const CenterWrapper = styled.div`
-  width: 1250px;
+  width: 1080px;
   border-radius: 6px;
   background: #fefadc;
 `;
 
 const BgWrapper = styled.div`
   position: relative;
-  height: 460px;
+  height: 400px;
   border-radius: 6px 6px 0px 0px;
   overflow: hidden;
 `;
@@ -296,7 +296,7 @@ const ConfirmBtn = styled.div<{ confirmActive: boolean }>`
   width: 68px;
   height: 30px;
   border-radius: 6px;
-  background: white;
+  background: #fefadc;
   font-size: 15px;
 
   align-items: center;
@@ -327,18 +327,18 @@ const BackgroundImgInput = styled.input`
 const Background = styled.img`
   width: 100%;
   height: 100%;
-  background: #eff2f5;
+  background: #fefadc;
   object-fit: cover;
 `;
 
 const BackgroundSKT = styled.div`
   width: 100%;
   height: 100%;
-  background: #eff2f5;
+  background: #fefadc;
 `;
 
 const InfoDiv = styled.div`
-  height: 190px;
+  height: 160px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -350,8 +350,8 @@ const InfoLeft = styled.div`
 `;
 
 const Avatar = styled.img`
-  width: 240px;
-  height: 240px;
+  width: 210px;
+  height: 210px;
   margin-right: 16px;
 
   border: 6px solid #fefadc;
@@ -360,8 +360,8 @@ const Avatar = styled.img`
   background: #fefadc;
 
   position: absolute;
-  top: -160px;
-  left: 40px;
+  top: -144px;
+  left: 48px;
   user-select: none;
 `;
 
@@ -371,7 +371,7 @@ const Username = styled.p`
   font-size: 36px;
   position: absolute;
   top: -60px;
-  left: 310px;
+  left: 286px;
   user-select: none;
   color: #3f612d;
 `;
@@ -382,7 +382,7 @@ const LibraryCount = styled.p`
   font-size: 28px;
   position: absolute;
   top: -10px;
-  left: 310px;
+  left: 290px;
   user-select: none;
   color: #3f612d;
 `;
@@ -393,18 +393,23 @@ const InfoRight = styled.div`
 `;
 
 const InfoRightP = styled.p<{ localPath: string; $uid: string }>`
-  width: 106px;
-  height: 36px;
+  width: 120px;
+  height: 40px;
   font-size: 16px;
 
   align-items: center;
   justify-content: center;
   margin-right: 30px;
   padding: 4px 20px;
-  background: #eff2f5;
+  background: #f6d4ba;
   border-radius: 6px;
   user-select: none;
+  color: #3f612d;
+  font-size: 20px;
   cursor: pointer;
+  :hover {
+    background: #e9c5a9;
+  }
   display: ${(props) => {
     if (props.localPath === props.$uid || props.localPath === "") return "none";
     else return "flex";

@@ -111,7 +111,7 @@ const Wrapper = styled.div<{
   width: 360px;
   height: 450px;
 
-  background: white;
+  background: #f6d4ba;
   flex-direction: column;
 
   padding-bottom: 8px;
@@ -131,7 +131,7 @@ const BackIconDiv = styled.div`
   position: relative;
   border-radius: 50%;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3b391;
   }
 `;
 
@@ -165,7 +165,7 @@ const Loading = styled.div`
   left: 0px;
   width: 100%;
   height: 100%;
-  background: white;
+  background: #f6d4ba;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,7 +180,7 @@ const FriendDiv = styled.div`
   border-radius: 6px;
 
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3b391;
   }
 `;
 
@@ -189,7 +189,7 @@ const FriendAvatar = styled.img`
   height: 38px;
   margin-right: 16px;
   background: #eff2f5;
-  border: 2px solid white;
+  border: 2px solid #fefadc;
   border-radius: 50%;
 `;
 const FriendName = styled.p``;

@@ -9,9 +9,10 @@ export default Footer;
 const FooterP = styled.p`
   font-size: 10px;
 
-  margin-left: 15px;
-  margin-top: 4px;
-  margin-bottom: 4px;
-  color: gray;
+  padding-left: 15px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  color: #1f2e16;
   letter-spacing: 1px;
+  background: #f6d4ba;
 `;

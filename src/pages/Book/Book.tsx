@@ -136,7 +136,7 @@ function Book() {
           </TopSection>
 
           <BottomSection>
-            <SectionBItem>
+            <ProgressSectionBItem>
               <ProgressP>進度</ProgressP>
               <ProgressWrapper>
                 {progressRows.map((i) => (
@@ -193,7 +193,7 @@ function Book() {
               ) : (
                 <ProgressTip>編輯/點擊輸入章節</ProgressTip>
               )}
-            </SectionBItem>
+            </ProgressSectionBItem>
             <SectionBItem>
               <PlaceP>地點</PlaceP>
               <Place>{currentBook.place}</Place>
@@ -220,26 +220,27 @@ const WholeWrapper = styled.div`
 
   background: #eff2f5;
   width: 100%;
+  background: #f6d4ba;
 `;
 
 const WholeCenterWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #e4e6eb;
+
   flex-direction: column;
   width: 902px;
-  background: #ffffff;
+
   border-radius: 6px;
   margin: 120px 0px;
 `;
 
 const TopIconDivWrapper = styled.div`
-  width: 902px;
+  width: 1080px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 32px;
+
   padding: 8px;
 `;
 
@@ -277,63 +278,73 @@ const EditIcon = styled.img`
 
 const TopSection = styled.div`
   display: flex;
-  width: 720px;
+  width: 900px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  margin-bottom: 60px;
 `;
 
 const BookImg = styled.img`
-  width: 180px;
-  height: 250px;
+  width: 260px;
+  height: 320px;
 
-  margin: 32px;
+  margin-right: 80px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
 `;
 
-const TopRightSection = styled.div``;
+const TopRightSection = styled.div`
+  border-left: 3px solid #3f612d;
+  height: auto;
+`;
 
 const SectionItem = styled.div`
   display: flex;
 
-  margin: 24px 0px;
-  width: 440px;
+  font-size: 24px;
+  margin-left: 32px;
+
+  color: #3f612d;
+  min-height: 64px;
 `;
 
 const SectionBItem = styled.div`
   display: flex;
-  align-items: center;
 
-  margin: 24px 0px 24px 54px;
+  font-size: 24px;
+  margin-left: 32px;
+
+  color: #3f612d;
+  min-height: 64px;
+`;
+
+const ProgressSectionBItem = styled(SectionBItem)`
+  justify-content: space-between;
 `;
 
 const BooknameP = styled.div`
-  width: 90px;
-  color: gray;
+  width: 120px;
 `;
-const Bookname = styled.div``;
+const Bookname = styled.div`
+  width: 400px;
+`;
 
 const CategoryP = styled.div`
-  width: 90px;
-  color: gray;
+  width: 120px;
 `;
 const Category = styled.div``;
 
 const LikeP = styled.div`
-  width: 90px;
-  color: gray;
+  width: 120px;
 `;
 const Like = styled.div``;
 
 const ProgressP = styled.div`
-  width: 90px;
-  color: gray;
+  width: 120px;
 `;
 const ProgressPercent = styled.div`
   display: flex;
   width: 90px;
-  color: gray;
-  align-items: center;
+
   justify-content: center;
 `;
 
@@ -341,46 +352,47 @@ const ProgressWrapper = styled.div`
   width: 400px;
   display: flex;
   border-radius: 6px;
-
   overflow: hidden;
 `;
-const ProgressTip = styled.p`
-  margin-left: 8px;
-  color: gray;
-`;
+const ProgressTip = styled.p``;
 const Progress = styled.div<{ progressArray: number[]; $i: number }>`
   width: 40px;
   height: 32px;
+  margin: 0px 1px;
   border-radius: 6px;
-  border: 1px solid white;
+  border: 1px solid #3f612d;
   transition: background 2s;
   background: ${(props) =>
-    props.progressArray.find((j) => j === props.$i) ? "#1A77F2" : "#eff2f5"};
+    props.progressArray.find((j) => j === props.$i) ? "#f3b391" : "#fefadc "};
 `;
 
 const PlaceP = styled.div`
-  width: 90px;
-  color: gray;
+  width: 120px;
 `;
 const Place = styled.div``;
 
 const LendToP = styled.div`
-  width: 90px;
-  color: gray;
+  width: 120px;
 `;
 const LendTo = styled.div``;
 
 const SummaryP = styled.div`
-  width: 90px;
-  color: gray;
-  margin: 24px 0px 12px 54px;
+  width: 120px;
+
+  font-size: 24px;
+  margin-left: 32px;
+
+  color: #3f612d;
+  min-height: 64px;
 `;
 const Summary = styled.div`
-  margin: 0px 54px 24px 54px;
+  margin: 0px 54px 0px 54px;
+
+  color: #3f612d;
 `;
 
 const BottomSection = styled.div`
-  width: 720px;
-
+  width: 900px;
+  border-left: 3px solid #3f612d;
   margin-bottom: 54px;
 `;

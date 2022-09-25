@@ -175,7 +175,7 @@ const Wrapper = styled.div<{ $active: boolean }>`
   width: 360px;
   height: 450px;
 
-  background: white;
+  background: #f6d4ba;
   flex-direction: column;
 
   padding-bottom: 8px;
@@ -195,7 +195,7 @@ const BackIconDiv = styled.div`
   position: relative;
   border-radius: 50%;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3b391;
   }
 `;
 
@@ -266,7 +266,7 @@ const UploadImgBtn = styled.div`
   cursor: pointer;
   z-index: 2;
   border: 1px solid black;
-  color: white;
+  color: #fefadc;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -295,7 +295,7 @@ const UsernameInput = styled.input<{ $isEdit: boolean }>`
   width: 130px;
   height: 38px;
   font-size: 20px;
-  border-bottom: 1px solid gray;
+  border-bottom: 1px solid #3f612d;
   color: gray;
   text-align: center;
 `;
@@ -308,7 +308,7 @@ const EditIconDiv = styled.div`
 
   border-radius: 50%;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3b391;
   }
 `;
 const EditIcon = styled.img`
@@ -328,8 +328,9 @@ const ConfirmBtn = styled.div<{ $imageFile: File | null; $isEdit: boolean }>`
   align-items: center;
   border-radius: 6px;
   margin-bottom: 16px;
+  background: #fefadc;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3eec8;
   }
 `;
 

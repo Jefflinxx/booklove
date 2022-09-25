@@ -32,7 +32,7 @@ function Edit() {
   const [likeActive, setLikeActive] = useState<boolean>(false);
   const [publicActive, setPublicActive] = useState<boolean>(true);
   const [isLendToActive, setIsLendToActive] = useState<boolean>(false);
-  const [summaryData, setSummaryData] = useState("");
+  const [summaryData, setSummaryData] = useState<string | null>(null);
 
   const uploadImage = async () => {
     if (imageFile === null) return;
@@ -56,9 +56,11 @@ function Edit() {
             }
             if (i.summary) {
               setSummaryData(i.summary);
+            } else {
+              setSummaryData("");
             }
             setPublicActive(i.isPublic);
-            setIsLendToActive(i.isLendTo);
+            setIsLendToActive(i.isLendTo || false);
           }
         });
       });
@@ -157,6 +159,8 @@ function Edit() {
                     bookInfoAddSubmitData = { ...i, ...submitData };
                   }
                 });
+                //firebase說資料不對就開這個
+                //console.log(bookInfoAddSubmitData);
 
                 dispatch({
                   type: actionType.BOOK.SETBOOKDATA,
@@ -253,6 +257,7 @@ function Edit() {
                 </SectionItem>
 
                 <SectionItem>
+                  <Like>愛心</Like>
                   <LikeDiv
                     likeActive={likeActive}
                     onClick={() => {
@@ -264,12 +269,11 @@ function Edit() {
                       //   { ...currentBook, like: !likeActive },
                       // ]);
                     }}
-                  >
-                    <Like>愛心</Like>
-                  </LikeDiv>
+                  ></LikeDiv>
                 </SectionItem>
 
                 <SectionItem>
+                  <Public>是否公開</Public>
                   <PublicDiv
                     publicActive={publicActive}
                     onClick={() => {
@@ -281,9 +285,7 @@ function Edit() {
                       //   { ...currentBook, like: !publicActive },
                       // ]);
                     }}
-                  >
-                    <Public>是公開</Public>
-                  </PublicDiv>
+                  ></PublicDiv>
                 </SectionItem>
               </TopRightSection>
             </TopSection>
@@ -341,8 +343,10 @@ function Edit() {
                 ></LendTo>
               </LendToWrapper>
               <SummaryP>書摘</SummaryP>
-              {summaryData && (
+              {summaryData || summaryData === "" ? (
                 <Tiptap data={summaryData} setData={setSummaryData}></Tiptap>
+              ) : (
+                <></>
               )}
 
               {/* <Summary
@@ -367,7 +371,7 @@ const WholeWrapper = styled.div`
   align-items: center;
   justify-content: center;
 
-  background: #eff2f5;
+  background: #f6d4ba;
   width: 100%;
 `;
 
@@ -375,20 +379,19 @@ const WholeCenterWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #e4e6eb;
+
   flex-direction: column;
-  width: 902px;
-  background: #ffffff;
+  width: auto;
+
   border-radius: 6px;
   margin: 120px 0px;
 `;
 
 const DeleteIconDivWrapper = styled.div`
-  width: 902px;
+  width: 1080px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 32px;
   padding: 8px;
 `;
 
@@ -425,19 +428,18 @@ const DeleteIcon = styled.img`
 `;
 
 const TopSection = styled.div`
-  border: 1px solid black;
   display: flex;
-  width: 720px;
+  width: 900px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  margin-bottom: 60px;
 `;
 
 const BookImgLabel = styled.label`
   position: relative;
-  width: 180px;
-  height: 250px;
-  margin: 32px;
+  width: 260px;
+  height: 320px;
+  margin-right: 80px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
 `;
 
@@ -484,34 +486,47 @@ const UploadImgBtn = styled.div`
   justify-content: center;
 `;
 
-const TopRightSection = styled.div``;
+const TopRightSection = styled.div`
+  border-left: 3px solid #3f612d;
+  height: auto;
+`;
 
 const SectionItem = styled.div`
   display: flex;
-  border: 1px solid black;
-  margin: 12px 0px;
-  width: 440px;
+
+  font-size: 24px;
+  margin-left: 32px;
+
+  color: #3f612d;
+  min-height: 64px;
 `;
 
 const SectionBItem = styled.div`
   display: flex;
-  border: 1px solid black;
-  margin: 24px 0px 24px 54px;
+
+  font-size: 24px;
+  margin-left: 32px;
+
+  color: #3f612d;
+  min-height: 64px;
 `;
 
 const BooknameP = styled.div`
-  width: 90px;
-  color: gray;
+  width: 120px;
 `;
 const Bookname = styled.input`
-  width: auto;
-  height: auto;
-  border: 1px solid black;
+  color: #3f612d;
+  font-size: 24px;
+  height: 36px;
+  width: 360px;
+  text-indent: 8px;
+  background: #fefadc;
+  border-radius: 6px;
+  border: 1px solid #3f612d;
 `;
 
 const CategoryP = styled.div`
-  width: 90px;
-  color: gray;
+  width: 120px;
 `;
 const CategoryWrapper = styled.div`
   display: flex;
@@ -521,38 +536,48 @@ const CategoryDiv = styled.div<{ categoryArray: string[]; $i: string }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: auto;
-  border: 1px solid black;
+  padding: 0px 8px;
+  height: 36px;
+  border: 1px solid #3f612d;
+  border-radius: 6px;
   background: ${(props) =>
-    props.categoryArray.find((j) => j === props.$i) ? "blue" : "white"};
+    props.categoryArray.find((j) => j === props.$i) ? "#f3b391" : "#fefadc"};
 `;
 
 const LikeDiv = styled.div<{ likeActive: boolean }>`
-  background: ${(props) => (props.likeActive ? "blue" : "white")};
+  width: 36px;
+  height: 36px;
+  border: 1px solid #3f612d;
+  border-radius: 6px;
+  background: ${(props) => (props.likeActive ? "#f3b391" : "#fefadc")};
 `;
 const Like = styled.div`
-  width: 160px;
-  height: 40px;
-  border: 1px solid black;
+  width: 120px;
 `;
 
 const PublicDiv = styled.div<{ publicActive: boolean }>`
-  background: ${(props) => (props.publicActive ? "blue" : "white")};
+  width: 36px;
+  height: 36px;
+  border: 1px solid #3f612d;
+  border-radius: 6px;
+  background: ${(props) => (props.publicActive ? "#f3b391" : "#fefadc")};
 `;
 const Public = styled.div`
-  width: 160px;
-  height: 40px;
-  border: 1px solid black;
+  width: 120px;
 `;
 
 const ProgressP = styled.div`
-  width: 90px;
-  color: gray;
+  width: 120px;
 `;
 const Progress = styled.input`
-  width: 160px;
-
-  border: 1px solid black;
+  color: #3f612d;
+  font-size: 24px;
+  height: 36px;
+  width: 360px;
+  text-indent: 8px;
+  background: #fefadc;
+  border-radius: 6px;
+  border: 1px solid #3f612d;
 `;
 
 const ProgressWarn = styled.div<{ progressWarn: boolean }>`
@@ -560,65 +585,88 @@ const ProgressWarn = styled.div<{ progressWarn: boolean }>`
 `;
 
 const PlaceP = styled.div`
-  width: 90px;
-  color: gray;
+  width: 120px;
 `;
 const Place = styled.input`
-  width: 160px;
-
-  border: 1px solid black;
+  color: #3f612d;
+  font-size: 24px;
+  height: 36px;
+  width: 360px;
+  text-indent: 8px;
+  background: #fefadc;
+  border-radius: 6px;
+  border: 1px solid #3f612d;
 `;
 
 const IsLendToP = styled.div`
-  width: 90px;
-  color: gray;
+  width: 120px;
 `;
 
 const IsLendTo = styled.div<{ isLendToActive: boolean }>`
-  width: 24px;
-  border: 1px solid black;
-  background: ${(props) => (props.isLendToActive ? "blue" : "white")};
+  width: 36px;
+  height: 36px;
+  border: 1px solid #3f612d;
+  border-radius: 6px;
+  background: ${(props) => (props.isLendToActive ? "#f3b391 " : "#fefadc ")};
 `;
 
 const LendToWrapper = styled.div<{ isLendToActive: boolean }>`
   display: ${(props) => (props.isLendToActive ? "flex" : "none")};
-  border: 1px solid black;
-  margin: 24px 0px 24px 54px;
+  font-size: 24px;
+  margin-left: 32px;
+
+  color: #3f612d;
+  min-height: 64px;
 `;
 
 const LendToP = styled.div`
-  width: 90px;
-  color: gray;
+  width: 120px;
 `;
 const LendTo = styled.input`
-  width: 160px;
-  border: 1px solid black;
+  font-size: 24px;
+  height: 36px;
+  width: 360px;
+  text-indent: 8px;
+  background: #fefadc;
+  border-radius: 6px;
+  border: 1px solid #3f612d;
 `;
 
 const SummaryP = styled.div`
-  width: 90px;
-  color: gray;
-  margin: 24px 0px 12px 54px;
+  font-size: 24px;
+  color: #3f612d;
+  width: 120px;
+  margin: 0px 0px 12px 32px;
 `;
 const Summary = styled.textarea`
   width: 612px;
   height: 200px;
   border: 1px solid black;
-  margin: 0px 0px 24px 54px;
+  margin: 0px 0px 24px 32px;
 `;
 
 const BottomSection = styled.div`
-  width: 720px;
-  border: 1px solid black;
-`;
-
-const ModifyButtonDiv = styled.div`
-  border: 1px solid black;
+  width: 900px;
+  border-left: 3px solid #3f612d;
   margin-bottom: 54px;
 `;
+
+const ModifyButtonDiv = styled.div``;
 const ModifyButton = styled.button`
   border: none;
   background-color: transparent;
   display: flex;
-  border: 1px solid black;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  width: 120px;
+  font-size: 24px;
+  color: #3f612d;
+
+  background: #fefadc;
+  border-radius: 6px;
+  border: 1px solid #3f612d;
+  :hover {
+    background: #f3b391;
+  }
 `;
