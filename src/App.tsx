@@ -77,11 +77,16 @@ const GlobalStyle = createGlobalStyle`
     margin:0;
     font-family: 'Noto Sans TC', sans-serif;
     font-family: 'Poppins', sans-serif;
+   
     user-select:none;
+   
   }
   input{
     background:none;  	
     outline:none;  	
     border:none;
+}
+body{
+  background:#f6d4ba;
 }
 `;

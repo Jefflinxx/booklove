@@ -203,14 +203,18 @@ const TitleWrapper = styled.div`
   flex-direction: column;
 `;
 const Title = styled.p`
-  font-size: 70px;
-  font-weight: 600;
+  font-size: 60px;
+  font-weight: 500;
+  line-height: 100px;
   color: #3f612d;
+  font-family: "Inknut Antiqua", serif;
 `;
 const SubTitle = styled.p`
   width: 500px;
   height: 84px;
+  font-weight: 300;
   font-size: 28px;
+  letter-spacing: 4px;
 `;
 const LW = styled.div`
   z-index: 17;

@@ -250,7 +250,7 @@ const BackIconDiv = styled.div`
   height: 38px;
   border-radius: 50%;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3b391;
   }
 `;
 const BackIcon = styled.img`
@@ -258,6 +258,7 @@ const BackIcon = styled.img`
   top: 8px;
   left: 10px;
   width: 14px;
+  fill: #f3b391;
 `;
 
 const EditIconDiv = styled.div`
@@ -266,7 +267,7 @@ const EditIconDiv = styled.div`
   height: 38px;
   border-radius: 50%;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3b391;
   }
 `;
 const EditIcon = styled.img`
@@ -326,17 +327,22 @@ const BooknameP = styled.div`
 `;
 const Bookname = styled.div`
   width: 400px;
+  color: #1f2e16;
 `;
 
 const CategoryP = styled.div`
   width: 120px;
 `;
-const Category = styled.div``;
+const Category = styled.div`
+  color: #1f2e16;
+`;
 
 const LikeP = styled.div`
   width: 120px;
 `;
-const Like = styled.div``;
+const Like = styled.div`
+  color: #1f2e16;
+`;
 
 const ProgressP = styled.div`
   width: 120px;
@@ -344,7 +350,7 @@ const ProgressP = styled.div`
 const ProgressPercent = styled.div`
   display: flex;
   width: 90px;
-
+  color: #1f2e16;
   justify-content: center;
 `;
 
@@ -369,12 +375,16 @@ const Progress = styled.div<{ progressArray: number[]; $i: number }>`
 const PlaceP = styled.div`
   width: 120px;
 `;
-const Place = styled.div``;
+const Place = styled.div`
+  color: #1f2e16;
+`;
 
 const LendToP = styled.div`
   width: 120px;
 `;
-const LendTo = styled.div``;
+const LendTo = styled.div`
+  color: #1f2e16;
+`;
 
 const SummaryP = styled.div`
   width: 120px;
@@ -383,12 +393,11 @@ const SummaryP = styled.div`
   margin-left: 32px;
 
   color: #3f612d;
-  min-height: 64px;
+  min-height: 52px;
 `;
 const Summary = styled.div`
-  margin: 0px 54px 0px 54px;
-
-  color: #3f612d;
+  margin: 0px 54px 0px 32px;
+  color: #1f2e16;
 `;
 
 const BottomSection = styled.div`

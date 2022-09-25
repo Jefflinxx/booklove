@@ -602,6 +602,7 @@ const LeftDiv = styled.div`
 
 const Logo = styled.p`
   font-size: 28px;
+  font-family: "Inknut Antiqua", serif;
   font-weight: 600;
   color: #3f612d;
   cursor: pointer;
@@ -644,8 +645,13 @@ const SearchInput = styled.input<{ isInputActive: boolean }>`
   background: #fefadc;
   color: #3f612d;
   width: ${(props) => (props.isInputActive ? "320px" : "0px")};
-  height: ${(props) => (props.isInputActive ? "40px" : "0px")};
-  display: ${(props) => (props.isInputActive ? "block" : "none")};
+  height: ${(props) => (props.isInputActive ? "40px" : "40px")};
+  opacity: ${(props) => (props.isInputActive ? "1" : "0")};
+  transition: all 1s;
+  ::placeholder {
+    font-family: "Inknut Antiqua", serif;
+    color: #3f612d88;
+  }
 `;
 
 const SearchResultWrapper = styled.div<{ searchResultActive: boolean }>`
@@ -878,7 +884,7 @@ const UserDiv = styled.div`
   border-radius: 6px;
   justify-content: space-between;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3b391;
   }
 `;
 
@@ -891,7 +897,7 @@ const FriendIconDiv = styled.div`
   position: relative;
   width: 38px;
   height: 38px;
-  margin-right: 8px;
+  margin-right: 16px;
   background: #f3b391;
 
   border-radius: 50%;
@@ -908,7 +914,7 @@ const AccountIconDiv = styled.div`
   position: relative;
   width: 38px;
   height: 38px;
-  margin-right: 8px;
+  margin-right: 16px;
   background: #f3b391;
 
   border-radius: 50%;
@@ -942,7 +948,7 @@ const LogoutIconDiv = styled.div`
   position: relative;
   width: 38px;
   height: 38px;
-  margin-right: 8px;
+  margin-right: 16px;
   background: #f3b391;
 
   border-radius: 50%;

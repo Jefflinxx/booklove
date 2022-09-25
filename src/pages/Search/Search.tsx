@@ -207,7 +207,7 @@ function Search() {
             <SearchIcon src={search} />
             <Input
               ref={friendSearchRef}
-              placeholder="Search books,add to bookshelf"
+              placeholder="Search books, add to bookshelf"
               onKeyPress={(e) => {
                 if (e.key === "Enter") {
                   //fetchEsliteBooksData(input);
@@ -352,8 +352,9 @@ const BackIconDiv = styled.div`
   width: 38px;
   height: 38px;
   border-radius: 50%;
+  cursor: pointer;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3b391;
   }
 `;
 const BackIcon = styled.img`
@@ -378,6 +379,7 @@ const SearchIconDiv = styled.div<{ $active: boolean }>`
   align-items: center;
   justify-content: center;
   margin-bottom: 50px;
+  border: 1px solid black;
 `;
 
 const SearchIcon = styled.img`
@@ -390,19 +392,20 @@ const SearchIcon = styled.img`
 const Input = styled.input`
   width: 500px;
   height: 56px;
-  text-indent: 56px;
+  text-indent: 48px;
   border-bottom: 3px solid #f3b391;
 
   font-size: 24px;
   ::placeholder {
-    color: #3f612d;
+    font-family: "Inknut Antiqua", serif;
+    color: #3f612d88;
   }
 `;
 
 const SearchCount = styled.div`
   width: 1080px;
   color: #3f612d;
-
+  letter-spacing: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -514,7 +517,7 @@ font-size:16px;
   }};
   color:${(props) => (props.$a ? "gray" : "#3f612d")};
   background: ${(props) => (props.$a ? "" : "")};
-  cursor: ${(props) => (props.$a ? "not-allowed" : "point")};
+  cursor: ${(props) => (props.$a ? "not-allowed" : "pointer")};
   :hover {
     background: ${(props) => (props.$a ? "" : "#fefadc")};
   }
@@ -536,7 +539,7 @@ const AddToWishList = styled.div<{ $b: string | undefined }>`
   display: flex;
   color: ${(props) => (props.$b ? "#b4b7bc" : "#3f612d")};
   background: ${(props) => (props.$b ? "" : "")};
-  cursor: ${(props) => (props.$b ? "not-allowed" : "point")};
+  cursor: ${(props) => (props.$b ? "not-allowed" : "pointer")};
   :hover {
     background: ${(props) => (props.$b ? "" : "#fefadc")};
   }
