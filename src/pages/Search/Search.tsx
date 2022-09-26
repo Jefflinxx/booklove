@@ -588,7 +588,7 @@ font-size:16px;
 `;
 
 const SplitBtn = styled.div`
-  border: 1px solid #3f612d;
+  border-left: 2px solid #3f612d;
   height: 24px;
 `;
 

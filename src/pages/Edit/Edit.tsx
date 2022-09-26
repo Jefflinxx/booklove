@@ -312,7 +312,7 @@ function Edit() {
                 </ProgressWarn>
               </SectionBItem>
               <SectionBItem>
-                <PlaceP>地點</PlaceP>
+                <PlaceP>放置位置</PlaceP>
                 <Place
                   defaultValue={currentBook?.place}
                   {...register("place")}
@@ -400,8 +400,9 @@ const BackIconDiv = styled.div`
   width: 38px;
   height: 38px;
   border-radius: 50%;
+  cursor: pointer;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3b391;
   }
 `;
 const BackIcon = styled.img`
@@ -416,8 +417,9 @@ const DeleteIconDiv = styled.div`
   width: 38px;
   height: 38px;
   border-radius: 50%;
+  cursor: pointer;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3b391;
   }
 `;
 const DeleteIcon = styled.img`
@@ -537,6 +539,7 @@ const CategoryDiv = styled.div<{ categoryArray: string[]; $i: string }>`
   align-items: center;
   justify-content: center;
   padding: 0px 8px;
+  margin-right: 8px;
   height: 36px;
   border: 1px solid #3f612d;
   border-radius: 6px;
@@ -662,7 +665,7 @@ const ModifyButton = styled.button`
   width: 120px;
   font-size: 24px;
   color: #3f612d;
-
+  cursor: pointer;
   background: #fefadc;
   border-radius: 6px;
   border: 1px solid #3f612d;

@@ -172,7 +172,7 @@ const PicWrapper = styled.div`
   right: 0px;
   width: 500px;
   height: 100vh;
-  background: green;
+  background: #f6d4ba;
 `;
 const Pic = styled.img`
   width: 500px;

@@ -194,6 +194,7 @@ const BackIconDiv = styled.div`
   height: 38px;
   position: relative;
   border-radius: 50%;
+  cursor: pointer;
   :hover {
     background: #f3b391;
   }
@@ -287,7 +288,28 @@ const Username = styled.p<{ $isEdit: boolean }>`
   display: ${(props) => (props.$isEdit ? "none" : "block")};
   font-size: 20px;
   font-weight: 500;
-  overflow: overlay;
+  overflow-x: overlay;
+  background: #f6d4ba;
+
+  // &::-webkit-scrollbar {
+  //   width: 4px;
+  // }
+  // &::-webkit-scrollbar-button {
+  //   display: none;
+  //   /* background: transparent;
+  // border-radius: 8px; */
+  // }
+  // &::-webkit-scrollbar-track-piece {
+  //   background: transparent;
+  // }
+  // &::-webkit-scrollbar-thumb {
+  //   border-radius: 8px;
+  //   background-color: rgba(0, 0, 0, 0.4);
+  //   border: 1px solid slategrey;
+  // }
+  // &::-webkit-scrollbar-track {
+  //   box-shadow: transparent;
+  // }
 `;
 
 const UsernameInput = styled.input<{ $isEdit: boolean }>`
@@ -305,7 +327,7 @@ const EditIconDiv = styled.div`
   position: absolute;
   bottom: 0px;
   right: -38px;
-
+  cursor: pointer;
   border-radius: 50%;
   :hover {
     background: #f3b391;

@@ -125,7 +125,10 @@ function Book() {
               })}
               <SectionItem>
                 <CategoryP>分類</CategoryP>
-                <Category>{currentBook.category}</Category>
+                {currentBook?.category?.map((i) => {
+                  return <Category>{i}</Category>;
+                })}
+                {/* <Category>{currentBook.category}</Category> */}
               </SectionItem>
 
               <SectionItem>
@@ -195,7 +198,7 @@ function Book() {
               )}
             </ProgressSectionBItem>
             <SectionBItem>
-              <PlaceP>地點</PlaceP>
+              <PlaceP>放置位置</PlaceP>
               <Place>{currentBook.place}</Place>
             </SectionBItem>
             <SectionBItem>
@@ -249,6 +252,7 @@ const BackIconDiv = styled.div`
   width: 38px;
   height: 38px;
   border-radius: 50%;
+  cursor: pointer;
   :hover {
     background: #f3b391;
   }
@@ -266,6 +270,7 @@ const EditIconDiv = styled.div`
   width: 38px;
   height: 38px;
   border-radius: 50%;
+  cursor: pointer;
   :hover {
     background: #f3b391;
   }
@@ -334,6 +339,8 @@ const CategoryP = styled.div`
   width: 120px;
 `;
 const Category = styled.div`
+  margin-right: 8px;
+
   color: #1f2e16;
 `;
 
@@ -367,7 +374,11 @@ const Progress = styled.div<{ progressArray: number[]; $i: number }>`
   margin: 0px 1px;
   border-radius: 6px;
   border: 1px solid #3f612d;
-  transition: background 2s;
+  transition: background 1s;
+  :hover {
+    background: #f3b391;
+  }
+  cursor: pointer;
   background: ${(props) =>
     props.progressArray.find((j) => j === props.$i) ? "#f3b391" : "#fefadc "};
 `;

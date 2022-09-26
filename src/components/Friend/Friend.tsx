@@ -130,6 +130,7 @@ const BackIconDiv = styled.div`
   height: 38px;
   position: relative;
   border-radius: 50%;
+  cursor: pointer;
   :hover {
     background: #f3b391;
   }
@@ -178,7 +179,7 @@ const FriendDiv = styled.div`
   align-items: center;
   padding: 0px 8px;
   border-radius: 6px;
-
+  cursor: pointer;
   :hover {
     background: #f3b391;
   }

@@ -258,25 +258,24 @@ function Home() {
                     updateNotification(nAlendFrom.id, [notification]);
                   }
                 });
-              }
-
-              //把歸還通知放入自己的資料庫
-              //之後對方按取消或確認再幫對方刪掉
-              if (giveBackAlert) {
-                updateGiveBackAlert(user.uid, [
-                  ...giveBackAlert,
-                  notification.isbn,
-                ]);
-                dispatch({
-                  type: actionType.GIVEBACK.SETGIVEBACK,
-                  value: [...giveBackAlert, notification.isbn],
-                });
-              } else {
-                updateGiveBackAlert(user.uid, [notification.isbn]);
-                dispatch({
-                  type: actionType.GIVEBACK.SETGIVEBACK,
-                  value: [notification.isbn],
-                });
+                //把歸還通知放入自己的資料庫
+                //之後對方按取消或確認再幫對方刪掉
+                if (giveBackAlert) {
+                  updateGiveBackAlert(user.uid, [
+                    ...giveBackAlert,
+                    notification.isbn,
+                  ]);
+                  dispatch({
+                    type: actionType.GIVEBACK.SETGIVEBACK,
+                    value: [...giveBackAlert, notification.isbn],
+                  });
+                } else {
+                  updateGiveBackAlert(user.uid, [notification.isbn]);
+                  dispatch({
+                    type: actionType.GIVEBACK.SETGIVEBACK,
+                    value: [notification.isbn],
+                  });
+                }
               }
 
               setBarrierBGActive(false);
@@ -317,6 +316,7 @@ function Home() {
               {library.length || user?.wishList?.length ? (
                 <TopTagWrapper>
                   <CategoryAll
+                    $active={categoryAllActive}
                     onClick={async () => {
                       setLoading(true);
 
@@ -357,6 +357,7 @@ function Home() {
                   </CategoryAll>
                   <Split />
                   <FinishRead
+                    $active={categoryReadActive}
                     onClick={async () => {
                       setLoading(true);
 
@@ -404,6 +405,7 @@ function Home() {
                   </FinishRead>
                   <Split />
                   <LendToOther
+                    $active={categoryLendActive}
                     onClick={async () => {
                       setLoading(true);
 
@@ -452,6 +454,7 @@ function Home() {
                   <Split />
                   <CategoryWholeWrapper>
                     <CategoryButton
+                      $active={categoryCurrent}
                       onClick={() => {
                         setCategorySelectActive(!categorySelectActive);
                         setCategoryAllActive(false);
@@ -624,6 +627,7 @@ function Home() {
                   </CategoryWholeWrapper>
                   <Split />
                   <LendFromFriend
+                    $active={lendFromActive}
                     onClick={async () => {
                       setLoading(true);
 
@@ -661,6 +665,7 @@ function Home() {
                   </LendFromFriend>
                   <Split />
                   <WishList
+                    $active={wishListActive}
                     onClick={async () => {
                       setLoading(true);
 
@@ -733,6 +738,8 @@ function Home() {
                       b = true;
                     }
                   });
+                  console.log(d.find((j) => i.isbn === j));
+                  console.log(d);
 
                   return (
                     <BookDiv
@@ -755,12 +762,14 @@ function Home() {
                     >
                       <BookImg src={i.cover}></BookImg>
 
-                      {i.bookname.length > 6 && (
+                      {/* {i.bookname.length > 6 && (
                         <BookName>{`${i.bookname.slice(0, 7)}...`}</BookName>
                       )}
                       {i.bookname.length <= 6 && (
                         <BookName>{i.bookname}</BookName>
-                      )}
+                      )} */}
+
+                      <BookName>{i.bookname}</BookName>
 
                       {localPath &&
                         !wishListActive &&
@@ -837,6 +846,18 @@ function Home() {
                               value:
                                 a?.wishList?.filter((j) => j.isbn !== i.isbn) ||
                                 [],
+                            });
+                            //這個是會讓他在header那邊通知確認取的東西是對的，但缺點就是會重新load資料
+                            //實測效果是好的
+                            dispatch({
+                              type: actionType.USER.SETUSER,
+                              value: {
+                                ...a,
+                                wishList:
+                                  a?.wishList?.filter(
+                                    (j) => j.isbn !== i.isbn
+                                  ) || [],
+                              },
                             });
                           }}
                         >
@@ -1040,7 +1061,7 @@ const PlusIconDiv = styled.div<{ localPath: string; $uid: string }>`
   :hover {
     background: #e9c5a9;
   }
-
+  cursor: pointer;
   display: ${(props) => {
     if (props.localPath === props.$uid || props.localPath === "") {
       return "flex";
@@ -1059,7 +1080,7 @@ const TopTagWrapper = styled.div`
 `;
 
 const Split = styled.div`
-  border: 1px solid #3f612d;
+  border-left: 2px solid #3f612d;
   height: 28px;
 `;
 
@@ -1073,7 +1094,7 @@ const TopTagRightWrapper = styled.div`
   padding-right: 2px;
 `;
 
-const LendFromFriend = styled.div`
+const LendFromFriend = styled.div<{ $active: boolean }>`
   cursor: pointer;
   user-select: none;
   width: 180px;
@@ -1087,9 +1108,10 @@ const LendFromFriend = styled.div`
   :hover {
     background: #fefadc;
   }
+  color: ${(props) => (props.$active ? "#1f2e16" : "#3f612d")};
 `;
 
-const WishList = styled.div`
+const WishList = styled.div<{ $active: boolean }>`
   cursor: pointer;
   user-select: none;
   width: 180px;
@@ -1103,9 +1125,10 @@ const WishList = styled.div`
   :hover {
     background: #fefadc;
   }
+  color: ${(props) => (props.$active ? "#1f2e16" : "#3f612d")};
 `;
 
-const LendToOther = styled.div`
+const LendToOther = styled.div<{ $active: boolean }>`
   cursor: pointer;
   user-select: none;
   width: 180px;
@@ -1119,9 +1142,10 @@ const LendToOther = styled.div`
   :hover {
     background: #fefadc;
   }
+  color: ${(props) => (props.$active ? "#1f2e16" : "#3f612d")};
 `;
 
-const FinishRead = styled.div`
+const FinishRead = styled.div<{ $active: boolean }>`
   cursor: pointer;
   user-select: none;
   width: 180px;
@@ -1130,14 +1154,15 @@ const FinishRead = styled.div`
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  color: #3f612d;
+
   border-radius: 6px;
   :hover {
     background: #fefadc;
   }
+  color: ${(props) => (props.$active ? "#1f2e16" : "#3f612d")};
 `;
 
-const CategoryAll = styled.div`
+const CategoryAll = styled.div<{ $active: boolean }>`
   width: 180px;
   height: 48px;
   cursor: pointer;
@@ -1146,18 +1171,20 @@ const CategoryAll = styled.div`
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  color: #3f612d;
+
+  color: ${(props) => (props.$active ? "#1f2e16" : "#3f612d")};
   border-radius: 6px;
   :hover {
     background: #fefadc;
   }
+  // background: ${(props) => (props.$active ? "#fefadc" : "")};
 `;
 
 const CategoryWholeWrapper = styled.div`
   position: relative;
 `;
 
-const CategoryButton = styled.div`
+const CategoryButton = styled.div<{ $active: string | null }>`
   cursor: pointer;
   user-select: none;
   width: 180px;
@@ -1171,17 +1198,18 @@ const CategoryButton = styled.div`
   :hover {
     background: #fefadc;
   }
+  color: ${(props) => (props.$active ? "#1f2e16" : "#3f612d")};
 `;
 
 const CategoryWrapper = styled.div<{ categorySelectActive: boolean }>`
-  width: 180px;
+  width: 240px;
   height: auto;
 
   position: absolute;
-  top: 36px;
+  top: 48px;
   left: 0px;
   z-index: 1;
-  background: white;
+  background: #f6d4ba;
   display: ${(props) => (props.categorySelectActive ? "block" : "none")};
 
   padding: 8px;
@@ -1198,8 +1226,11 @@ const NoCategoryP = styled.p``;
 
 const CategoryDiv = styled.div`
   position: relative;
-  height: 26px;
+  height: 48px;
+  width: 170px;
+  font-size: 24px;
   display: flex;
+  color: #3f612d;
   align-items: center;
   justify-content: center;
   border-radius: 6px;
@@ -1207,25 +1238,29 @@ const CategoryDiv = styled.div`
   user-select: none;
   margin: 0px 24px;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #f3b391;
   }
 `;
 
 const DeleteCategory = styled.div`
+  cursor: pointer;
   position: absolute;
-  right: -24px;
+  right: -30px;
   width: 24px;
   height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid black;
-  background: white;
+
+  border-radius: 6px;
+  :hover {
+    background: #fefadc;
+  }
 `;
 
 const CategoryInputWrapper = styled.div`
   position: relative;
-  height: 30px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1233,17 +1268,18 @@ const CategoryInputWrapper = styled.div`
 `;
 
 const CategoryInput = styled.input`
-  border-bottom: 1px solid rgb(206, 208, 212);
+  border-bottom: 1px solid #3f612d;
+  width: 220px;
   text-align: center;
-  font-size: 16px;
+  font-size: 24px;
   ::placeholder {
-    color: #b4b7bc;
+    color: gray;
   }
 `;
 const CategoryPlus = styled.div`
   position: absolute;
-  bottom: 2px;
-  right: 4px;
+  bottom: 12px;
+  right: 0px;
   width: 28px;
   height: 28px;
   font-size: 28px;
@@ -1251,13 +1287,13 @@ const CategoryPlus = styled.div`
   cursor: pointer;
   user-select: none;
 
-  color: rgb(206, 208, 212);
+  color: #3f612d;
   display: flex;
   align-items: center;
   justify-content: center;
   :hover {
-    background: rgba(200, 200, 200, 0.4);
-    color: black;
+    background: #f3eec8;
+    color: #1f2e16;
   }
 `;
 
@@ -1301,7 +1337,7 @@ const BookDiv = styled.div<{ $w: boolean; $l: boolean }>`
     margin-right: auto;
   }
 
-  cursor: ${(props) => (props.$w || props.$l ? "" : "point")};
+  cursor: ${(props) => (props.$w || props.$l ? "" : "pointer")};
   :hover {
     background: ${(props) => (props.$w || props.$l ? "" : " #f3b391")};
   }
@@ -1313,17 +1349,24 @@ const BookImg = styled.img`
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
 `;
 
-const BookName = styled.p`
-  margin-top: 24px;
-  width: 200px;
-  height: 56px;
-  font-size: 24px;
-  font-weight: 500;
-  color: #1f2e16;
-  border-bottom: 1px solid #1f2e16;
+const BookNameDiv = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+`;
+
+const BookName = styled.p`
+  margin-top: 24px;
+  width: 200px;
+  height: 48px;
+  font-size: 22px;
+  font-weight: 500;
+  color: #1f2e16;
+  border-bottom: 1px solid #1f2e16;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 `;
 
 const BorrowFrom = styled.div<{ $b: boolean; $c: string | undefined }>`
@@ -1337,14 +1380,14 @@ const BorrowFrom = styled.div<{ $b: boolean; $c: string | undefined }>`
   justify-content: center;
   color: ${(props) => (props.$b || props.$c ? "gray" : "#3f612d ")};
   background: ${(props) => (props.$b || props.$c ? "" : "")};
-  cursor: ${(props) => (props.$b || props.$c ? "not-allowed" : "point")};
+  cursor: ${(props) => (props.$b || props.$c ? "not-allowed" : "pointer")};
   :hover {
     background: ${(props) => (props.$b || props.$c ? "" : "#fefadc")};
   }
 `;
 
 const AddToLibrary = styled.div`
-margin-top:16px;
+  margin-top: 16px;
   width: 120px;
   height: 36px;
 
@@ -1352,11 +1395,11 @@ margin-top:16px;
   display: flex;
   align-items: center;
   justify-content: center;
- 
-}
-:hover {
-  background: #fefadc;
-}
+  cursor: pointer;
+
+  :hover {
+    background: #fefadc;
+  }
 `;
 
 const LendToFriend = styled.div<{ $a: boolean; $c: string | undefined }>`
@@ -1367,7 +1410,7 @@ const LendToFriend = styled.div<{ $a: boolean; $c: string | undefined }>`
   border-radius: 6px;
   color: ${(props) => (props.$c ? "gray" : "#3f612d")};
   background: ${(props) => (props.$c ? "" : "")};
-  cursor: ${(props) => (props.$c ? "not-allowed" : "point")};
+  cursor: ${(props) => (props.$c ? "not-allowed" : "pointer")};
   :hover {
     background: ${(props) => (props.$c ? "" : "#fefadc")};
   }
@@ -1392,7 +1435,7 @@ const GiveBackBtn = styled.div<{ $d: string | undefined }>`
   border-radius: 6px;
   color: ${(props) => (props.$d ? "gray" : "#3f612d ")};
   background: ${(props) => (props.$d ? "" : "")};
-  cursor: ${(props) => (props.$d ? "not-allowed" : "point")};
+  cursor: ${(props) => (props.$d ? "not-allowed" : "pointer")};
   :hover {
     background: ${(props) => (props.$d ? "" : "#fefadc")};
   }
@@ -1408,22 +1451,25 @@ const NoLibraryDiv = styled.div`
   justify-content: center;
 `;
 
-const NoLibrary = styled.div``;
+const NoLibrary = styled.div`
+  font-size: 24px;
+  color: #3f612d;
+`;
 
 const NoLibraryPlusIconDiv = styled.div`
   width: 48px;
   height: 36px;
   border-radius: 6px;
-  background: #f6d4ba;
+  background: #fefadc;
   align-items: center;
   justify-content: center;
 
   font-size: 32px;
   font-weight: 500;
   color: #3f612d;
-
+  cursor: pointer;
   :hover {
-    background: #e9c5a9;
+    background: #f3eec8;
   }
   margin: 16px 16px;
   display: flex;

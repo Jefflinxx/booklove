@@ -39,6 +39,10 @@ function Header() {
   const Location = useLocation();
   const dispatch = useDispatch();
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
+  const displayLibrary = useSelector(
+    (state: { displayLibraryReducer: CurrentBook[] }) =>
+      state.displayLibraryReducer
+  );
   const notification = useSelector(
     (state: {
       notificationReducer: {
@@ -733,7 +737,7 @@ const AlertIconDiv = styled.div`
 const AlertIcon = styled.img`
   position: absolute;
   width: 20px;
-  left: 8px;
+  left: 9px;
   top: 8px;
 `;
 
@@ -824,7 +828,7 @@ const Avatar = styled.img`
   width: 38px;
   height: 38px;
 
-  background: #ffffff;
+  background: #fefadc;
   border-radius: 50%;
   user-select: none;
 `;
@@ -838,6 +842,7 @@ const AvatarArrowIconDiv = styled.div`
   background: #fefadc;
   border: 1px solid #f3eec8;
   border-radius: 50%;
+  cursor: pointer;
   user-select: none;
   :hover {
     background: #f3eec8;
@@ -883,6 +888,7 @@ const UserDiv = styled.div`
   padding: 0px 8px;
   border-radius: 6px;
   justify-content: space-between;
+  cursor: pointer;
   :hover {
     background: #f3b391;
   }

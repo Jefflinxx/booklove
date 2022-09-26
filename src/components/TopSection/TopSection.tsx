@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import avatar from "./avatar.svg";
 import camera from "./camera.png";
-import grayBack from "./grayBack.png";
+// import grayBack from "./grayBack.png";
 import { User } from "../../reducer/userReducer";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -47,7 +47,8 @@ function TopSection() {
       };
     }) => state.topSDisplayReducer
   );
-
+  const grayBack =
+    "https://firebasestorage.googleapis.com/v0/b/booklove-d393f.appspot.com/o/defaultBG.jpeg?alt=media&token=3a992fc9-e591-440a-838d-45155bfebffe";
   const localPath = Location.pathname.split("/")[1];
 
   const uploadImage = async () => {
@@ -68,7 +69,7 @@ function TopSection() {
           background: user.background || grayBack,
         },
       });
-      setLibraryCount(library.length);
+      setLibraryCount(user.library.length);
     }
 
     const getFollowObj = async () => {
@@ -123,10 +124,10 @@ function TopSection() {
 
               if (imageUrl) {
                 updateBackground(user.uid, imageUrl);
-                dispatch({
-                  type: actionType.USER.SETUSER,
-                  value: { ...user, background: imageUrl },
-                });
+                // dispatch({
+                //   type: actionType.USER.SETUSER,
+                //   value: { ...user, background: imageUrl },
+                // });
               }
             }}
             confirmActive={confirmActive}
@@ -170,7 +171,11 @@ function TopSection() {
           <InfoLeft>
             <Avatar src={topSDisplay.avatar} />
             <Username>{topSDisplay.uname}</Username>
-            <LibraryCount>{`${libraryCount} books`}</LibraryCount>
+            {libraryCount && libraryCount <= 1 ? (
+              <LibraryCount>{`${libraryCount} book`}</LibraryCount>
+            ) : (
+              <LibraryCount>{`${libraryCount} books`}</LibraryCount>
+            )}
           </InfoLeft>
           <InfoRight>
             <InfoRightP
@@ -297,6 +302,10 @@ const ConfirmBtn = styled.div<{ confirmActive: boolean }>`
   height: 30px;
   border-radius: 6px;
   background: #fefadc;
+  cursor: pointer;
+  :hover {
+    background: #f3eec8;
+  }
   font-size: 15px;
 
   align-items: center;
@@ -310,7 +319,11 @@ const CancelBtn = styled.div<{ confirmActive: boolean }>`
   width: 68px;
   height: 30px;
   border-radius: 6px;
-  background: white;
+  background: #fefadc;
+  cursor: pointer;
+  :hover {
+    background: #f3eec8;
+  }
   font-size: 15px;
 
   align-items: center;
@@ -327,14 +340,14 @@ const BackgroundImgInput = styled.input`
 const Background = styled.img`
   width: 100%;
   height: 100%;
-  background: #fefadc;
+  background: #e9c5a9;
   object-fit: cover;
 `;
 
 const BackgroundSKT = styled.div`
   width: 100%;
   height: 100%;
-  background: #fefadc;
+  background: #e9c5a9;
 `;
 
 const InfoDiv = styled.div`
@@ -378,7 +391,6 @@ const Username = styled.p`
 
 const LibraryCount = styled.p`
   width: 228px;
-
   font-size: 28px;
   position: absolute;
   top: -10px;
