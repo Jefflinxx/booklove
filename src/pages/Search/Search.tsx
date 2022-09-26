@@ -25,6 +25,8 @@ function Search() {
   const navigator = useNavigate();
   const [input, setInput] = useState("");
   const [resultCountActive, setResultCountActive] = useState(false);
+  const [popupActive, setPopupActive] = useState(false);
+  const [barrierBGActive, setBarrierBGActive] = useState<boolean>(false);
   const [bookAlreadyInLibrary, setBookAlreadyInLibrary] = useState<string[]>(
     []
   );
@@ -194,18 +196,32 @@ function Search() {
 
   return (
     <>
+      <BarrierBG barrierBGActive={barrierBGActive} />
+      <Popup $active={popupActive}>
+        已成功加入
+        <PopupClose
+          onClick={() => {
+            setPopupActive(false);
+            setBarrierBGActive(false);
+          }}
+        >
+          ✗
+        </PopupClose>
+      </Popup>
       <WholeWrapper>
         <Center>
           <SearchIconDiv $active={resultCountActive}>
             <BackIconDiv
+              $active={resultCountActive}
               onClick={() => {
                 navigator(-1);
               }}
             >
-              <BackIcon src={back}></BackIcon>
+              <BackIcon src={back} $active={resultCountActive}></BackIcon>
             </BackIconDiv>
-            <SearchIcon src={search} />
+            <SearchIcon src={search} $active={resultCountActive} />
             <Input
+              $active={resultCountActive}
               ref={friendSearchRef}
               placeholder="Search books, add to bookshelf"
               onKeyPress={(e) => {
@@ -270,6 +286,8 @@ function Search() {
                               ...bookAlreadyInLibrary,
                               i.isbn,
                             ]);
+                            setPopupActive(true);
+                            setBarrierBGActive(true);
                           }}
                         >
                           加入書櫃
@@ -299,6 +317,8 @@ function Search() {
                               ...bookAlreadyInLibrary,
                               i.isbn,
                             ]);
+                            setPopupActive(true);
+                            setBarrierBGActive(true);
                           }}
                         >
                           加入願望清單
@@ -345,23 +365,24 @@ const TopIconDivWrapper = styled.div`
   padding: 8px;
 `;
 
-const BackIconDiv = styled.div`
+const BackIconDiv = styled.div<{ $active: boolean }>`
   position: absolute;
-  top: 8px;
-  left: 240px;
-  width: 38px;
-  height: 38px;
+  top: ${(props) => (props.$active ? "6px" : "6px")};
+  left: ${(props) => (props.$active ? "240px" : "40px")};
+  width: ${(props) => (props.$active ? "38px" : "48px")};
+  height: ${(props) => (props.$active ? "38px" : "48px")};
   border-radius: 50%;
   cursor: pointer;
+
   :hover {
     background: #f3b391;
   }
 `;
-const BackIcon = styled.img`
+const BackIcon = styled.img<{ $active: boolean }>`
   position: absolute;
-  top: 8px;
-  left: 10px;
-  width: 14px;
+  top: ${(props) => (props.$active ? "8px" : "5px")};
+  left: ${(props) => (props.$active ? "10px" : "10px")};
+  width: ${(props) => (props.$active ? "14px" : "24px")};
 `;
 
 const Center = styled.div`
@@ -371,31 +392,30 @@ const Center = styled.div`
 
 const SearchIconDiv = styled.div<{ $active: boolean }>`
   position: relative;
-  top: ${(props) => (props.$active ? "0px" : "30vh")};
-  right: ${(props) => (props.$active ? "0px" : "-200px")};
-  width: 1080px;
+  top: ${(props) => (props.$active ? "0px" : "33vh")};
+  right: ${(props) => (props.$active ? "0px" : "-370px")};
+  width: ${(props) => (props.$active ? "1080px" : "700px")};
   z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: ${(props) => (props.$active ? "center" : "flex-end")};
   margin-bottom: 50px;
-  border: 1px solid black;
 `;
 
-const SearchIcon = styled.img`
+const SearchIcon = styled.img<{ $active: boolean }>`
   position: absolute;
-  width: 24px;
-  left: 292px;
-  top: 16px;
+  width: ${(props) => (props.$active ? "24px" : "36px")};
+  left: ${(props) => (props.$active ? "292px" : "100px")};
+  top: ${(props) => (props.$active ? "16px" : "12px")};
 `;
 
-const Input = styled.input`
-  width: 500px;
-  height: 56px;
-  text-indent: 48px;
+const Input = styled.input<{ $active: boolean }>`
+  width: ${(props) => (props.$active ? "500px" : "600px")};
+  height: ${(props) => (props.$active ? "56px" : "64px")};
+  text-indent: ${(props) => (props.$active ? "48px" : "54px")};
   border-bottom: 3px solid #f3b391;
 
-  font-size: 24px;
+  font-size: ${(props) => (props.$active ? "24px" : "28px")};
   ::placeholder {
     font-family: "Inknut Antiqua", serif;
     color: #3f612d88;
@@ -501,6 +521,50 @@ const AddWrapper = styled.div`
   right: 20px;
   display: flex;
   align-items: center;
+`;
+
+const Popup = styled.div<{ $active: boolean }>`
+  display: ${(props) => (props.$active ? "flex" : "none")};
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  position: fixed;
+  top: 50vh;
+  left: 50vw;
+  width: 300px;
+  height: 100px;
+  transform: translate(-50%, -50%);
+  z-index: 9;
+  background: #fefadc;
+  border: 1px solid #fefadc;
+  border-radius: 6px;
+  color: #3f612d;
+  border: 8px solid #f3b391;
+`;
+
+const BarrierBG = styled.div<{ barrierBGActive: boolean }>`
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 8;
+
+  display: ${(props) => (props.barrierBGActive ? "block" : "none")};
+`;
+
+const PopupClose = styled.div`
+  position: absolute;
+  top: -18px;
+  left: -18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f3b391;
+  border: 1px solid #fefadc;
 `;
 
 const AddBookBtn = styled.div<{ $a: string | undefined }>`

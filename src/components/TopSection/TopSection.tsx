@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import avatar from "./avatar.svg";
-import camera from "./camera.svg";
+import camera from "./camera.png";
 import grayBack from "./grayBack.png";
 import { User } from "../../reducer/userReducer";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -269,7 +269,7 @@ const AvatarImgLabel = styled.label<{ confirmActive: boolean }>`
   display: ${(props) => (props.confirmActive ? "none" : "flex")};
 
   :hover {
-    background: #e4e6eb;
+    background: #fefadc;
   }
 `;
 

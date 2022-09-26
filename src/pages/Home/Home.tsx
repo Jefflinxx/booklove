@@ -874,30 +874,35 @@ function Home() {
                             已送出請求
                           </LendToFriend>
                         )}
+                      {lendFromActive && !localPath && (
+                        <LendFromNameP>{`來自:${i.lendFromName}`}</LendFromNameP>
+                      )}
                       {lendFromActive &&
                         !localPath &&
                         !d.find((j) => i.isbn === j) && (
-                          <GiveBackBtn
-                            $d={d.find((j) => i.isbn === j)}
-                            onClick={() => {
-                              setBarrierBGActive(true);
-                              setNotificationAlertActive(true);
-                              setNotification({
-                                type: "giveBack",
-                                avatar: user.avatar,
-                                uid: user.uid,
-                                uname: user.uname,
-                                isbn: i.isbn,
-                                bookname: i.bookname,
-                              });
-                              setNAlendFrom({
-                                id: i.lendFrom,
-                                name: i.lendFromName,
-                              });
-                            }}
-                          >
-                            歸還
-                          </GiveBackBtn>
+                          <>
+                            <GiveBackBtn
+                              $d={d.find((j) => i.isbn === j)}
+                              onClick={() => {
+                                setBarrierBGActive(true);
+                                setNotificationAlertActive(true);
+                                setNotification({
+                                  type: "giveBack",
+                                  avatar: user.avatar,
+                                  uid: user.uid,
+                                  uname: user.uname,
+                                  isbn: i.isbn,
+                                  bookname: i.bookname,
+                                });
+                                setNAlendFrom({
+                                  id: i.lendFrom,
+                                  name: i.lendFromName,
+                                });
+                              }}
+                            >
+                              歸還
+                            </GiveBackBtn>
+                          </>
                         )}
                       {lendFromActive &&
                         !localPath &&
@@ -948,29 +953,49 @@ const BarrierBG = styled.div<{ barrierBGActive: boolean }>`
 
 const NotificationAlert = styled.div<{ notificationAlertActive: boolean }>`
   width: 420px;
-  height: 360px;
-  border: 1px solid black;
-  background: white;
+  height: 160px;
+  border: 1px solid #fefadc;
+  background: #fefadc;
+  border: 8px solid #f3b391;
+  border-radius: 6px;
   display: ${(props) => (props.notificationAlertActive ? "block" : "none")};
-
+  font-size: 24px;
   position: fixed;
   top: 50vh;
   left: 50vw;
   transform: translate(-50%, -50%);
   z-index: 22;
+  color: #3f612d;
 `;
 
-const NAP = styled.div``;
+const NAP = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 70px;
+`;
 const NABtnWrapper = styled.div`
   display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 70px;
 `;
 const NAConfirm = styled.div`
   width: 100px;
-  border: 1px solid black;
+  border: 2px solid #f3b391;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 32px;
+  border-radius: 6px;
 `;
 const NACancel = styled.div`
   width: 100px;
-  border: 1px solid black;
+  border: 2px solid #f3b391;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
 `;
 
 const WholeWrapper = styled.div`
@@ -1289,7 +1314,7 @@ const BookImg = styled.img`
 `;
 
 const BookName = styled.p`
-  margin-top: 30px;
+  margin-top: 24px;
   width: 200px;
   height: 56px;
   font-size: 24px;
@@ -1310,10 +1335,11 @@ const BorrowFrom = styled.div<{ $b: boolean; $c: string | undefined }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${(props) => (props.$b || props.$c ? "#F3EEC8" : "#fefadc")};
+  color: ${(props) => (props.$b || props.$c ? "gray" : "#3f612d ")};
+  background: ${(props) => (props.$b || props.$c ? "" : "")};
   cursor: ${(props) => (props.$b || props.$c ? "not-allowed" : "point")};
   :hover {
-    background: ${(props) => (props.$b || props.$c ? "" : "#F3EEC8")};
+    background: ${(props) => (props.$b || props.$c ? "" : "#fefadc")};
   }
 `;
 
@@ -1326,10 +1352,10 @@ margin-top:16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F3EEC8;
+ 
 }
 :hover {
-  background: rgba(200, 200, 200, 0.4);
+  background: #fefadc;
 }
 `;
 
@@ -1339,10 +1365,11 @@ const LendToFriend = styled.div<{ $a: boolean; $c: string | undefined }>`
   height: 36px;
 
   border-radius: 6px;
-  background: ${(props) => (props.$c ? "#F3EEC8" : "#F3EEC8")};
+  color: ${(props) => (props.$c ? "gray" : "#3f612d")};
+  background: ${(props) => (props.$c ? "" : "")};
   cursor: ${(props) => (props.$c ? "not-allowed" : "point")};
   :hover {
-    background: ${(props) => (props.$c ? "" : "#F3EEC8")};
+    background: ${(props) => (props.$c ? "" : "#fefadc")};
   }
 
   display: flex;
@@ -1350,14 +1377,20 @@ const LendToFriend = styled.div<{ $a: boolean; $c: string | undefined }>`
   justify-content: center;
 `;
 
+const LendFromNameP = styled.div`
+  color: #1f2e16;
+  margin-top: 8px;
+  font-weight: 500;
+`;
+
 const GiveBackBtn = styled.div<{ $d: string | undefined }>`
-  margin-top: 16px;
   width: 180px;
   height: 48px;
-
+  margin-top: 4px;
   color: #3f612d;
 
   border-radius: 6px;
+  color: ${(props) => (props.$d ? "gray" : "#3f612d ")};
   background: ${(props) => (props.$d ? "" : "")};
   cursor: ${(props) => (props.$d ? "not-allowed" : "point")};
   :hover {
@@ -1381,12 +1414,16 @@ const NoLibraryPlusIconDiv = styled.div`
   width: 48px;
   height: 36px;
   border-radius: 6px;
-  background: #f3eec8;
+  background: #f6d4ba;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
+
+  font-size: 32px;
+  font-weight: 500;
+  color: #3f612d;
+
   :hover {
-    background: rgba(200, 200, 200, 0.4);
+    background: #e9c5a9;
   }
   margin: 16px 16px;
   display: flex;
