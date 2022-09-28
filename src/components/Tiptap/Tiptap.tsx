@@ -147,6 +147,7 @@ const ContentWrapper = styled.div`
     border: 1px solid #3f612d;
     min-height: 200px;
     background: #fefadc;
+    user-select: auto;
 
     padding: 8px;
     outline: none;
@@ -158,6 +159,7 @@ const ContentWrapper = styled.div`
   .ProseMirror h5,
   .ProseMirror h6 {
     line-height: 1.1;
+    user-select: auto;
   }
   .ProseMirror blockquote {
     padding-left: 1rem;
@@ -168,6 +170,7 @@ const ContentWrapper = styled.div`
     border: none;
     border-top: 2px solid rgba(13, 13, 13, 0.1);
     margin: 2rem 0;
+    user-select: auto;
   }
   .ProseMirror pre {
     background: #0d0d0d;
@@ -175,6 +178,10 @@ const ContentWrapper = styled.div`
     font-family: "JetBrainsMono", monospace;
     padding: 0.75rem 1rem;
     border-radius: 0.5rem;
+    user-select: auto;
+  }
+  p {
+    user-select: auto;
   }
 `;
 

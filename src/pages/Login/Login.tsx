@@ -290,6 +290,7 @@ const Input = styled.input`
   border-radius: 6px;
   margin-bottom: 16px;
   text-indent: 16px;
+  user-select: auto;
   ::placeholder {
     color: gray;
   }

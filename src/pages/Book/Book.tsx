@@ -194,7 +194,13 @@ function Book() {
                   %
                 </ProgressPercent>
               ) : (
-                <ProgressTip>編輯/點擊輸入章節</ProgressTip>
+                <ProgressTip
+                  onClick={() => {
+                    navigator(`../edit/${user.uid}${currentBook.isbn}`);
+                  }}
+                >
+                  編輯/點擊輸入章節
+                </ProgressTip>
               )}
             </ProgressSectionBItem>
             <SectionBItem>
@@ -367,7 +373,12 @@ const ProgressWrapper = styled.div`
   border-radius: 6px;
   overflow: hidden;
 `;
-const ProgressTip = styled.p``;
+const ProgressTip = styled.p`
+  cursor: pointer;
+  :hover {
+    color: #1f2e16;
+  }
+`;
 const Progress = styled.div<{ progressArray: number[]; $i: number }>`
   width: 40px;
   height: 32px;

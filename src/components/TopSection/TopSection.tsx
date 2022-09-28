@@ -69,7 +69,7 @@ function TopSection() {
           background: user.background || grayBack,
         },
       });
-      setLibraryCount(user.library.length);
+      setLibraryCount(user.library?.length || 0);
     }
 
     const getFollowObj = async () => {
@@ -85,7 +85,7 @@ function TopSection() {
               background: a.background || grayBack,
             },
           });
-          setLibraryCount(a.library.length);
+          setLibraryCount(a.library?.length || 0);
           setFollowObj({
             uid: a.uid,
             uname: a.uname,
@@ -251,6 +251,9 @@ const CenterWrapper = styled.div`
   width: 1080px;
   border-radius: 6px;
   background: #fefadc;
+  @media screen and (max-width: 830px) {
+    border-radius: 0px;
+  }
 `;
 
 const BgWrapper = styled.div`
@@ -258,6 +261,9 @@ const BgWrapper = styled.div`
   height: 400px;
   border-radius: 6px 6px 0px 0px;
   overflow: hidden;
+  @media screen and (max-width: 830px) {
+    border-radius: 0px;
+  }
 `;
 
 const AvatarImgLabel = styled.label<{ confirmActive: boolean }>`
@@ -311,6 +317,13 @@ const ConfirmBtn = styled.div<{ confirmActive: boolean }>`
   align-items: center;
   justify-content: center;
   display: ${(props) => (props.confirmActive ? "flex" : "none")};
+  @media screen and (max-width: 666px) {
+    bottom: 60px;
+    right: 36px;
+  }
+  @media screen and (max-width: 480px) {
+    right: 16px;
+  }
 `;
 const CancelBtn = styled.div<{ confirmActive: boolean }>`
   position: absolute;
@@ -329,6 +342,13 @@ const CancelBtn = styled.div<{ confirmActive: boolean }>`
   align-items: center;
   justify-content: center;
   display: ${(props) => (props.confirmActive ? "flex" : "none")};
+  @media screen and (max-width: 666px) {
+    bottom: 20px;
+    right: 36px;
+  }
+  @media screen and (max-width: 480px) {
+    right: 16px;
+  }
 `;
 
 const BackgroundImgInput = styled.input`
@@ -355,11 +375,18 @@ const InfoDiv = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  @media screen and (max-width: 830px) {
+    justify-content: center;
+    height: 182px;
+  }
 `;
 const InfoLeft = styled.div`
   display: flex;
   align-items: center;
   position: relative;
+  @media screen and (max-width: 830px) {
+    justify-content: center;
+  }
 `;
 
 const Avatar = styled.img`
@@ -376,6 +403,16 @@ const Avatar = styled.img`
   top: -144px;
   left: 48px;
   user-select: none;
+  @media screen and (max-width: 830px) {
+    position: relative;
+    left: 0px;
+    margin-right: 0px;
+  }
+  @media screen and (max-width: 444px) {
+    width: 160px;
+    height: 160px;
+    top: -100px;
+  }
 `;
 
 const Username = styled.p`
@@ -387,6 +424,17 @@ const Username = styled.p`
   left: 286px;
   user-select: none;
   color: #3f612d;
+  @media screen and (max-width: 830px) {
+    top: 60px;
+    left: -10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  @media screen and (max-width: 444px) {
+    font-size: 24px;
+    left: -36px;
+  }
 `;
 
 const LibraryCount = styled.p`
@@ -397,11 +445,26 @@ const LibraryCount = styled.p`
   left: 290px;
   user-select: none;
   color: #3f612d;
+  @media screen and (max-width: 830px) {
+    top: 110px;
+    left: -10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  @media screen and (max-width: 444px) {
+    font-size: 20px;
+    left: -36px;
+    top: 98px;
+  }
 `;
 
 const InfoRight = styled.div`
   display: flex;
   align-items: center;
+
+  @media screen and (max-width: 830px) {
+  }
 `;
 
 const InfoRightP = styled.p<{ localPath: string; $uid: string }>`
@@ -426,6 +489,18 @@ const InfoRightP = styled.p<{ localPath: string; $uid: string }>`
     if (props.localPath === props.$uid || props.localPath === "") return "none";
     else return "flex";
   }};
+  @media screen and (max-width: 830px) {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: calc(100vw - 15px);
+    border-radius: 0px;
+    background: #fefadc;
+    z-index: 2;
+    :hover {
+      background: #f3eec8;
+    }
+  }
 `;
 
 const Split = styled.div`

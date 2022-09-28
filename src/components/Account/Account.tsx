@@ -167,7 +167,7 @@ const Account: React.FC<AccountProps> = ({
 export default Account;
 
 const Wrapper = styled.div<{ $active: boolean }>`
-  z-index: 3;
+  z-index: 13;
   display: ${(props) => (props.$active ? "flex" : "none")};
   position: absolute;
   top: 0px;
@@ -181,6 +181,10 @@ const Wrapper = styled.div<{ $active: boolean }>`
   padding-bottom: 8px;
   border-radius: 6px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  @media screen and (max-width: 830px) {
+    width: 100%;
+    border-radius: 0px;
+  }
 `;
 
 const TitleWrapper = styled.div`
@@ -188,6 +192,9 @@ const TitleWrapper = styled.div`
   align-items: center;
   height: 60px;
   padding: 16px 16px 8px;
+  @media screen and (max-width: 830px) {
+    justify-content: center;
+  }
 `;
 const BackIconDiv = styled.div`
   width: 38px;
@@ -197,6 +204,11 @@ const BackIconDiv = styled.div`
   cursor: pointer;
   :hover {
     background: #f3b391;
+  }
+  @media screen and (max-width: 830px) {
+    position: absolute;
+    top: 15px;
+    left: 12px;
   }
 `;
 
@@ -210,6 +222,9 @@ const Title = styled.div`
   font-size: 24px;
   font-weight: 500;
   padding-left: 10px;
+  @media screen and (max-width: 830px) {
+    padding-left: 0px;
+  }
 `;
 
 const Center = styled.div`
@@ -240,7 +255,7 @@ const Avatar = styled.img`
   top: 0;
   left: 0;
   border-radius: 50%;
-  z-index: 1;
+  z-index: 11;
 `;
 
 const AvatarImgMask = styled.div`
@@ -249,7 +264,7 @@ const AvatarImgMask = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1;
+  z-index: 11;
   border-radius: 50%;
 
   background: rgba(0, 0, 0, 0.3);
@@ -265,7 +280,7 @@ const UploadImgBtn = styled.div`
   left: 50%;
   transform: translate(-50%, -50%);
   cursor: pointer;
-  z-index: 2;
+  z-index: 12;
   border: 1px solid black;
   color: #fefadc;
   display: flex;

@@ -464,9 +464,9 @@ function Home() {
                         setLendFromActive(false);
                       }}
                     >
-                      類別
+                      {!categoryCurrent && "類別"}
                       {categoryCurrent &&
-                        `:${categoryCurrent}(${displayLibrary?.length})`}
+                        `${categoryCurrent}(${displayLibrary?.length})`}
                     </CategoryButton>
                     <CategoryWrapper
                       categorySelectActive={categorySelectActive}
@@ -487,6 +487,8 @@ function Home() {
                                   (j) => j === categoryInput
                                 )
                               ) {
+                                return;
+                              } else if (categoryInput === "") {
                                 return;
                               } else if (displayUser?.category) {
                                 updateCategory(user.uid, [
@@ -726,6 +728,9 @@ function Home() {
                       a = true;
                     }
                   });
+                  console.log(a);
+                  console.log(c.find((j) => i.isbn === j));
+
                   //去別人的書櫃跟別人借書 確認自己沒有這本書 且也沒有正在借同本書中
                   let b = false;
                   user?.library?.forEach((j) => {
@@ -738,8 +743,8 @@ function Home() {
                       b = true;
                     }
                   });
-                  console.log(d.find((j) => i.isbn === j));
-                  console.log(d);
+                  // console.log(d.find((j) => i.isbn === j));
+                  // console.log(d);
 
                   return (
                     <BookDiv
@@ -887,6 +892,7 @@ function Home() {
                             出借好友
                           </LendToFriend>
                         )}
+                      {wishListActive && localPath && !a && <Space />}
                       {wishListActive &&
                         localPath &&
                         a &&
@@ -987,6 +993,14 @@ const NotificationAlert = styled.div<{ notificationAlertActive: boolean }>`
   transform: translate(-50%, -50%);
   z-index: 22;
   color: #3f612d;
+  @media screen and (max-width: 470px) {
+    width: 352px;
+  }
+  @media screen and (max-width: 470px) {
+    left: 0;
+    width: calc(100vw - 15px);
+    transform: translate(0, 0);
+  }
 `;
 
 const NAP = styled.div`
@@ -1030,6 +1044,17 @@ const WholeWrapper = styled.div`
 
 const CenterWrapper = styled.div`
   width: 1080px;
+
+  @media screen and (max-width: 1100px) {
+    width: 100%;
+  }
+  // @media screen and (max-width: 830px) {
+  //   width: 540px;
+  // }
+  // @media screen and (max-width: 560px) {
+  //   width: 270px;
+  // }
+  //border: 1px solid black;
 `;
 
 const Center = styled.div`
@@ -1043,6 +1068,14 @@ const PlusIconDivWrapper = styled.div`
   width: 1186px;
   height: 24px;
   position: relative;
+
+  @media screen and (max-width: 1100px) {
+    width: 100%;
+  }
+  @media screen and (max-width: 830px) {
+  }
+  @media screen and (max-width: 560px) {
+  }
 `;
 
 const PlusIconDiv = styled.div<{ localPath: string; $uid: string }>`
@@ -1067,21 +1100,45 @@ const PlusIconDiv = styled.div<{ localPath: string; $uid: string }>`
       return "flex";
     } else return "none";
   }};
+  @media screen and (max-width: 830px) {
+    border-radius: 0px;
+    top: -22px;
+    right: 0px;
+    width: 100%;
+    height: 46px;
+    background: none;
+    :hover {
+      background: #f3eec8;
+      color: #1f2e16;
+    }
+  }
 `;
 
 //上面的標籤
 const TopTagWrapper = styled.div`
-  width: 1080px;
+  max-width: 1080px;
 
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: 24px;
+
+  @media screen and (max-width: 1100px) {
+    width: 100%;
+  }
+  @media screen and (max-width: 830px) {
+    flex-direction: column;
+  }
+  @media screen and (max-width: 560px) {
+  }
 `;
 
 const Split = styled.div`
   border-left: 2px solid #3f612d;
   height: 28px;
+  @media screen and (max-width: 830px) {
+    display: none;
+  }
 `;
 
 const TopTagLeftWrapper = styled.div`
@@ -1109,6 +1166,20 @@ const LendFromFriend = styled.div<{ $active: boolean }>`
     background: #fefadc;
   }
   color: ${(props) => (props.$active ? "#1f2e16" : "#3f612d")};
+  background: ${(props) => (props.$active ? "#fefadc" : "")};
+  @media screen and (max-width: 1100px) {
+    width: 135px;
+  }
+  @media screen and (max-width: 830px) {
+    width: 100%;
+    border-radius: 0px;
+    :hover {
+      background: #e9c5a9;
+      color: #1f2e16;
+    }
+  }
+  @media screen and (max-width: 560px) {
+  }
 `;
 
 const WishList = styled.div<{ $active: boolean }>`
@@ -1126,6 +1197,20 @@ const WishList = styled.div<{ $active: boolean }>`
     background: #fefadc;
   }
   color: ${(props) => (props.$active ? "#1f2e16" : "#3f612d")};
+  background: ${(props) => (props.$active ? "#fefadc" : "")};
+  @media screen and (max-width: 1100px) {
+    width: 135px;
+  }
+  @media screen and (max-width: 830px) {
+    width: 100%;
+    border-radius: 0px;
+    :hover {
+      background: #e9c5a9;
+      color: #1f2e16;
+    }
+  }
+  @media screen and (max-width: 560px) {
+  }
 `;
 
 const LendToOther = styled.div<{ $active: boolean }>`
@@ -1143,6 +1228,20 @@ const LendToOther = styled.div<{ $active: boolean }>`
     background: #fefadc;
   }
   color: ${(props) => (props.$active ? "#1f2e16" : "#3f612d")};
+  background: ${(props) => (props.$active ? "#fefadc" : "")};
+  @media screen and (max-width: 1100px) {
+    width: 135px;
+  }
+  @media screen and (max-width: 830px) {
+    width: 100%;
+    border-radius: 0px;
+    :hover {
+      background: #e9c5a9;
+      color: #1f2e16;
+    }
+  }
+  @media screen and (max-width: 560px) {
+  }
 `;
 
 const FinishRead = styled.div<{ $active: boolean }>`
@@ -1160,6 +1259,20 @@ const FinishRead = styled.div<{ $active: boolean }>`
     background: #fefadc;
   }
   color: ${(props) => (props.$active ? "#1f2e16" : "#3f612d")};
+  background: ${(props) => (props.$active ? "#fefadc" : "")};
+  @media screen and (max-width: 1100px) {
+    width: 135px;
+  }
+  @media screen and (max-width: 830px) {
+    width: 100%;
+    border-radius: 0px;
+    :hover {
+      background: #e9c5a9;
+      color: #1f2e16;
+    }
+  }
+  @media screen and (max-width: 560px) {
+  }
 `;
 
 const CategoryAll = styled.div<{ $active: boolean }>`
@@ -1177,11 +1290,27 @@ const CategoryAll = styled.div<{ $active: boolean }>`
   :hover {
     background: #fefadc;
   }
-  // background: ${(props) => (props.$active ? "#fefadc" : "")};
+  background: ${(props) => (props.$active ? "#fefadc" : "")};
+  @media screen and (max-width: 1100px) {
+    width: 135px;
+  }
+  @media screen and (max-width: 830px) {
+    width: 100%;
+    border-radius: 0px;
+    :hover {
+      background: #e9c5a9;
+      color: #1f2e16;
+    }
+  }
+  @media screen and (max-width: 560px) {
+  }
 `;
 
 const CategoryWholeWrapper = styled.div`
   position: relative;
+  @media screen and (max-width: 830px) {
+    width: 100%;
+  }
 `;
 
 const CategoryButton = styled.div<{ $active: string | null }>`
@@ -1199,6 +1328,20 @@ const CategoryButton = styled.div<{ $active: string | null }>`
     background: #fefadc;
   }
   color: ${(props) => (props.$active ? "#1f2e16" : "#3f612d")};
+  background: ${(props) => (props.$active ? "#fefadc" : "")};
+  @media screen and (max-width: 1100px) {
+    width: 135px;
+  }
+  @media screen and (max-width: 830px) {
+    width: 100%;
+    border-radius: 0px;
+    :hover {
+      background: #e9c5a9;
+      color: #1f2e16;
+    }
+  }
+  @media screen and (max-width: 560px) {
+  }
 `;
 
 const CategoryWrapper = styled.div<{ categorySelectActive: boolean }>`
@@ -1306,6 +1449,16 @@ const Bookcase = styled.div`
   justify-content: center;
   flex-wrap: wrap;
   border-radius: 6px;
+
+  @media screen and (max-width: 1100px) {
+    width: 810px;
+  }
+  @media screen and (max-width: 830px) {
+    width: 540px;
+  }
+  @media screen and (max-width: 560px) {
+    width: 270px;
+  }
 `;
 
 const BookcaseLoading = styled.div`
@@ -1418,6 +1571,10 @@ const LendToFriend = styled.div<{ $a: boolean; $c: string | undefined }>`
   display: flex;
   align-items: center;
   justify-content: center;
+`;
+
+const Space = styled.div`
+  height: 52px;
 `;
 
 const LendFromNameP = styled.div`

@@ -62,6 +62,7 @@ function Header() {
   const [friendLoading, setFriendLoading] = useState<boolean>(false);
   const [accountActive, setAccountActive] = useState<boolean>(false);
   const [themeActive, setThemeActive] = useState<boolean>(false);
+  const [bGBlock, setBGBlock] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [isInputActive, setIsInputActive] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
@@ -89,6 +90,14 @@ function Header() {
           value: [],
         });
         setActive(false);
+        setAccountActive(false);
+        setFriendActive(false);
+        setThemeActive(false);
+        setAlertActive(false);
+        setIsInputActive(false);
+        setInput("");
+        setBGBlock(false);
+
         navigator("./login");
       })
       .catch((error) => {
@@ -130,6 +139,7 @@ function Header() {
   return (
     <>
       <HeaderDiv>
+        <BGSearchBlock $active={isInputActive} />
         <LeftDiv>
           <Logo
             onClick={() => {
@@ -153,12 +163,16 @@ function Header() {
           <SearchWrapper>
             <SearchIconDiv
               onClick={() => {
+                setActive(false);
+                setAlertActive(false);
                 if (isInputActive) {
                   setIsInputActive(false);
                   setInput("");
+                  setBGBlock(false);
                 } else {
                   setIsInputActive(true);
                   friendSearchRef?.current?.focus();
+                  setBGBlock(true);
                 }
               }}
             >
@@ -237,10 +251,33 @@ function Header() {
             </SearchResultWrapper>
           </SearchWrapper>
         </LeftDiv>
+        <LogoMobile
+          onClick={() => {
+            if (localPath) {
+              dispatch({
+                type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
+                value: {
+                  avatar: "",
+                  uname: "",
+                  background: "",
+                },
+              });
+            }
+
+            //這邊希望點擊後可以回到自己的主頁
+            navigator("./");
+          }}
+        >
+          BOOKLOVE
+        </LogoMobile>
         <RightDiv>
           <AlertIconDiv
             onClick={() => {
               setAlertActive(!alertActive);
+              setBGBlock(!alertActive);
+              setActive(false);
+              setIsInputActive(false);
+              setInput("");
             }}
           >
             <AlertIcon src={alert} />
@@ -268,244 +305,272 @@ function Header() {
                 cancel = "取消";
               }
               return (
-                <AlertDiv key={`${i.type}${i.uname}${i.bookname}`}>
-                  <AlertLeftWrapper>
-                    <AlertAvatar src={i.avatar} />
-                    <AlertP>
-                      <AlertPB>{i.uname}</AlertPB>
-                      {p}
-                    </AlertP>
-                  </AlertLeftWrapper>
-                  <AlertRightWrapper>
-                    <AlertConfirm
-                      onClick={() => {
-                        if (i.type === "borrow") {
-                          //請求確認的話會在確認端把書的狀態改變為借出，借給誰改成那個人
-                          let libraryExceptThisBook;
-                          let bookPutInOtherLendFromList;
-                          getUserInfo(user.uid).then((v) => {
-                            libraryExceptThisBook = v!.library.filter(
-                              (j) => j.isbn !== i.isbn
-                            );
+                <>
+                  <AlertDiv key={`${i.type}${i.uname}${i.bookname}`}>
+                    <AlertLeftWrapper>
+                      <AlertAvatar src={i.avatar} />
+                      <AlertP>
+                        <AlertPB>{i.uname}</AlertPB>
+                        {p}
+                      </AlertP>
+                    </AlertLeftWrapper>
+                    <AlertRightWrapper>
+                      <AlertConfirm
+                        onClick={() => {
+                          if (i.type === "borrow") {
+                            //請求確認的話會在確認端把書的狀態改變為借出，借給誰改成那個人
+                            let libraryExceptThisBook;
+                            let bookPutInOtherLendFromList;
+                            getUserInfo(user.uid).then((v) => {
+                              libraryExceptThisBook = v!.library.filter(
+                                (j) => j.isbn !== i.isbn
+                              );
 
-                            v!.library.forEach((j) => {
-                              if (j.isbn === i.isbn) {
-                                const thisbook: CurrentBook = {
-                                  ...j,
-                                  lendTo: i.uname,
-                                  isLendTo: true,
-                                };
-                                updateUserLibrary(user.uid, [
-                                  ...libraryExceptThisBook,
-                                  thisbook,
+                              v!.library.forEach((j) => {
+                                if (j.isbn === i.isbn) {
+                                  const thisbook: CurrentBook = {
+                                    ...j,
+                                    lendTo: i.uname,
+                                    isLendTo: true,
+                                  };
+                                  updateUserLibrary(user.uid, [
+                                    ...libraryExceptThisBook,
+                                    thisbook,
+                                  ]);
+                                }
+                              });
+                              //更新要放到對方lendFromList的書資訊
+                              v?.library?.forEach((j) => {
+                                if (j.isbn === i.isbn) {
+                                  bookPutInOtherLendFromList = {
+                                    ...j,
+                                    lendFrom: user.uid,
+                                    lendFromName: user.uname,
+                                  };
+                                }
+                              });
+                            });
+                            //在請求借書端會把那本書放入自己的借入書籍區
+                            getUserInfo(i.uid).then((v) => {
+                              if (v?.lendFromList) {
+                                updatelendFromList(i.uid, [
+                                  ...v.lendFromList,
+                                  bookPutInOtherLendFromList,
+                                ]);
+                              } else {
+                                updatelendFromList(i.uid, [
+                                  bookPutInOtherLendFromList,
                                 ]);
                               }
+                              //也會檢查對方的願望清單去把他清除掉
+                              updateWishList(
+                                i.uid,
+                                v?.wishList?.filter((j) => j.isbn !== i.isbn) ||
+                                  []
+                              );
                             });
-                            //更新要放到對方lendFromList的書資訊
-                            v?.library?.forEach((j) => {
+                          }
+                          if (i.type === "lendFrom") {
+                            //把他的書改成出借狀態
+                            let libraryExceptThisBook;
+                            getUserInfo(i.uid).then((v) => {
+                              libraryExceptThisBook = v!.library.filter(
+                                (j) => j.isbn !== i.isbn
+                              );
+
+                              v!.library.forEach((j) => {
+                                if (j.isbn === i.isbn) {
+                                  const thisbook: CurrentBook = {
+                                    ...j,
+                                    lendTo: user.uname,
+                                    isLendTo: true,
+                                  };
+                                  updateUserLibrary(i.uid, [
+                                    ...libraryExceptThisBook,
+                                    thisbook,
+                                  ]);
+                                }
+                              });
+                            });
+                            //並加到我的lendFromList，並把lendFrom改成對方id 把name改成對方姓名，方便取出
+                            let b;
+                            user.wishList?.forEach((j) => {
                               if (j.isbn === i.isbn) {
-                                bookPutInOtherLendFromList = {
+                                b = {
                                   ...j,
-                                  lendFrom: user.uid,
-                                  lendFromName: user.uname,
+                                  lendFrom: i.uid,
+                                  lendFromName: i.uname,
                                 };
                               }
                             });
-                          });
-                          //在請求借書端會把那本書放入自己的借入書籍區
-                          getUserInfo(i.uid).then((v) => {
-                            if (v?.lendFromList) {
-                              updatelendFromList(i.uid, [
-                                ...v.lendFromList,
-                                bookPutInOtherLendFromList,
+                            if (user.lendFromList) {
+                              updatelendFromList(user.uid, [
+                                ...user.lendFromList,
+                                b,
                               ]);
                             } else {
-                              updatelendFromList(i.uid, [
-                                bookPutInOtherLendFromList,
-                              ]);
+                              updatelendFromList(user.uid, [b]);
                             }
-                            //也會檢查對方的願望清單去把他清除掉
+                            //把我的書從願望清單移出
                             updateWishList(
-                              i.uid,
-                              v?.wishList?.filter((j) => j.isbn !== i.isbn) ||
+                              user.uid,
+                              user.wishList?.filter((j) => j.isbn !== i.isbn) ||
                                 []
                             );
-                          });
-                        }
-                        if (i.type === "lendFrom") {
-                          //把他的書改成出借狀態
-                          let libraryExceptThisBook;
-                          getUserInfo(i.uid).then((v) => {
-                            libraryExceptThisBook = v!.library.filter(
-                              (j) => j.isbn !== i.isbn
-                            );
-
-                            v!.library.forEach((j) => {
-                              if (j.isbn === i.isbn) {
-                                const thisbook: CurrentBook = {
-                                  ...j,
-                                  lendTo: user.uname,
-                                  isLendTo: true,
-                                };
-                                updateUserLibrary(i.uid, [
-                                  ...libraryExceptThisBook,
-                                  thisbook,
-                                ]);
-                              }
+                            dispatch({
+                              type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
+                              value:
+                                user.wishList?.filter(
+                                  (j) => j.isbn !== i.isbn
+                                ) || [],
                             });
-                          });
-                          //並加到我的lendFromList，並把lendFrom改成對方id 把name改成對方姓名，方便取出
-                          let b;
-                          user.wishList?.forEach((j) => {
-                            if (j.isbn === i.isbn) {
-                              b = {
-                                ...j,
-                                lendFrom: i.uid,
-                                lendFromName: i.uname,
-                              };
-                            }
-                          });
-                          if (user.lendFromList) {
-                            updatelendFromList(user.uid, [
-                              ...user.lendFromList,
-                              b,
-                            ]);
-                          } else {
-                            updatelendFromList(user.uid, [b]);
                           }
-                          //把我的書從願望清單移出
-                          updateWishList(
+                          if (i.type === "giveBack") {
+                            //把我的那本書的出借狀態改成flase 出借人清空
+                            let libraryExceptThisBook;
+                            getUserInfo(user.uid).then((v) => {
+                              libraryExceptThisBook = v!.library.filter(
+                                (j) => j.isbn !== i.isbn
+                              );
+
+                              v!.library.forEach((j) => {
+                                if (j.isbn === i.isbn) {
+                                  const thisbook: CurrentBook = {
+                                    ...j,
+                                    lendTo: "",
+                                    isLendTo: false,
+                                  };
+                                  updateUserLibrary(user.uid, [
+                                    ...libraryExceptThisBook,
+                                    thisbook,
+                                  ]);
+                                }
+                              });
+                            });
+                            //把對方的lendFrom庫裡的那本書清掉
+                            let lendFromListExceptThisBook;
+
+                            getUserInfo(i.uid).then((v) => {
+                              lendFromListExceptThisBook =
+                                v!.lendFromList!.filter(
+                                  (j) => j.isbn !== i.isbn
+                                );
+                              updatelendFromList(
+                                i.uid,
+                                lendFromListExceptThisBook
+                              );
+                              //把對方的歸還通知清掉
+
+                              updateGiveBackAlert(
+                                i.uid,
+                                v?.giveBackAlert?.filter((j) => j !== i.isbn) ||
+                                  []
+                              );
+                            });
+                          }
+                          //把這則通知清除
+                          updateNotification(
                             user.uid,
-                            user.wishList?.filter((j) => j.isbn !== i.isbn) ||
-                              []
+                            notification?.filter((j) => j.isbn !== i.isbn) || []
                           );
+
                           dispatch({
-                            type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
+                            type: actionType.NOTIFICATION.SETNOTIFICATION,
                             value:
-                              user.wishList?.filter((j) => j.isbn !== i.isbn) ||
+                              notification?.filter((j) => j.isbn !== i.isbn) ||
                               [],
                           });
-                        }
-                        if (i.type === "giveBack") {
-                          //把我的那本書的出借狀態改成flase 出借人清空
-                          let libraryExceptThisBook;
-                          getUserInfo(user.uid).then((v) => {
-                            libraryExceptThisBook = v!.library.filter(
-                              (j) => j.isbn !== i.isbn
-                            );
+                          //這個目前是應該不用
+                          // getUserInfo(user.uid).then((v) => {
+                          //   dispatch({
+                          //     type: actionType.USER.SETUSER,
+                          //     value: {
+                          //       ...v,
+                          //       notification:
+                          //         notification?.filter(
+                          //           (j) => j.isbn !== i.isbn
+                          //         ) || [],
+                          //     },
+                          //   });
+                          // });
+                        }}
+                      >
+                        {confirm}
+                      </AlertConfirm>
+                      <AlertCancel
+                        onClick={() => {
+                          //把這則通知清除
+                          updateNotification(
+                            user.uid,
+                            notification?.filter((j) => j.isbn !== i.isbn) || []
+                          );
 
-                            v!.library.forEach((j) => {
-                              if (j.isbn === i.isbn) {
-                                const thisbook: CurrentBook = {
-                                  ...j,
-                                  lendTo: "",
-                                  isLendTo: false,
-                                };
-                                updateUserLibrary(user.uid, [
-                                  ...libraryExceptThisBook,
-                                  thisbook,
-                                ]);
-                              }
+                          dispatch({
+                            type: actionType.NOTIFICATION.SETNOTIFICATION,
+                            value:
+                              notification?.filter((j) => j.isbn !== i.isbn) ||
+                              [],
+                          });
+                          if (i.type === "giveBack") {
+                            getUserInfo(i.uid).then((v) => {
+                              //把對方的歸還通知清掉
+
+                              updateGiveBackAlert(
+                                i.uid,
+                                v?.giveBackAlert?.filter((j) => j !== i.isbn) ||
+                                  []
+                              );
                             });
-                          });
-                          //把對方的lendFrom庫裡的那本書清掉
-                          let lendFromListExceptThisBook;
-
-                          getUserInfo(i.uid).then((v) => {
-                            lendFromListExceptThisBook =
-                              v!.lendFromList!.filter((j) => j.isbn !== i.isbn);
-                            updatelendFromList(
-                              i.uid,
-                              lendFromListExceptThisBook
-                            );
-                            //把對方的歸還通知清掉
-
-                            updateGiveBackAlert(
-                              i.uid,
-                              v?.giveBackAlert?.filter((j) => j !== i.isbn) ||
-                                []
-                            );
-                          });
-                        }
-                        //把這則通知清除
-                        updateNotification(
-                          user.uid,
-                          notification?.filter((j) => j.isbn !== i.isbn) || []
-                        );
-
-                        dispatch({
-                          type: actionType.NOTIFICATION.SETNOTIFICATION,
-                          value:
-                            notification?.filter((j) => j.isbn !== i.isbn) ||
-                            [],
-                        });
-                        //這個目前是應該不用
-                        // getUserInfo(user.uid).then((v) => {
-                        //   dispatch({
-                        //     type: actionType.USER.SETUSER,
-                        //     value: {
-                        //       ...v,
-                        //       notification:
-                        //         notification?.filter(
-                        //           (j) => j.isbn !== i.isbn
-                        //         ) || [],
-                        //     },
-                        //   });
-                        // });
-                      }}
-                    >
-                      {confirm}
-                    </AlertConfirm>
-                    <AlertCancel
-                      onClick={() => {
-                        //把這則通知清除
-                        updateNotification(
-                          user.uid,
-                          notification?.filter((j) => j.isbn !== i.isbn) || []
-                        );
-
-                        dispatch({
-                          type: actionType.NOTIFICATION.SETNOTIFICATION,
-                          value:
-                            notification?.filter((j) => j.isbn !== i.isbn) ||
-                            [],
-                        });
-                        if (i.type === "giveBack") {
-                          getUserInfo(i.uid).then((v) => {
-                            //把對方的歸還通知清掉
-
-                            updateGiveBackAlert(
-                              i.uid,
-                              v?.giveBackAlert?.filter((j) => j !== i.isbn) ||
-                                []
-                            );
-                          });
-                        }
-                      }}
-                    >
-                      {cancel}
-                    </AlertCancel>
-                  </AlertRightWrapper>
-                </AlertDiv>
+                          }
+                        }}
+                      >
+                        {cancel}
+                      </AlertCancel>
+                    </AlertRightWrapper>
+                  </AlertDiv>
+                  <AlertSplit />
+                </>
               );
             })}
           </AlertWrapper>
-
+          <BGBlock
+            $active={bGBlock}
+            onClick={() => {
+              setActive(false);
+              setAccountActive(false);
+              setFriendActive(false);
+              setThemeActive(false);
+              setAlertActive(false);
+              setIsInputActive(false);
+              setInput("");
+              setBGBlock(false);
+            }}
+          />
           <Avatar
             src={user?.avatar || grayBack}
             onClick={() => {
               setActive(!active);
+              setBGBlock(!active);
+
               setAccountActive(false);
               setFriendActive(false);
               setThemeActive(false);
+              setAlertActive(false);
+              setIsInputActive(false);
+              setInput("");
             }}
           ></Avatar>
           <AvatarArrowIconDiv
             onClick={() => {
               setActive(!active);
+              setBGBlock(!active);
+
               setAccountActive(false);
               setFriendActive(false);
               setThemeActive(false);
+              setAlertActive(false);
+              setIsInputActive(false);
+              setInput("");
             }}
           >
             <AvatarArrowIcon src={arrow} />
@@ -534,6 +599,7 @@ function Header() {
           setFriendActive={setFriendActive}
           friendLoading={friendLoading}
           setFriendLoading={setFriendLoading}
+          setActive={setActive}
         />
 
         <UserDiv
@@ -596,12 +662,21 @@ const HeaderDiv = styled.div`
   width: 100vw;
   background: #f3b391;
   z-index: 10;
+
+  @media screen and (max-width: 685px) {
+    justify-content: center;
+  }
 `;
 
 const LeftDiv = styled.div`
   display: flex;
   align-items: center;
   padding-left: 20px;
+  @media screen and (max-width: 685px) {
+    position: absolute;
+    left: 0px;
+    padding-left: 0px;
+  }
 `;
 
 const Logo = styled.p`
@@ -610,6 +685,51 @@ const Logo = styled.p`
   font-weight: 600;
   color: #3f612d;
   cursor: pointer;
+  z-index: 10;
+  @media screen and (max-width: 685px) {
+    display: none;
+  }
+`;
+
+const LogoMobile = styled.p`
+  display: none;
+  @media screen and (max-width: 685px) {
+    display: block;
+    font-size: 28px;
+    font-family: "Inknut Antiqua", serif;
+    font-weight: 600;
+    color: #3f612d;
+    cursor: pointer;
+    z-index: 10;
+  }
+  @media screen and (max-width: 530px) {
+    font-size: 24px;
+  }
+  @media screen and (max-width: 450px) {
+    font-size: 20px;
+    position: relative;
+    right: 16px;
+  }
+  @media screen and (max-width: 420px) {
+    font-size: 16px;
+  }
+`;
+
+const BGSearchBlock = styled.div<{ $active: boolean }>`
+  display: none;
+  @media screen and (max-width: 685px) {
+    display: block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+
+    z-index: ${(props) => (props.$active ? "13" : "-1")};
+    opacity: ${(props) => (props.$active ? "1" : "0")};
+    transition: opacity 0.7s;
+    background: #f3b391;
+  }
 `;
 
 const SearchWrapper = styled.div`
@@ -627,6 +747,7 @@ const SearchIconDiv = styled.div`
   :hover {
     background: #f3eec8;
   }
+  z-index: 15;
 `;
 
 const SearchIcon = styled.img`
@@ -634,7 +755,6 @@ const SearchIcon = styled.img`
   width: 18px;
   left: 10px;
   top: 10px;
-  z-index: 11;
 `;
 
 const SearchInput = styled.input<{ isInputActive: boolean }>`
@@ -656,6 +776,14 @@ const SearchInput = styled.input<{ isInputActive: boolean }>`
     font-family: "Inknut Antiqua", serif;
     color: #3f612d88;
   }
+  z-index: 12;
+  @media screen and (max-width: 685px) {
+    width: ${(props) => (props.isInputActive ? "93vw" : "0px")};
+    z-index: 14;
+  }
+  @media screen and (max-width: 560px) {
+    width: ${(props) => (props.isInputActive ? "90vw" : "0px")};
+  }
 `;
 
 const SearchResultWrapper = styled.div<{ searchResultActive: boolean }>`
@@ -668,9 +796,14 @@ const SearchResultWrapper = styled.div<{ searchResultActive: boolean }>`
   border-radius: 6px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
   background: #f6d4ba;
-  z-index: 11;
+  z-index: 12;
   color: #3f612d;
   display: ${(props) => (props.searchResultActive ? "block" : "none")};
+  @media screen and (max-width: 685px) {
+    width: ${() => `calc(100vw - 15px)`};
+    left: 0px;
+    border-radius: 0px;
+  }
 `;
 
 const SearchResultDiv = styled.div`
@@ -716,6 +849,10 @@ const RightDiv = styled.div`
   display: flex;
   align-items: center;
   padding-right: 32px;
+  @media screen and (max-width: 685px) {
+    position: absolute;
+    right: 0px;
+  }
 `;
 
 const AlertIconDiv = styled.div`
@@ -732,6 +869,7 @@ const AlertIconDiv = styled.div`
   :hover {
     background: #f3eec8;
   }
+  z-index: 12;
 `;
 
 const AlertIcon = styled.img`
@@ -756,6 +894,12 @@ const AlertWrapper = styled.div<{ $alertActive: boolean }>`
   padding: 8px 0px;
   border-radius: 6px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  @media screen and (max-width: 830px) {
+    width: ${() => `calc(100vw - 15px)`};
+    right: 15px;
+    top: 47px;
+    border-radius: 0px;
+  }
 `;
 
 const AlertDiv = styled.div`
@@ -767,6 +911,14 @@ const AlertDiv = styled.div`
   padding: 0px 8px;
   border-radius: 6px;
   justify-content: space-between;
+`;
+
+const AlertSplit = styled.div`
+  width: 344px;
+  border-bottom: 2px solid #f3b391;
+  :last-child {
+    display: none;
+  }
 `;
 
 const AlertAvatar = styled.img`
@@ -824,6 +976,18 @@ const AlertCancel = styled.div`
   }
 `;
 
+const BGBlock = styled.div<{ $active: boolean }>`
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+
+  z-index: 9;
+  display: ${(props) => (props.$active ? "block" : "none")};
+  // background: #00000035;
+`;
+
 const Avatar = styled.img`
   width: 38px;
   height: 38px;
@@ -831,6 +995,8 @@ const Avatar = styled.img`
   background: #fefadc;
   border-radius: 50%;
   user-select: none;
+  cursor: pointer;
+  z-index: 12;
 `;
 
 const AvatarArrowIconDiv = styled.div`
@@ -847,6 +1013,7 @@ const AvatarArrowIconDiv = styled.div`
   :hover {
     background: #f3eec8;
   }
+  z-index: 12;
 `;
 
 const AvatarArrowIcon = styled.img`
@@ -871,6 +1038,13 @@ const UserWrapper = styled.div<{ $active: boolean }>`
   padding: 8px 0px;
   border-radius: 6px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  @media screen and (max-width: 830px) {
+    width: ${() => `calc(100vw - 15px)`};
+    right: 0px;
+    top: 56px;
+    border-radius: 0px;
+    padding: 0px 0px;
+  }
 `;
 
 const RightArrow = styled.img`
@@ -891,6 +1065,10 @@ const UserDiv = styled.div`
   cursor: pointer;
   :hover {
     background: #f3b391;
+  }
+  @media screen and (max-width: 830px) {
+    width: 100%;
+    border-radius: 0px;
   }
 `;
 

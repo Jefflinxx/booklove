@@ -8,8 +8,10 @@ import { User } from "../../reducer/userReducer";
 import ReactLoading from "react-loading";
 
 import back from "../Header/back.svg";
+import { promises } from "stream";
 
 type FriendProps = {
+  setActive: (value: boolean) => void;
   friendActive: boolean;
   setFriendActive: (value: boolean) => void;
   friendLoading: boolean;
@@ -17,6 +19,7 @@ type FriendProps = {
 };
 
 const Friend: React.FC<FriendProps> = ({
+  setActive,
   friendActive,
   setFriendActive,
   friendLoading,
@@ -35,7 +38,24 @@ const Friend: React.FC<FriendProps> = ({
       const a: User | null = await getUserInfo(user.uid);
 
       if (a?.followList) {
-        setFollowList(a.followList);
+        const newFollowList: { uid: string; avatar: string; uname: string }[] =
+          [];
+        const all: Promise<User | null>[] = [];
+        a.followList.forEach((i) => {
+          all.push(getUserInfo(i.uid));
+        });
+        Promise.all(all).then((j) => {
+          console.log(j);
+          j?.forEach((k) => {
+            newFollowList.push({
+              uid: k!.uid,
+              uname: k!.uname,
+              avatar: k!.avatar,
+            });
+          });
+          console.log(newFollowList);
+          setFollowList(newFollowList);
+        });
       }
       setFriendLoading(false);
     };
@@ -83,7 +103,14 @@ const Friend: React.FC<FriendProps> = ({
                     },
                   });
                 }
+                //偷更新user
+                const u = await getUserInfo(user.uid);
+                dispatch({
+                  type: actionType.USER.SETUSER,
+                  value: u || null,
+                });
 
+                setActive(false);
                 navigator(`./${i.uid}`);
               }}
             >
@@ -103,7 +130,7 @@ export default Friend;
 const Wrapper = styled.div<{
   $active: boolean;
 }>`
-  z-index: 3;
+  z-index: 13;
   display: ${(props) => (props.$active ? "flex" : "none")};
   position: absolute;
   top: 0px;
@@ -117,6 +144,11 @@ const Wrapper = styled.div<{
   padding-bottom: 8px;
   border-radius: 6px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  @media screen and (max-width: 830px) {
+    width: 100%;
+    height: 200px;
+    border-radius: 0px;
+  }
 `;
 
 const TitleWrapper = styled.div`
@@ -124,6 +156,9 @@ const TitleWrapper = styled.div`
   align-items: center;
   height: 60px;
   padding: 16px 16px 8px;
+  @media screen and (max-width: 830px) {
+    justify-content: center;
+  }
 `;
 const BackIconDiv = styled.div`
   width: 38px;
@@ -133,6 +168,11 @@ const BackIconDiv = styled.div`
   cursor: pointer;
   :hover {
     background: #f3b391;
+  }
+  @media screen and (max-width: 830px) {
+    position: absolute;
+    top: 15px;
+    left: 12px;
   }
 `;
 
@@ -146,6 +186,9 @@ const Title = styled.div`
   font-size: 24px;
   font-weight: 500;
   padding-left: 10px;
+  @media screen and (max-width: 830px) {
+    padding-left: 0px;
+  }
 `;
 
 const FriendWrapper = styled.div`
@@ -182,6 +225,11 @@ const FriendDiv = styled.div`
   cursor: pointer;
   :hover {
     background: #f3b391;
+  }
+  @media screen and (max-width: 830px) {
+    width: 100%;
+    border-radius: 0px;
+    justify-content: center;
   }
 `;
 

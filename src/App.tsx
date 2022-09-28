@@ -85,6 +85,7 @@ const GlobalStyle = createGlobalStyle`
     background:none;  	
     outline:none;  	
     border:none;
+    user-select: auto;
 }
 body{
   background:#f6d4ba;
