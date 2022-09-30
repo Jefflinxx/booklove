@@ -69,7 +69,14 @@ function Book() {
     getTotalLike();
   }, []);
 
-  // useEffect(() => {}, [displayLibrary]);
+  useEffect(() => {
+    getUserInfo(user.uid).then((v) => {
+      dispatch({
+        type: actionType.USER.SETUSER,
+        value: v,
+      });
+    });
+  }, []);
 
   return (
     <>
@@ -78,7 +85,7 @@ function Book() {
           <TopIconDivWrapper>
             <BackIconDiv
               onClick={() => {
-                navigator(-1);
+                navigator("../../");
               }}
             >
               <BackIcon src={back}></BackIcon>
@@ -147,16 +154,38 @@ function Book() {
                     $i={i}
                     progressArray={progressArray}
                     key={i}
+                    onMouseEnter={() => {
+                      setProgressArray(() => {
+                        const a: number[] = [];
+                        for (let j = 1; j <= i; j++) {
+                          a.push(j);
+                        }
+                        return [...a];
+                      });
+                    }}
+                    onMouseLeave={() => {
+                      setProgressArray(() => {
+                        const a: number[] = [];
+                        for (
+                          let j = 1;
+                          j <= currentBook.alreadyReadChapter;
+                          j++
+                        ) {
+                          a.push(j);
+                        }
+                        return a;
+                      });
+                    }}
                     onClick={async () => {
                       const userData = await getUserInfo(user.uid);
                       if (userData) {
-                        setProgressArray(() => {
-                          const a: number[] = [];
-                          for (let j = 1; j <= i; j++) {
-                            a.push(j);
-                          }
-                          return [...a];
-                        });
+                        // setProgressArray(() => {
+                        //   const a: number[] = [];
+                        //   for (let j = 1; j <= i; j++) {
+                        //     a.push(j);
+                        //   }
+                        //   return [...a];
+                        // });
                         if (i === currentBook.totalChapter) {
                           updateUserLibrary(user.uid, [
                             {
@@ -168,6 +197,15 @@ function Book() {
                               (i) => i.isbn !== currentBook.isbn
                             ),
                           ]);
+
+                          dispatch({
+                            type: actionType.BOOK.SETBOOKDATA,
+                            value: {
+                              ...currentBook,
+                              alreadyReadChapter: i,
+                              isFinishRead: true,
+                            },
+                          });
                         } else {
                           updateUserLibrary(user.uid, [
                             {
@@ -179,6 +217,15 @@ function Book() {
                               (i) => i.isbn !== currentBook.isbn
                             ),
                           ]);
+
+                          dispatch({
+                            type: actionType.BOOK.SETBOOKDATA,
+                            value: {
+                              ...currentBook,
+                              alreadyReadChapter: i,
+                              isFinishRead: false,
+                            },
+                          });
                         }
                       }
                     }}
@@ -196,6 +243,20 @@ function Book() {
               ) : (
                 <ProgressTip
                   onClick={() => {
+                    getUserInfo(user.uid).then((v) => {
+                      dispatch({
+                        type: actionType.USER.SETUSER,
+                        value: v,
+                      });
+                      v?.library.forEach((i) => {
+                        if (i.isbn === currentBook.isbn) {
+                          dispatch({
+                            type: actionType.BOOK.SETBOOKDATA,
+                            value: i,
+                          });
+                        }
+                      });
+                    });
                     navigator(`../edit/${user.uid}${currentBook.isbn}`);
                   }}
                 >

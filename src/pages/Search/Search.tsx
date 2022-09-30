@@ -1,6 +1,7 @@
 import search from "./search.svg";
 import back from "./back.svg";
 import bg from "./search.jpeg";
+import bc from "./bookcover.jpg";
 
 import { actionType } from "../../reducer/rootReducer";
 import { useSelector, useDispatch } from "react-redux";
@@ -17,6 +18,7 @@ import {
 } from "../../utils/firestore";
 import { stringify } from "querystring";
 import { useNavigate } from "react-router-dom";
+import ReactLoading from "react-loading";
 
 const googleApi = `https://www.googleapis.com/books/v1/volumes?q=`;
 const esliteApi = `https://athena.eslite.com/api/v2/search?q=`;
@@ -24,7 +26,9 @@ function Search() {
   const dispatch = useDispatch();
   const navigator = useNavigate();
   const [input, setInput] = useState("");
+  // const [popupInfo, setPopupInfo] = useState("");
   const [resultCountActive, setResultCountActive] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [popupActive, setPopupActive] = useState(false);
   const [barrierBGActive, setBarrierBGActive] = useState<boolean>(false);
   const [bookAlreadyInLibrary, setBookAlreadyInLibrary] = useState<string[]>(
@@ -50,6 +54,7 @@ function Search() {
   const friendSearchRef = useRef<HTMLInputElement>(null);
 
   const fetchGoogleBooksData = async (input: string) => {
+    setLoading(true);
     const apiKey = "AIzaSyDz4bZxMmhDzE2XFztfzDqrBaCEuyiwFe4";
     const response = await fetch(
       `${googleApi}${input}&maxResults=40&key=${apiKey}`,
@@ -118,7 +123,7 @@ function Search() {
               name: name || "查無資料",
               author: author || "查無資料",
               publisher: publisher || "查無資料",
-              picture_url: picture_url || "查無資料",
+              picture_url: picture_url || bc,
               isbn: isbn,
             },
           ];
@@ -126,6 +131,7 @@ function Search() {
       }
     );
     setResultCountActive(true);
+    setLoading(false);
   };
 
   //誠品
@@ -192,7 +198,7 @@ function Search() {
     setBookAlreadyInWishList(b);
   }, [books]);
 
-  console.log(bookAlreadyInLibrary);
+  console.log(input);
 
   return (
     <>
@@ -207,6 +213,30 @@ function Search() {
         >
           ✗
         </PopupClose>
+        <PopupBtnW>
+          <PopupBtn
+            // $popupInfo={popupInfo}
+            // onClick={() => {
+            //   console.log(popupInfo);
+            //   window.location.assign(`../edit/${user.uid}${popupInfo}`);
+            //   //navigator(`../book/${user.uid}${popupInfo}`);
+            // }}
+            onClick={() => {
+              navigator(-1);
+            }}
+          >
+            回到主頁
+          </PopupBtn>
+          <PopupBtn
+            // $popupInfo={popupInfo}
+            onClick={() => {
+              setPopupActive(false);
+              setBarrierBGActive(false);
+            }}
+          >
+            繼續加書
+          </PopupBtn>
+        </PopupBtnW>
       </Popup>
       <WholeWrapper>
         <Center>
@@ -227,13 +257,23 @@ function Search() {
               onKeyPress={(e) => {
                 if (e.key === "Enter") {
                   //fetchEsliteBooksData(input);
-                  fetchGoogleBooksData(input);
+
+                  if (input.trim()) {
+                    fetchGoogleBooksData(input);
+                  } else {
+                    console.log("不能空白");
+                  }
                 }
               }}
               onChange={(e) => {
                 setInput(e.target.value);
               }}
             ></Input>
+            {loading && (
+              <SearchLoading $active={resultCountActive}>
+                <ReactLoading type="cylon" color="black" width={40} />
+              </SearchLoading>
+            )}
           </SearchIconDiv>
           {resultCountActive ? (
             <>
@@ -274,6 +314,7 @@ function Search() {
                         <AddBookBtn
                           $a={bookAlreadyInLibrary.find((j) => i.isbn === j)}
                           onClick={() => {
+                            // setPopupInfo(i.isbn);
                             addSearchBookToUserLibrary(
                               user.uid,
                               i.isbn,
@@ -305,6 +346,7 @@ function Search() {
                         <AddToWishList
                           $b={bookAlreadyInWishList.find((j) => i.isbn === j)}
                           onClick={() => {
+                            // setPopupInfo("");
                             addSearchBookToUserWishList(
                               user.uid,
                               i.isbn,
@@ -313,8 +355,9 @@ function Search() {
                               i.publisher,
                               i.picture_url
                             );
+
                             setBookAlreadyInWishList([
-                              ...bookAlreadyInLibrary,
+                              ...bookAlreadyInWishList,
                               i.isbn,
                             ]);
                             setPopupActive(true);
@@ -527,12 +570,13 @@ const Popup = styled.div<{ $active: boolean }>`
   display: ${(props) => (props.$active ? "flex" : "none")};
   align-items: center;
   justify-content: center;
+  flex-direction: column;
   font-size: 24px;
   position: fixed;
   top: 50vh;
   left: 50vw;
   width: 300px;
-  height: 100px;
+  height: 140px;
   transform: translate(-50%, -50%);
   z-index: 9;
   background: #fefadc;
@@ -565,6 +609,32 @@ const PopupClose = styled.div`
   border-radius: 50%;
   background: #f3b391;
   border: 1px solid #fefadc;
+  :hover {
+    background: #dc9d7b;
+  }
+  cursor: pointer;
+`;
+
+const PopupBtnW = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+`;
+const PopupBtn = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 30px;
+  background: #f6d4ba;
+  border-radius: 6px;
+  font-size: 20px;
+  margin: 0px 8px;
+  :hover {
+    background: #e9c5a9;
+  }
+  cursor: pointer;
 `;
 
 const AddBookBtn = styled.div<{ $a: string | undefined }>`
@@ -579,7 +649,7 @@ font-size:16px;
 
   display: flex;
   }};
-  color:${(props) => (props.$a ? "gray" : "#3f612d")};
+  color:${(props) => (props.$a ? "gray" : "#1f2e16 ")};
   background: ${(props) => (props.$a ? "" : "")};
   cursor: ${(props) => (props.$a ? "not-allowed" : "pointer")};
   :hover {
@@ -588,7 +658,7 @@ font-size:16px;
 `;
 
 const SplitBtn = styled.div`
-  border-left: 2px solid #3f612d;
+  border-left: 2px solid #1f2e16;
   height: 24px;
 `;
 
@@ -601,10 +671,23 @@ const AddToWishList = styled.div<{ $b: string | undefined }>`
   border-radius: 6px;
 
   display: flex;
-  color: ${(props) => (props.$b ? "#b4b7bc" : "#3f612d")};
+  color: ${(props) => (props.$b ? "gray" : "#1f2e16 ")};
   background: ${(props) => (props.$b ? "" : "")};
   cursor: ${(props) => (props.$b ? "not-allowed" : "pointer")};
   :hover {
     background: ${(props) => (props.$b ? "" : "#fefadc")};
   }
+`;
+
+const SearchLoading = styled.div<{ $active: boolean }>`
+  position: absolute;
+  bottom: 0px;
+  right: ${(props) => (props.$active ? "290px" : "0px")};
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // background: white;
 `;

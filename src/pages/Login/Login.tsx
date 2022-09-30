@@ -72,6 +72,7 @@ const Login = () => {
             onSubmit={(e) => {
               e.preventDefault();
               setLoading(true);
+
               if (signState === "signup") {
                 createUserWithEmailAndPassword(auth, email, password)
                   .then((u) => {
@@ -85,11 +86,11 @@ const Login = () => {
                   })
                   .catch((e) => {
                     if (e.code === "auth/email-already-in-use") {
-                      console.log("信箱已存在");
+                      alert("信箱已存在");
                     } else if (e.code === "auth/invalid-email") {
-                      console.log("信箱格式不正確");
+                      alert("信箱格式不正確");
                     } else if (e.code === "auth/week-password") {
-                      console.log("密碼強度不足");
+                      alert("密碼強度不足");
                     }
                     setLoading(false);
                   });
@@ -105,11 +106,11 @@ const Login = () => {
                   })
                   .catch((e) => {
                     if (e.code === "auth/invalid-email") {
-                      console.log("信箱格式不正確");
+                      alert("信箱格式不正確");
                     } else if (e.code === "auth/user-not-found") {
-                      console.log("信箱不存在");
+                      alert("信箱不存在");
                     } else if (e.code === "auth/wrong-password") {
-                      console.log("密碼錯誤");
+                      alert("密碼錯誤");
                     }
                     setLoading(false);
                   });
@@ -159,11 +160,13 @@ const LoginPage = styled.div`
   width: 100vw;
   height: 100vh;
   background: #f6d4ba;
-  border: 1px solid black;
 
   display: flex;
   align-items: center;
   justify-content: center;
+  @media screen and (max-width: 1080px) {
+    flex-direction: column;
+  }
 `;
 
 const PicWrapper = styled.div`
@@ -173,6 +176,9 @@ const PicWrapper = styled.div`
   width: 500px;
   height: 100vh;
   background: #f6d4ba;
+  @media screen and (max-width: 1080px) {
+    display: none;
+  }
 `;
 const Pic = styled.img`
   width: 500px;
@@ -201,6 +207,13 @@ const TitleWrapper = styled.div`
   display: flex;
   justify-content: center;
   flex-direction: column;
+  @media screen and (max-width: 1080px) {
+    align-items: center;
+    height: auto;
+  }
+  @media screen and (max-width: 580px) {
+    width: auto;
+  }
 `;
 const Title = styled.p`
   font-size: 60px;
@@ -208,6 +221,16 @@ const Title = styled.p`
   line-height: 100px;
   color: #3f612d;
   font-family: "Inknut Antiqua", serif;
+  @media screen and (max-width: 1080px) {
+    display: flex;
+    justify-content: center;
+  }
+  @media screen and (max-width: 580px) {
+    font-size: 48px;
+  }
+  @media screen and (max-width: 400px) {
+    font-size: 36px;
+  }
 `;
 const SubTitle = styled.p`
   width: 500px;
@@ -215,6 +238,17 @@ const SubTitle = styled.p`
   font-weight: 300;
   font-size: 28px;
   letter-spacing: 4px;
+  @media screen and (max-width: 1080px) {
+    display: flex;
+    justify-content: center;
+  }
+  @media screen and (max-width: 580px) {
+    font-size: 24px;
+    width: 100vw;
+  }
+  @media screen and (max-width: 400px) {
+    font-size: 20px;
+  }
 `;
 const LW = styled.div`
   z-index: 17;
@@ -235,6 +269,11 @@ const LoginWrapper = styled.div`
   display: flex;
   align-items: center;
   flex-direction: column;
+  @media screen and (max-width: 400px) {
+    border-radius: 0px;
+    background: #f6d4ba;
+    box-shadow: none;
+  }
 `;
 
 const LoginButtonDiv = styled.div`
@@ -246,6 +285,10 @@ const LoginButtonDiv = styled.div`
   margin: 16px 0px;
   border: 1px solid #f6d4ba;
   border-radius: 6px;
+  @media screen and (max-width: 400px) {
+    width: 90vw;
+    border: 1px solid #fefadc;
+  }
 `;
 
 const Signup = styled.div<{ signState: string }>`
@@ -258,6 +301,9 @@ const Signup = styled.div<{ signState: string }>`
   font-size: 21px;
   border-radius: 6px;
   background: ${(props) => (props.signState === "signup" ? "#3f612d" : "none")};
+  @media screen and (max-width: 400px) {
+    width: 50vw;
+  }
 `;
 
 const Signin = styled.div<{ signState: string }>`
@@ -270,6 +316,9 @@ const Signin = styled.div<{ signState: string }>`
   align-items: center;
   justify-content: center;
   background: ${(props) => (props.signState === "signin" ? "#3f612d" : "none")};
+  @media screen and (max-width: 400px) {
+    width: 50vw;
+  }
 `;
 
 const Form = styled.form`
@@ -278,6 +327,9 @@ const Form = styled.form`
   display: flex;
   align-items: center;
   flex-direction: column;
+  @media screen and (max-width: 400px) {
+    width: 100vw;
+  }
 `;
 
 const Input = styled.input`
@@ -294,6 +346,9 @@ const Input = styled.input`
   ::placeholder {
     color: gray;
   }
+  @media screen and (max-width: 400px) {
+    width: 90vw;
+  }
 `;
 
 const Button = styled.button`
@@ -305,6 +360,9 @@ const Button = styled.button`
   color: black;
   border-radius: 6px;
   margin-bottom: 36px;
+  @media screen and (max-width: 400px) {
+    width: 90vw;
+  }
 `;
 
 const TestP = styled.p`

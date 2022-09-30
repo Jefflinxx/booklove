@@ -1,7 +1,11 @@
 import styled from "styled-components";
 import { actionType } from "../../reducer/rootReducer";
 import { useSelector, useDispatch } from "react-redux";
-import { getUserInfo, updateUserLibrary } from "../../utils/firestore";
+import {
+  getUserInfo,
+  updateUserLibrary,
+  updateCategory,
+} from "../../utils/firestore";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { storage } from "../../utils/firebase";
@@ -33,6 +37,7 @@ function Edit() {
   const [publicActive, setPublicActive] = useState<boolean>(true);
   const [isLendToActive, setIsLendToActive] = useState<boolean>(false);
   const [summaryData, setSummaryData] = useState<string | null>(null);
+  const [categoryInput, setCategoryInput] = useState<string>("");
 
   const uploadImage = async () => {
     if (imageFile === null) return;
@@ -74,7 +79,7 @@ function Edit() {
           <DeleteIconDivWrapper>
             <BackIconDiv
               onClick={() => {
-                navigator(-1);
+                navigator(`../book/${user.uid}${currentBook.isbn}`);
               }}
             >
               <BackIcon src={back}></BackIcon>
@@ -253,6 +258,52 @@ function Edit() {
                         {i}
                       </CategoryDiv>
                     ))}
+
+                    <CategoryInputWrapper>
+                      <CategoryInput
+                        placeholder="新增類別"
+                        value={categoryInput}
+                        onChange={(e) => {
+                          setCategoryInput(e.target.value);
+                        }}
+                      />
+                      <CategoryPlus
+                        onClick={() => {
+                          if (
+                            user?.category &&
+                            user?.category.find((j) => j === categoryInput)
+                          ) {
+                            return;
+                          } else if (categoryInput.trim() === "") {
+                            return;
+                          } else if (user?.category) {
+                            updateCategory(user.uid, [
+                              ...user.category,
+                              categoryInput,
+                            ]);
+                            dispatch({
+                              type: actionType.USER.SETUSER,
+                              value: {
+                                ...user,
+                                category: [...user.category, categoryInput],
+                              },
+                            });
+                          } else {
+                            updateCategory(user.uid, [categoryInput]);
+                            dispatch({
+                              type: actionType.USER.SETUSER,
+                              value: {
+                                ...user,
+                                category: [categoryInput],
+                              },
+                            });
+                          }
+                          setCategoryInput("");
+                        }}
+                      >
+                        +
+                      </CategoryPlus>
+                    </CategoryInputWrapper>
                   </CategoryWrapper>
                 </SectionItem>
 
@@ -297,7 +348,7 @@ function Edit() {
                   onChange={(e) => {
                     const a = Number(e.target.value);
 
-                    if (isNaN(a)) {
+                    if (isNaN(a) || a > 30) {
                       setProgressWarn(true);
                     } else {
                       setProgressWarn(false);
@@ -308,7 +359,7 @@ function Edit() {
                   // {...register("totalChapter")}
                 ></Progress>
                 <ProgressWarn progressWarn={progressWarn}>
-                  請輸入數字
+                  請輸入數字，且不可大於30
                 </ProgressWarn>
               </SectionBItem>
               <SectionBItem>
@@ -533,6 +584,8 @@ const CategoryP = styled.div`
 const CategoryWrapper = styled.div`
   display: flex;
   height: auto;
+  width: 360px;
+  flex-wrap: wrap;
 `;
 const CategoryDiv = styled.div<{ categoryArray: string[]; $i: string }>`
   display: flex;
@@ -545,6 +598,46 @@ const CategoryDiv = styled.div<{ categoryArray: string[]; $i: string }>`
   border-radius: 6px;
   background: ${(props) =>
     props.categoryArray.find((j) => j === props.$i) ? "#f3b391" : "#fefadc"};
+`;
+
+const CategoryInputWrapper = styled.div`
+  position: relative;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+`;
+
+const CategoryInput = styled.input`
+  border-bottom: 1px solid #3f612d;
+  width: 220px;
+  text-align: center;
+  font-size: 24px;
+  color: #1f2e16;
+  ::placeholder {
+    color: gray;
+  }
+`;
+const CategoryPlus = styled.div`
+  position: absolute;
+  bottom: 12px;
+  right: 0px;
+  width: 28px;
+  height: 28px;
+  font-size: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  z-index: 3;
+  color: #3f612d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  :hover {
+    background: #f3eec8;
+    color: #1f2e16;
+  }
 `;
 
 const LikeDiv = styled.div<{ likeActive: boolean }>`

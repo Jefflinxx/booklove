@@ -475,6 +475,7 @@ function Home() {
                         <CategoryInputWrapper>
                           <CategoryInput
                             placeholder="新增類別"
+                            value={categoryInput}
                             onChange={(e) => {
                               setCategoryInput(e.target.value);
                             }}
@@ -488,7 +489,7 @@ function Home() {
                                 )
                               ) {
                                 return;
-                              } else if (categoryInput === "") {
+                              } else if (categoryInput.trim() === "") {
                                 return;
                               } else if (displayUser?.category) {
                                 updateCategory(user.uid, [
@@ -515,6 +516,7 @@ function Home() {
                                   },
                                 });
                               }
+                              setCategoryInput("");
                             }}
                           >
                             +
@@ -578,7 +580,8 @@ function Home() {
                               setCategoryCurrent(i);
                             }}
                           >
-                            {i}
+                            <CategoryDivP>{i}</CategoryDivP>
+
                             <DeleteCategory
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -1324,6 +1327,8 @@ const CategoryButton = styled.div<{ $active: string | null }>`
   font-size: 24px;
   color: #3f612d;
   border-radius: 6px;
+  overflow: overlay;
+
   :hover {
     background: #fefadc;
   }
@@ -1347,6 +1352,8 @@ const CategoryButton = styled.div<{ $active: string | null }>`
 const CategoryWrapper = styled.div<{ categorySelectActive: boolean }>`
   width: 240px;
   height: auto;
+  max-height: 300px;
+  overflow-y: overlay;
 
   position: absolute;
   top: 48px;
@@ -1384,6 +1391,9 @@ const CategoryDiv = styled.div`
     background: #f3b391;
   }
 `;
+const CategoryDivP = styled.p`
+  overflow-x: overlay;
+`;
 
 const DeleteCategory = styled.div`
   cursor: pointer;
@@ -1415,6 +1425,7 @@ const CategoryInput = styled.input`
   width: 220px;
   text-align: center;
   font-size: 24px;
+  color: #1f2e16;
   ::placeholder {
     color: gray;
   }
@@ -1429,7 +1440,7 @@ const CategoryPlus = styled.div`
   border-radius: 6px;
   cursor: pointer;
   user-select: none;
-
+  z-index: 3;
   color: #3f612d;
   display: flex;
   align-items: center;
@@ -1549,7 +1560,7 @@ const AddToLibrary = styled.div`
   align-items: center;
   justify-content: center;
   cursor: pointer;
-
+  color: #3f612d;
   :hover {
     background: #fefadc;
   }

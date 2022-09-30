@@ -33,7 +33,7 @@ function TopSection() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [bSKT, setBSKT] = useState<boolean>(true);
   const [confirmActive, setConfirmActive] = useState<boolean>(false);
-  const [libraryCount, setLibraryCount] = useState<number | null>(null);
+  const [libraryCount, setLibraryCount] = useState<number | null>(0);
   const library = useSelector(
     (state: { currentLibraryReducer: CurrentBook[] }) =>
       state.currentLibraryReducer
@@ -171,7 +171,7 @@ function TopSection() {
           <InfoLeft>
             <Avatar src={topSDisplay.avatar} />
             <Username>{topSDisplay.uname}</Username>
-            {libraryCount && libraryCount <= 1 ? (
+            {Number(libraryCount) === 0 || Number(libraryCount) === 1 ? (
               <LibraryCount>{`${libraryCount} book`}</LibraryCount>
             ) : (
               <LibraryCount>{`${libraryCount} books`}</LibraryCount>

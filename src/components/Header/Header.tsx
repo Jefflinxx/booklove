@@ -123,6 +123,7 @@ function Header() {
 
   useEffect(() => {
     if (user) {
+      console.log("拿通知");
       getUserInfo(user.uid).then((v) => {
         dispatch({
           type: actionType.NOTIFICATION.SETNOTIFICATION,
@@ -134,7 +135,7 @@ function Header() {
         // });
       });
     }
-  }, [alertActive]);
+  }, [alertActive, user]);
 
   return (
     <>
@@ -281,6 +282,7 @@ function Header() {
             }}
           >
             <AlertIcon src={alert} />
+            {notification?.length ? <AlertDot></AlertDot> : <></>}
           </AlertIconDiv>
 
           <AlertWrapper $alertActive={alertActive}>
@@ -305,8 +307,8 @@ function Header() {
                 cancel = "取消";
               }
               return (
-                <>
-                  <AlertDiv key={`${i.type}${i.uname}${i.bookname}`}>
+                <div key={`${i.type}${i.uname}${i.bookname}`}>
+                  <AlertDiv>
                     <AlertLeftWrapper>
                       <AlertAvatar src={i.avatar} />
                       <AlertP>
@@ -529,7 +531,7 @@ function Header() {
                     </AlertRightWrapper>
                   </AlertDiv>
                   <AlertSplit />
-                </>
+                </div>
               );
             })}
           </AlertWrapper>
@@ -877,6 +879,17 @@ const AlertIcon = styled.img`
   width: 20px;
   left: 9px;
   top: 8px;
+`;
+
+const AlertDot = styled.div`
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  position: absolute;
+
+  right: -2px;
+  top: -2px;
+  background: #feea00;
 `;
 
 const AlertWrapper = styled.div<{ $alertActive: boolean }>`

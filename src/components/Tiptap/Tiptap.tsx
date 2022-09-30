@@ -180,7 +180,10 @@ const ContentWrapper = styled.div`
     border-radius: 0.5rem;
     user-select: auto;
   }
-  p {
+  p,
+  strong,
+  s,
+  em {
     user-select: auto;
   }
 `;
@@ -191,6 +194,10 @@ const BtnWrapper = styled.div`
   border-radius: 6px 6px 0px 0px;
   border: 1px solid #3f612d;
   background: #f3b391;
+  .is-active {
+    background: #f6d4ba;
+    border-radius: 6px 6px 0px 0px;
+  }
 `;
 const Button = styled.div`
   display: flex;

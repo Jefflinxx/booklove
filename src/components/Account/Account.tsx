@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { storage } from "../../utils/firebase";
 import { getUserInfo, updateUser } from "../../utils/firestore";
@@ -28,6 +28,7 @@ const Account: React.FC<AccountProps> = ({
   const [input, setInput] = useState<string>("");
   const [readCount, setReadCount] = useState<number>(0);
   const [writeCount, setWriteCount] = useState<number>(0);
+  // const userNameRef = useRef<HTMLInputElement>(null);
 
   const uploadImage = async () => {
     if (imageFile === null) return;
@@ -111,15 +112,19 @@ const Account: React.FC<AccountProps> = ({
         <UnameWrapper>
           <Username $isEdit={isEdit}>{user?.uname}</Username>
           <UsernameInput
+            // ref={userNameRef}
             $isEdit={isEdit}
             onChange={(e) => {
-              setInput(e.target.value);
+              if (e.target.value.length < 17) {
+                setInput(e.target.value);
+              }
             }}
             value={input}
           ></UsernameInput>
           <EditIconDiv
             onClick={() => {
               setIsEdit(!isEdit);
+              // userNameRef?.current?.focus();
             }}
           >
             <EditIcon src={edit}></EditIcon>
