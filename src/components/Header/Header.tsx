@@ -89,6 +89,14 @@ function Header() {
           type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
           value: [],
         });
+        dispatch({
+          type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
+          value: {
+            avatar: "",
+            uname: "",
+            background: "",
+          },
+        });
         setActive(false);
         setAccountActive(false);
         setFriendActive(false);

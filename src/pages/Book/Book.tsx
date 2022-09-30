@@ -67,16 +67,16 @@ function Book() {
     };
 
     getTotalLike();
-  }, []);
+  }, [currentBook]);
 
-  useEffect(() => {
-    getUserInfo(user.uid).then((v) => {
-      dispatch({
-        type: actionType.USER.SETUSER,
-        value: v,
-      });
-    });
-  }, []);
+  // useEffect(() => {
+  //   getUserInfo(user.uid).then((v) => {
+  //     dispatch({
+  //       type: actionType.USER.SETUSER,
+  //       value: v,
+  //     });
+  //   });
+  // }, []);
 
   return (
     <>
@@ -133,7 +133,7 @@ function Book() {
               <SectionItem>
                 <CategoryP>分類</CategoryP>
                 {currentBook?.category?.map((i) => {
-                  return <Category>{i}</Category>;
+                  return <Category key={i}>{i}</Category>;
                 })}
                 {/* <Category>{currentBook.category}</Category> */}
               </SectionItem>
@@ -264,6 +264,10 @@ function Book() {
                 </ProgressTip>
               )}
             </ProgressSectionBItem>
+            <SectionBItem>
+              <PlaceP>書籤頁</PlaceP>
+              <Place>{currentBook.page && `${currentBook.page}頁`}</Place>
+            </SectionBItem>
             <SectionBItem>
               <PlaceP>放置位置</PlaceP>
               <Place>{currentBook.place}</Place>

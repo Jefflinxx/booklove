@@ -13,6 +13,7 @@ export type BookInfo = {
   category: string[];
   totalChapter: number;
   alreadyReadChapter: number;
+  page: number;
   isFinishRead: boolean;
   place: string;
   lendTo: string;

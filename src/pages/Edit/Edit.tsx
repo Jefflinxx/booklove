@@ -7,12 +7,14 @@ import {
   updateCategory,
 } from "../../utils/firestore";
 import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { appendErrors, useForm } from "react-hook-form";
 import { storage } from "../../utils/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useEffect, useState } from "react";
 import { User } from "../../reducer/userReducer";
-import { CurrentBook } from "../../reducer/currentBookReducer";
+import currentBookReducer, {
+  CurrentBook,
+} from "../../reducer/currentBookReducer";
 import back from "./back.svg";
 import deleteIcon from "./delete.svg";
 import Tiptap from "../../components/Tiptap/Tiptap";
@@ -28,16 +30,24 @@ function Edit() {
       state.currentLibraryReducer
   );
   const navigator = useNavigate();
-  const { register, handleSubmit } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [categoryArray, setCategoryArray] = useState<string[]>([]);
   const [progress, setProgress] = useState<number>(0);
+  const [page, setPage] = useState<number>(0);
   const [progressWarn, setProgressWarn] = useState<boolean>(false);
+  const [pageWarn, setPageWarn] = useState<boolean>(false);
   const [likeActive, setLikeActive] = useState<boolean>(false);
   const [publicActive, setPublicActive] = useState<boolean>(true);
   const [isLendToActive, setIsLendToActive] = useState<boolean>(false);
   const [summaryData, setSummaryData] = useState<string | null>(null);
   const [categoryInput, setCategoryInput] = useState<string>("");
+  const [popupActive, setPopupActive] = useState(false);
+  const [barrierBGActive, setBarrierBGActive] = useState<boolean>(false);
 
   const uploadImage = async () => {
     if (imageFile === null) return;
@@ -55,6 +65,9 @@ function Edit() {
           if (i.isbn === currentBook.isbn) {
             if (i.totalChapter) {
               setProgress(i.totalChapter);
+            }
+            if (i.page) {
+              setPage(i.page);
             }
             if (i.like) {
               setLikeActive(i.like);
@@ -74,6 +87,18 @@ function Edit() {
 
   return (
     <>
+      <BarrierBG barrierBGActive={barrierBGActive} />
+      <Popup $active={popupActive}>
+        書籍仍在出借中，對方須先歸還此書
+        <PopupClose
+          onClick={() => {
+            setPopupActive(false);
+            setBarrierBGActive(false);
+          }}
+        >
+          ✗
+        </PopupClose>
+      </Popup>
       <WholeWrapper>
         <WholeCenterWrapper>
           <DeleteIconDivWrapper>
@@ -87,6 +112,11 @@ function Edit() {
 
             <DeleteIconDiv
               onClick={() => {
+                if (currentBook.isLendTo) {
+                  setPopupActive(true);
+                  setBarrierBGActive(true);
+                  return;
+                }
                 const a = library.filter((i) => i.isbn !== currentBook.isbn);
 
                 updateUserLibrary(user.uid, a);
@@ -108,6 +138,7 @@ function Edit() {
                     cover: imageUrl,
                     category: categoryArray,
                     totalChapter: progress,
+                    page: page,
                     like: likeActive,
                     isPublic: publicActive,
                     isLendTo: isLendToActive,
@@ -120,6 +151,7 @@ function Edit() {
                     category: categoryArray,
                     totalChapter: progress,
                     alreadyReadChapter: progress,
+                    page: page,
                     like: likeActive,
                     isPublic: publicActive,
                     isLendTo: isLendToActive,
@@ -136,6 +168,7 @@ function Edit() {
                     ...data,
                     category: categoryArray,
                     totalChapter: progress,
+                    page: page,
                     like: likeActive,
                     isPublic: publicActive,
                     isLendTo: isLendToActive,
@@ -147,6 +180,7 @@ function Edit() {
                     category: categoryArray,
                     totalChapter: progress,
                     alreadyReadChapter: progress,
+                    page: page,
                     like: likeActive,
                     isPublic: publicActive,
                     isLendTo: isLendToActive,
@@ -231,8 +265,13 @@ function Edit() {
                       <BooknameP>{i.tagName}</BooknameP>
                       <Bookname
                         defaultValue={i.value}
-                        {...register(`${i.key}`)}
+                        {...register(`${i.key}`, {
+                          required: { value: true, message: "請輸入欄位" },
+                        })}
                       ></Bookname>
+                      <Errorp>
+                        {errors[i.key] && (errors[i.key]!.message as string)}
+                      </Errorp>
                     </SectionItem>
                   );
                 })}
@@ -361,6 +400,25 @@ function Edit() {
                 <ProgressWarn progressWarn={progressWarn}>
                   請輸入數字，且不可大於30
                 </ProgressWarn>
+                <PTipP>輸入本書章節，即可在資訊頁面編輯閱讀進度</PTipP>
+              </SectionBItem>
+              <SectionBItem>
+                <ProgressP>書籤頁</ProgressP>
+                <Progress
+                  onChange={(e) => {
+                    const a = Number(e.target.value);
+
+                    if (isNaN(a)) {
+                      setPageWarn(true);
+                    } else {
+                      setPageWarn(false);
+                      setPage(a);
+                    }
+                  }}
+                  defaultValue={currentBook?.page}
+                  // {...register("totalChapter")}
+                ></Progress>
+                <PageWarn pageWarn={pageWarn}>請輸入數字</PageWarn>
               </SectionBItem>
               <SectionBItem>
                 <PlaceP>放置位置</PlaceP>
@@ -545,6 +603,7 @@ const TopRightSection = styled.div`
 `;
 
 const SectionItem = styled.div`
+  position: relative;
   display: flex;
 
   font-size: 24px;
@@ -555,6 +614,7 @@ const SectionItem = styled.div`
 `;
 
 const SectionBItem = styled.div`
+  position: relative;
   display: flex;
 
   font-size: 24px;
@@ -576,6 +636,14 @@ const Bookname = styled.input`
   background: #fefadc;
   border-radius: 6px;
   border: 1px solid #3f612d;
+`;
+
+const Errorp = styled.p`
+  font-size: 16px;
+  position: absolute;
+  left: 120px;
+  bottom: 2px;
+  color: #b9480c;
 `;
 
 const CategoryP = styled.div`
@@ -680,6 +748,17 @@ const ProgressWarn = styled.div<{ progressWarn: boolean }>`
   display: ${(props) => (props.progressWarn ? "block" : "none")};
 `;
 
+const PageWarn = styled.div<{ pageWarn: boolean }>`
+  display: ${(props) => (props.pageWarn ? "block" : "none")};
+`;
+
+const PTipP = styled.p`
+  font-size: 16px;
+  position: absolute;
+  left: 120px;
+  bottom: 2px;
+`;
+
 const PlaceP = styled.div`
   width: 120px;
 `;
@@ -765,4 +844,53 @@ const ModifyButton = styled.button`
   :hover {
     background: #f3b391;
   }
+`;
+
+const Popup = styled.div<{ $active: boolean }>`
+  display: ${(props) => (props.$active ? "flex" : "none")};
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 24px;
+  position: fixed;
+  top: 50vh;
+  left: 50vw;
+  width: 300px;
+  height: 140px;
+  transform: translate(-50%, -50%);
+  z-index: 9;
+  background: #fefadc;
+  border: 1px solid #fefadc;
+  border-radius: 6px;
+  color: #3f612d;
+  border: 8px solid #f3b391;
+`;
+
+const BarrierBG = styled.div<{ barrierBGActive: boolean }>`
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 8;
+
+  display: ${(props) => (props.barrierBGActive ? "block" : "none")};
+`;
+
+const PopupClose = styled.div`
+  position: absolute;
+  top: -18px;
+  left: -18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f3b391;
+  border: 1px solid #fefadc;
+  :hover {
+    background: #dc9d7b;
+  }
+  cursor: pointer;
 `;
