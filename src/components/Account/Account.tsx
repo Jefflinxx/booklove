@@ -151,6 +151,7 @@ const Account: React.FC<AccountProps> = ({
               });
             }
             setIsEdit(false);
+            setImageFile(null);
           }}
         >
           確認修改

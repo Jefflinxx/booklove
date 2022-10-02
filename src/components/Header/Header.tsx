@@ -81,6 +81,7 @@ function Header() {
   function logOut() {
     signOut(auth)
       .then(() => {
+        navigator("./login");
         dispatch({
           type: actionType.USER.SETUSER,
           value: null,
@@ -105,8 +106,6 @@ function Header() {
         setIsInputActive(false);
         setInput("");
         setBGBlock(false);
-
-        navigator("./login");
       })
       .catch((error) => {
         console.log("登出失敗");
@@ -135,7 +134,7 @@ function Header() {
       getUserInfo(user.uid).then((v) => {
         dispatch({
           type: actionType.NOTIFICATION.SETNOTIFICATION,
-          value: v?.notification,
+          value: v?.notification || [],
         });
         // dispatch({
         //   type: actionType.USER.SETUSER,
@@ -152,6 +151,18 @@ function Header() {
         <LeftDiv>
           <Logo
             onClick={() => {
+              setActive(false);
+              setAccountActive(false);
+              setFriendActive(false);
+              setThemeActive(false);
+              setAlertActive(false);
+              setIsInputActive(false);
+              setInput("");
+              setBGBlock(false);
+
+              //這邊希望點擊後可以回到自己的主頁
+              navigator("./");
+
               if (localPath) {
                 dispatch({
                   type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
@@ -162,9 +173,6 @@ function Header() {
                   },
                 });
               }
-
-              //這邊希望點擊後可以回到自己的主頁
-              navigator("./");
             }}
           >
             BOOKLOVE
@@ -201,8 +209,27 @@ function Header() {
                 return (
                   <SearchResultDiv key={i.uid}>
                     <SearchResultDivLeft
-                      onClick={() => {
+                      onClick={async () => {
+                        setIsInputActive(false);
+                        setInput("");
                         navigator(`./${i.uid}`);
+                        if (!localPath) {
+                          dispatch({
+                            type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
+                            value: {
+                              avatar: "",
+                              uname: "",
+                              background: "",
+                            },
+                          });
+                        }
+                        //偷更新user
+                        const u = await getUserInfo(user.uid);
+
+                        dispatch({
+                          type: actionType.USER.SETUSER,
+                          value: u || null,
+                        });
                       }}
                     >
                       <SearchAvatar src={i.avatar} />
@@ -344,8 +371,8 @@ function Header() {
                                     isLendTo: true,
                                   };
                                   updateUserLibrary(user.uid, [
-                                    ...libraryExceptThisBook,
                                     thisbook,
+                                    ...libraryExceptThisBook,
                                   ]);
                                 }
                               });
@@ -396,8 +423,8 @@ function Header() {
                                     isLendTo: true,
                                   };
                                   updateUserLibrary(i.uid, [
-                                    ...libraryExceptThisBook,
                                     thisbook,
+                                    ...libraryExceptThisBook,
                                   ]);
                                 }
                               });
@@ -451,8 +478,8 @@ function Header() {
                                     isLendTo: false,
                                   };
                                   updateUserLibrary(user.uid, [
-                                    ...libraryExceptThisBook,
                                     thisbook,
+                                    ...libraryExceptThisBook,
                                   ]);
                                 }
                               });

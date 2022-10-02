@@ -158,6 +158,11 @@ function Home() {
                 type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
                 value: newLibrary,
               });
+            } else {
+              dispatch({
+                type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
+                value: [],
+              });
             }
           }
           setWholePageLoading(false);
@@ -313,7 +318,7 @@ function Home() {
               </PlusIconDivWrapper>
             </Center>
             <Center>
-              {library.length || user?.wishList?.length ? (
+              {library.length || user?.wishList?.length || localPath ? (
                 <TopTagWrapper>
                   <CategoryAll
                     $active={categoryAllActive}
@@ -1172,6 +1177,8 @@ const LendFromFriend = styled.div<{ $active: boolean }>`
   background: ${(props) => (props.$active ? "#fefadc" : "")};
   @media screen and (max-width: 1100px) {
     width: 135px;
+    overflow-x: overlay;
+    white-space: nowrap;
   }
   @media screen and (max-width: 830px) {
     width: 100%;
@@ -1203,6 +1210,8 @@ const WishList = styled.div<{ $active: boolean }>`
   background: ${(props) => (props.$active ? "#fefadc" : "")};
   @media screen and (max-width: 1100px) {
     width: 135px;
+    overflow-x: overlay;
+    white-space: nowrap;
   }
   @media screen and (max-width: 830px) {
     width: 100%;
@@ -1265,6 +1274,8 @@ const FinishRead = styled.div<{ $active: boolean }>`
   background: ${(props) => (props.$active ? "#fefadc" : "")};
   @media screen and (max-width: 1100px) {
     width: 135px;
+    overflow-x: overlay;
+    white-space: nowrap;
   }
   @media screen and (max-width: 830px) {
     width: 100%;

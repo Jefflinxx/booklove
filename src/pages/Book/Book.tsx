@@ -85,7 +85,7 @@ function Book() {
           <TopIconDivWrapper>
             <BackIconDiv
               onClick={() => {
-                navigator("../../");
+                navigator(-1);
               }}
             >
               <BackIcon src={back}></BackIcon>
@@ -155,6 +155,7 @@ function Book() {
                     progressArray={progressArray}
                     key={i}
                     onMouseEnter={() => {
+                      if (userId !== user.uid) return;
                       setProgressArray(() => {
                         const a: number[] = [];
                         for (let j = 1; j <= i; j++) {
@@ -164,6 +165,7 @@ function Book() {
                       });
                     }}
                     onMouseLeave={() => {
+                      if (userId !== user.uid) return;
                       setProgressArray(() => {
                         const a: number[] = [];
                         for (
@@ -177,6 +179,7 @@ function Book() {
                       });
                     }}
                     onClick={async () => {
+                      if (userId !== user.uid) return;
                       const userData = await getUserInfo(user.uid);
                       if (userData) {
                         // setProgressArray(() => {
@@ -243,6 +246,7 @@ function Book() {
               ) : (
                 <ProgressTip
                   onClick={() => {
+                    if (userId !== user.uid) return;
                     getUserInfo(user.uid).then((v) => {
                       dispatch({
                         type: actionType.USER.SETUSER,
@@ -266,7 +270,7 @@ function Book() {
             </ProgressSectionBItem>
             <SectionBItem>
               <PlaceP>書籤頁</PlaceP>
-              <Place>{currentBook.page && `${currentBook.page}頁`}</Place>
+              <Place>{!!currentBook.page && `${currentBook.page}頁`}</Place>
             </SectionBItem>
             <SectionBItem>
               <PlaceP>放置位置</PlaceP>
@@ -394,9 +398,7 @@ const SectionBItem = styled.div`
   min-height: 64px;
 `;
 
-const ProgressSectionBItem = styled(SectionBItem)`
-  justify-content: space-between;
-`;
+const ProgressSectionBItem = styled(SectionBItem)``;
 
 const BooknameP = styled.div`
   width: 120px;
@@ -437,6 +439,7 @@ const ProgressWrapper = styled.div`
   display: flex;
   border-radius: 6px;
   overflow: hidden;
+  margin-right: 40px;
 `;
 const ProgressTip = styled.p`
   cursor: pointer;

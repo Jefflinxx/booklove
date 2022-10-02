@@ -824,6 +824,7 @@ const BottomSection = styled.div`
   width: 900px;
   border-left: 3px solid #3f612d;
   margin-bottom: 54px;
+  height: auto;
 `;
 
 const ModifyButtonDiv = styled.div``;

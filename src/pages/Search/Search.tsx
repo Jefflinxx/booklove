@@ -420,6 +420,17 @@ const BackIconDiv = styled.div<{ $active: boolean }>`
   :hover {
     background: #f3b391;
   }
+
+  @media screen and (max-width: 1100px) {
+    top: 6px;
+    left: 6px;
+  }
+  @media screen and (max-width: 800px) {
+    left: ${(props) => (props.$active ? "-6px" : "6px")};
+  }
+  @media screen and (max-width: 620px) {
+    left: ${(props) => (props.$active ? "6px" : "32px")};
+  }
 `;
 const BackIcon = styled.img<{ $active: boolean }>`
   position: absolute;
@@ -443,6 +454,19 @@ const SearchIconDiv = styled.div<{ $active: boolean }>`
   align-items: center;
   justify-content: ${(props) => (props.$active ? "center" : "flex-end")};
   margin-bottom: 50px;
+
+  @media screen and (max-width: 1100px) {
+    width: ${(props) => (props.$active ? "600px" : "700px")};
+    right: ${(props) => (props.$active ? "0px" : "0px")};
+  }
+  @media screen and (max-width: 940px) {
+  }
+  @media screen and (max-width: 800px) {
+    width: 600px;
+  }
+  @media screen and (max-width: 620px) {
+    width: 352px;
+  }
 `;
 
 const SearchIcon = styled.img<{ $active: boolean }>`
@@ -450,6 +474,16 @@ const SearchIcon = styled.img<{ $active: boolean }>`
   width: ${(props) => (props.$active ? "24px" : "36px")};
   left: ${(props) => (props.$active ? "292px" : "100px")};
   top: ${(props) => (props.$active ? "16px" : "12px")};
+  @media screen and (max-width: 1100px) {
+    top: 14px;
+    left: 50px;
+  }
+  @media screen and (max-width: 800px) {
+    left: ${(props) => (props.$active ? "36px" : "62px")};
+  }
+  @media screen and (max-width: 620px) {
+    left: ${(props) => (props.$active ? "50px" : "92px")};
+  }
 `;
 
 const Input = styled.input<{ $active: boolean }>`
@@ -463,6 +497,15 @@ const Input = styled.input<{ $active: boolean }>`
     font-family: "Inknut Antiqua", serif;
     color: #3f612d88;
   }
+  @media screen and (max-width: 800px) {
+    width: 540px;
+  }
+  @media screen and (max-width: 620px) {
+    width: 260px;
+    ::placeholder {
+      opacity: 0;
+    }
+  }
 `;
 
 const SearchCount = styled.div`
@@ -473,18 +516,33 @@ const SearchCount = styled.div`
   align-items: center;
   justify-content: center;
   font-size: 28px;
+  @media screen and (max-width: 1100px) {
+    width: 600px;
+  }
+  @media screen and (max-width: 620px) {
+    width: 352px;
+  }
 `;
 
 const SplitDiv = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  @media screen and (max-width: 620px) {
+    margin-bottom: 32px;
+  }
 `;
 
 const Split = styled.div`
   width: 1080px;
   height: 20px;
   border-bottom: 3px solid #f3b391;
+  @media screen and (max-width: 1100px) {
+    width: 600px;
+  }
+  @media screen and (max-width: 620px) {
+    width: 352px;
+  }
 `;
 const BackgroundDiv = styled.div<{ $active: boolean }>`
   position: absolute;
@@ -500,6 +558,9 @@ const BackgroundDiv = styled.div<{ $active: boolean }>`
   background-size: cover;
   background-position: center;
   transition: all 1s;
+  @media screen and (max-width: 800px) {
+    display: none;
+  }
 `;
 const Bookcase = styled.div`
   margin: 0px 0px 100px 0px;
@@ -508,6 +569,12 @@ const Bookcase = styled.div`
   align-items: center;
   ${"" /* justify-content: center; */}
   flex-wrap: wrap;
+  @media screen and (max-width: 1100px) {
+    width: 600px;
+  }
+  @media screen and (max-width: 620px) {
+    width: 352px;
+  }
 `;
 
 const BookDiv = styled.div`
@@ -517,6 +584,10 @@ const BookDiv = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  @media screen and (max-width: 620px) {
+    flex-wrap: wrap;
+    height: auto;
+  }
 `;
 
 const BookImg = styled.img`
@@ -528,6 +599,14 @@ const BookImg = styled.img`
 const BookRightSection = styled.div`
   margin-left: 32px;
   width: 285px;
+  @media screen and (max-width: 620px) {
+    height: auto;
+    margin: 16px 0px 32px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
 `;
 
 const BookItem = styled.div`
@@ -557,13 +636,20 @@ const PublishP = styled.p`
   width: 70px;
   font-weight: 700;
 `;
-const Publish = styled.p``;
+const Publish = styled.p`
+  @media screen and (max-width: 620px) {
+    width: 200px;
+  }
+`;
 
 const AddWrapper = styled.div`
   position: relative;
   right: 20px;
   display: flex;
   align-items: center;
+  @media screen and (max-width: 620px) {
+    // margin-left: 24px;
+  }
 `;
 
 const Popup = styled.div<{ $active: boolean }>`

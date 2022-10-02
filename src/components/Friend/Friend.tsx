@@ -88,6 +88,8 @@ const Friend: React.FC<FriendProps> = ({
             <FriendDiv
               key={i.uid}
               onClick={async () => {
+                setActive(false);
+                navigator(`./${i.uid}`);
                 // const a = await getUserInfo(i.uid);
                 // dispatch({
                 //   type: actionType.DISPLAYUSER.SETDISPLAYUSER,
@@ -105,13 +107,11 @@ const Friend: React.FC<FriendProps> = ({
                 }
                 //偷更新user
                 const u = await getUserInfo(user.uid);
+
                 dispatch({
                   type: actionType.USER.SETUSER,
                   value: u || null,
                 });
-
-                setActive(false);
-                navigator(`./${i.uid}`);
               }}
             >
               <FriendAvatar src={i.avatar} />

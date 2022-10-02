@@ -136,7 +136,7 @@ const Wrapper = styled.div`
 
 const ContentWrapper = styled.div`
   width: 780px;
-  height: 200px;
+  min-height: 200px;
 
   display: flex;
   justify-content: center;
