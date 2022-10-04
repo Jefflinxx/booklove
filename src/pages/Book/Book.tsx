@@ -310,7 +310,10 @@ const WholeCenterWrapper = styled.div`
   width: 902px;
 
   border-radius: 6px;
-  margin: 120px 0px;
+  margin: 120px 0px 150px 0px;
+  @media screen and (max-width: 620px) {
+    margin: 60px 0px 120px 0px;
+  }
 `;
 
 const TopIconDivWrapper = styled.div`
@@ -320,6 +323,16 @@ const TopIconDivWrapper = styled.div`
   justify-content: space-between;
 
   padding: 8px;
+  @media screen and (max-width: 1100px) {
+    width: 900px;
+    margin-bottom: 32px;
+  }
+  @media screen and (max-width: 920px) {
+    width: 560px;
+  }
+  @media screen and (max-width: 620px) {
+    width: 348px;
+  }
 `;
 
 const BackIconDiv = styled.div`
@@ -363,6 +376,14 @@ const TopSection = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 60px;
+  @media screen and (max-width: 920px) {
+    width: 560px;
+    flex-direction: column;
+  }
+  @media screen and (max-width: 620px) {
+    width: 348px;
+    margin-bottom: 0px;
+  }
 `;
 
 const BookImg = styled.img`
@@ -371,11 +392,18 @@ const BookImg = styled.img`
 
   margin-right: 80px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  @media screen and (max-width: 920px) {
+    margin-right: 0px;
+    margin-bottom: 32px;
+  }
 `;
 
 const TopRightSection = styled.div`
   border-left: 3px solid #3f612d;
   height: auto;
+  @media screen and (max-width: 920px) {
+    border-left: none;
+  }
 `;
 
 const SectionItem = styled.div`
@@ -386,6 +414,10 @@ const SectionItem = styled.div`
 
   color: #3f612d;
   min-height: 64px;
+  @media screen and (max-width: 620px) {
+    flex-direction: column;
+    margin-left: 0px;
+  }
 `;
 
 const SectionBItem = styled.div`
@@ -396,42 +428,53 @@ const SectionBItem = styled.div`
 
   color: #3f612d;
   min-height: 64px;
+  @media screen and (max-width: 620px) {
+    flex-direction: column;
+    margin-left: 0px;
+  }
 `;
 
-const ProgressSectionBItem = styled(SectionBItem)``;
+const ProgressSectionBItem = styled(SectionBItem)`
+  position: relative;
+`;
 
-const BooknameP = styled.div`
+const Title = styled.div`
   width: 120px;
 `;
-const Bookname = styled.div`
+
+const Content = styled.div`
+  color: #1f2e16;
+  word-wrap: break-word;
   width: 400px;
-  color: #1f2e16;
+  @media screen and (max-width: 620px) {
+    width: 320px;
+    margin-bottom: 16px;
+  }
 `;
 
-const CategoryP = styled.div`
-  width: 120px;
-`;
-const Category = styled.div`
+const BooknameP = styled(Title)``;
+const Bookname = styled(Content)``;
+
+const CategoryP = styled(Title)``;
+const Category = styled(Content)`
   margin-right: 8px;
-
-  color: #1f2e16;
 `;
 
-const LikeP = styled.div`
-  width: 120px;
-`;
-const Like = styled.div`
-  color: #1f2e16;
-`;
+const LikeP = styled(Title)``;
+const Like = styled(Content)``;
 
-const ProgressP = styled.div`
-  width: 120px;
-`;
+const ProgressP = styled(Title)``;
 const ProgressPercent = styled.div`
   display: flex;
   width: 90px;
   color: #1f2e16;
   justify-content: center;
+  @media screen and (max-width: 620px) {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    justify-content: flex-end;
+  }
 `;
 
 const ProgressWrapper = styled.div`
@@ -440,11 +483,19 @@ const ProgressWrapper = styled.div`
   border-radius: 6px;
   overflow: hidden;
   margin-right: 40px;
+  @media screen and (max-width: 620px) {
+    width: 320px;
+    margin-right: 0px;
+    margin-bottom: 16px;
+  }
 `;
 const ProgressTip = styled.p`
   cursor: pointer;
   :hover {
     color: #1f2e16;
+  }
+  @media screen and (max-width: 920px) {
+    display: none;
   }
 `;
 const Progress = styled.div<{ progressArray: number[]; $i: number }>`
@@ -462,36 +513,45 @@ const Progress = styled.div<{ progressArray: number[]; $i: number }>`
     props.progressArray.find((j) => j === props.$i) ? "#f3b391" : "#fefadc "};
 `;
 
-const PlaceP = styled.div`
-  width: 120px;
-`;
-const Place = styled.div`
-  color: #1f2e16;
-`;
+const PlaceP = styled(Title)``;
+const Place = styled(Content)``;
 
-const LendToP = styled.div`
-  width: 120px;
-`;
-const LendTo = styled.div`
-  color: #1f2e16;
-`;
+const LendToP = styled(Title)``;
+const LendTo = styled(Content)``;
 
-const SummaryP = styled.div`
-  width: 120px;
-
+const SummaryP = styled(Title)`
   font-size: 24px;
   margin-left: 32px;
 
   color: #3f612d;
   min-height: 52px;
+  @media screen and (max-width: 620px) {
+    width: 320px;
+    margin-left: 0px;
+    min-height: auto;
+  }
 `;
-const Summary = styled.div`
+const Summary = styled(Content)`
   margin: 0px 54px 0px 32px;
-  color: #1f2e16;
+  width: auto;
+  @media screen and (max-width: 620px) {
+    margin: 0px;
+  }
 `;
 
 const BottomSection = styled.div`
   width: 900px;
   border-left: 3px solid #3f612d;
   margin-bottom: 54px;
+  @media screen and (max-width: 920px) {
+    width: 560px;
+    border: none;
+  }
+  @media screen and (max-width: 620px) {
+    display: flex;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 348px;
+  }
 `;

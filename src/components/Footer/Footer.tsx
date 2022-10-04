@@ -8,7 +8,6 @@ export default Footer;
 
 const FooterP = styled.p`
   font-size: 10px;
-
   padding-left: 15px;
   padding-top: 4px;
   padding-bottom: 4px;

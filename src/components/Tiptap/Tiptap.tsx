@@ -132,6 +132,9 @@ export default Tiptap;
 
 const Wrapper = styled.div`
   margin: 16px 0px 24px 48px;
+  @media screen and (max-width: 920px) {
+    margin: 0px 0px 0px 0px;
+  }
 `;
 
 const ContentWrapper = styled.div`
@@ -151,6 +154,12 @@ const ContentWrapper = styled.div`
 
     padding: 8px;
     outline: none;
+    @media screen and (max-width: 920px) {
+      width: 480px;
+    }
+    @media screen and (max-width: 620px) {
+      width: 320px;
+    }
   }
   .ProseMirror h1,
   .ProseMirror h2,
@@ -186,10 +195,17 @@ const ContentWrapper = styled.div`
   em {
     user-select: auto;
   }
+  @media screen and (max-width: 920px) {
+    width: auto;
+  }
+  @media screen and (max-width: 620px) {
+    justify-content: flex-start;
+  }
 `;
 
 const BtnWrapper = styled.div`
   display: flex;
+
   width: 780px;
   border-radius: 6px 6px 0px 0px;
   border: 1px solid #3f612d;
@@ -197,6 +213,12 @@ const BtnWrapper = styled.div`
   .is-active {
     background: #f6d4ba;
     border-radius: 6px 6px 0px 0px;
+  }
+  @media screen and (max-width: 920px) {
+    width: 480px;
+  }
+  @media screen and (max-width: 620px) {
+    width: 320px;
   }
 `;
 const Button = styled.div`

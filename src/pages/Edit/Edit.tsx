@@ -347,7 +347,7 @@ function Edit() {
                 </SectionItem>
 
                 <SectionItem>
-                  <Like>愛心</Like>
+                  <Like>點讚</Like>
                   <LikeDiv
                     likeActive={likeActive}
                     onClick={() => {
@@ -403,8 +403,8 @@ function Edit() {
                 <PTipP>輸入本書章節，即可在資訊頁面編輯閱讀進度</PTipP>
               </SectionBItem>
               <SectionBItem>
-                <ProgressP>書籤頁</ProgressP>
-                <Progress
+                <BookmarkP>書籤頁</BookmarkP>
+                <Bookmark
                   onChange={(e) => {
                     const a = Number(e.target.value);
 
@@ -417,7 +417,7 @@ function Edit() {
                   }}
                   defaultValue={currentBook?.page}
                   // {...register("totalChapter")}
-                ></Progress>
+                ></Bookmark>
                 <PageWarn pageWarn={pageWarn}>請輸入數字</PageWarn>
               </SectionBItem>
               <SectionBItem>
@@ -494,6 +494,9 @@ const WholeCenterWrapper = styled.div`
 
   border-radius: 6px;
   margin: 120px 0px;
+  @media screen and (max-width: 620px) {
+    margin: 60px 0px 120px 0px;
+  }
 `;
 
 const DeleteIconDivWrapper = styled.div`
@@ -502,6 +505,16 @@ const DeleteIconDivWrapper = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 8px;
+  @media screen and (max-width: 1100px) {
+    width: 900px;
+    margin-bottom: 32px;
+  }
+  @media screen and (max-width: 920px) {
+    width: 560px;
+  }
+  @media screen and (max-width: 620px) {
+    width: 348px;
+  }
 `;
 
 const BackIconDiv = styled.div`
@@ -544,6 +557,14 @@ const TopSection = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 60px;
+  @media screen and (max-width: 920px) {
+    width: 560px;
+    flex-direction: column;
+  }
+  @media screen and (max-width: 620px) {
+    width: 348px;
+    margin-bottom: 0px;
+  }
 `;
 
 const BookImgLabel = styled.label`
@@ -552,6 +573,10 @@ const BookImgLabel = styled.label`
   height: 320px;
   margin-right: 80px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  @media screen and (max-width: 920px) {
+    margin-right: 0px;
+    margin-bottom: 32px;
+  }
 `;
 
 const BookImgInput = styled.input`
@@ -600,6 +625,9 @@ const UploadImgBtn = styled.div`
 const TopRightSection = styled.div`
   border-left: 3px solid #3f612d;
   height: auto;
+  @media screen and (max-width: 920px) {
+    border-left: none;
+  }
 `;
 
 const SectionItem = styled.div`
@@ -611,6 +639,12 @@ const SectionItem = styled.div`
 
   color: #3f612d;
   min-height: 64px;
+  @media screen and (max-width: 920px) {
+    margin-left: 0px;
+  }
+  @media screen and (max-width: 620px) {
+    flex-direction: column;
+  }
 `;
 
 const SectionBItem = styled.div`
@@ -622,21 +656,37 @@ const SectionBItem = styled.div`
 
   color: #3f612d;
   min-height: 64px;
+
+  @media screen and (max-width: 920px) {
+    margin-left: 0px;
+    width: 480px;
+  }
+  @media screen and (max-width: 620px) {
+    flex-direction: column;
+    width: 320px;
+  }
 `;
 
-const BooknameP = styled.div`
+const Title = styled.div`
   width: 120px;
 `;
-const Bookname = styled.input`
+const Input = styled.input`
+  width: 360px;
+  height: 36px;
   color: #3f612d;
   font-size: 24px;
-  height: 36px;
-  width: 360px;
   text-indent: 8px;
   background: #fefadc;
   border-radius: 6px;
   border: 1px solid #3f612d;
+  @media screen and (max-width: 620px) {
+    width: 320px;
+    margin-bottom: 16px;
+  }
 `;
+
+const BooknameP = styled(Title)``;
+const Bookname = styled(Input)``;
 
 const Errorp = styled.p`
   font-size: 16px;
@@ -646,14 +696,15 @@ const Errorp = styled.p`
   color: #b9480c;
 `;
 
-const CategoryP = styled.div`
-  width: 120px;
-`;
+const CategoryP = styled(Title)``;
 const CategoryWrapper = styled.div`
   display: flex;
   height: auto;
-  width: 360px;
+  width: 320px;
   flex-wrap: wrap;
+  @media screen and (max-width: 620px) {
+    margin-bottom: 16px;
+  }
 `;
 const CategoryDiv = styled.div<{ categoryArray: string[]; $i: string }>`
   display: flex;
@@ -714,10 +765,11 @@ const LikeDiv = styled.div<{ likeActive: boolean }>`
   border: 1px solid #3f612d;
   border-radius: 6px;
   background: ${(props) => (props.likeActive ? "#f3b391" : "#fefadc")};
+  @media screen and (max-width: 620px) {
+    margin-bottom: 16px;
+  }
 `;
-const Like = styled.div`
-  width: 120px;
-`;
+const Like = styled(Title)``;
 
 const PublicDiv = styled.div<{ publicActive: boolean }>`
   width: 36px;
@@ -725,24 +777,19 @@ const PublicDiv = styled.div<{ publicActive: boolean }>`
   border: 1px solid #3f612d;
   border-radius: 6px;
   background: ${(props) => (props.publicActive ? "#f3b391" : "#fefadc")};
+  @media screen and (max-width: 620px) {
+    margin-bottom: 16px;
+  }
 `;
-const Public = styled.div`
-  width: 120px;
+const Public = styled(Title)``;
+
+const ProgressP = styled(Title)``;
+const Progress = styled(Input)`
+  margin-bottom: 0px;
 `;
 
-const ProgressP = styled.div`
-  width: 120px;
-`;
-const Progress = styled.input`
-  color: #3f612d;
-  font-size: 24px;
-  height: 36px;
-  width: 360px;
-  text-indent: 8px;
-  background: #fefadc;
-  border-radius: 6px;
-  border: 1px solid #3f612d;
-`;
+const BookmarkP = styled(Title)``;
+const Bookmark = styled(Input)``;
 
 const ProgressWarn = styled.div<{ progressWarn: boolean }>`
   display: ${(props) => (props.progressWarn ? "block" : "none")};
@@ -757,25 +804,16 @@ const PTipP = styled.p`
   position: absolute;
   left: 120px;
   bottom: 2px;
+  @media screen and (max-width: 620px) {
+    position: static;
+    margin-bottom: 16px;
+  }
 `;
 
-const PlaceP = styled.div`
-  width: 120px;
-`;
-const Place = styled.input`
-  color: #3f612d;
-  font-size: 24px;
-  height: 36px;
-  width: 360px;
-  text-indent: 8px;
-  background: #fefadc;
-  border-radius: 6px;
-  border: 1px solid #3f612d;
-`;
+const PlaceP = styled(Title)``;
+const Place = styled(Input)``;
 
-const IsLendToP = styled.div`
-  width: 120px;
-`;
+const IsLendToP = styled(Title)``;
 
 const IsLendTo = styled.div<{ isLendToActive: boolean }>`
   width: 36px;
@@ -783,6 +821,9 @@ const IsLendTo = styled.div<{ isLendToActive: boolean }>`
   border: 1px solid #3f612d;
   border-radius: 6px;
   background: ${(props) => (props.isLendToActive ? "#f3b391 " : "#fefadc ")};
+  @media screen and (max-width: 620px) {
+    margin-bottom: 16px;
+  }
 `;
 
 const LendToWrapper = styled.div<{ isLendToActive: boolean }>`
@@ -792,32 +833,29 @@ const LendToWrapper = styled.div<{ isLendToActive: boolean }>`
 
   color: #3f612d;
   min-height: 64px;
+  @media screen and (max-width: 920px) {
+    margin-left: 0px;
+  }
+  @media screen and (max-width: 620px) {
+    flex-direction: column;
+  }
 `;
 
-const LendToP = styled.div`
-  width: 120px;
-`;
-const LendTo = styled.input`
-  font-size: 24px;
-  height: 36px;
-  width: 360px;
-  text-indent: 8px;
-  background: #fefadc;
-  border-radius: 6px;
-  border: 1px solid #3f612d;
-`;
+const LendToP = styled(Title)``;
+const LendTo = styled(Input)``;
 
-const SummaryP = styled.div`
+const SummaryP = styled(Title)`
   font-size: 24px;
   color: #3f612d;
-  width: 120px;
+
   margin: 0px 0px 12px 32px;
-`;
-const Summary = styled.textarea`
-  width: 612px;
-  height: 200px;
-  border: 1px solid black;
-  margin: 0px 0px 24px 32px;
+  @media screen and (max-width: 920px) {
+    width: 480px;
+    margin-left: 0px;
+  }
+  @media screen and (max-width: 620px) {
+    width: 320px;
+  }
 `;
 
 const BottomSection = styled.div`
@@ -825,9 +863,25 @@ const BottomSection = styled.div`
   border-left: 3px solid #3f612d;
   margin-bottom: 54px;
   height: auto;
+  @media screen and (max-width: 920px) {
+    width: 560px;
+    border: none;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: auto;
+  }
+  @media screen and (max-width: 620px) {
+  }
 `;
 
-const ModifyButtonDiv = styled.div``;
+const ModifyButtonDiv = styled.div`
+  @media screen and (max-width: 920px) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+`;
 const ModifyButton = styled.button`
   border: none;
   background-color: transparent;
