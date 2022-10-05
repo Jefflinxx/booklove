@@ -222,7 +222,13 @@ function Search() {
             //   //navigator(`../book/${user.uid}${popupInfo}`);
             // }}
             onClick={() => {
-              navigator(-1);
+              navigator("../");
+              getUserInfo(user.uid).then((v) => {
+                dispatch({
+                  type: actionType.USER.SETUSER,
+                  value: v,
+                });
+              });
             }}
           >
             回到主頁
@@ -465,7 +471,9 @@ const SearchIconDiv = styled.div<{ $active: boolean }>`
     width: 600px;
   }
   @media screen and (max-width: 620px) {
-    width: 352px;
+    width: 338px;
+    top: ${(props) => (props.$active ? "0px" : "33vh")};
+    right: ${(props) => (props.$active ? "0px" : "20px")};
   }
 `;
 

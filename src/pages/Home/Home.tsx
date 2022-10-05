@@ -1001,9 +1001,7 @@ const NotificationAlert = styled.div<{ notificationAlertActive: boolean }>`
   transform: translate(-50%, -50%);
   z-index: 22;
   color: #3f612d;
-  @media screen and (max-width: 470px) {
-    width: 352px;
-  }
+
   @media screen and (max-width: 470px) {
     left: 0;
     width: calc(100vw - 15px);

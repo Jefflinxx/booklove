@@ -132,6 +132,7 @@ function Book() {
               })}
               <SectionItem>
                 <CategoryP>分類</CategoryP>
+                {!currentBook?.category?.length && <Content>無</Content>}
                 {currentBook?.category?.map((i) => {
                   return <Category key={i}>{i}</Category>;
                 })}
@@ -149,6 +150,7 @@ function Book() {
             <ProgressSectionBItem>
               <ProgressP>進度</ProgressP>
               <ProgressWrapper>
+                {!progressRows.length && "未設定"}
                 {progressRows.map((i) => (
                   <Progress
                     $i={i}
@@ -270,15 +272,17 @@ function Book() {
             </ProgressSectionBItem>
             <SectionBItem>
               <PlaceP>書籤頁</PlaceP>
-              <Place>{!!currentBook.page && `${currentBook.page}頁`}</Place>
+              <Place>
+                {!!currentBook.page ? `${currentBook.page}頁` : `未設定`}
+              </Place>
             </SectionBItem>
             <SectionBItem>
               <PlaceP>放置位置</PlaceP>
-              <Place>{currentBook.place}</Place>
+              <Place>{currentBook.place || "未設定"}</Place>
             </SectionBItem>
             <SectionBItem>
               <LendToP>出借給</LendToP>
-              <LendTo>{currentBook.lendTo}</LendTo>
+              <LendTo>{currentBook.lendTo || "無"}</LendTo>
             </SectionBItem>
             <SummaryP>書摘</SummaryP>
             <Summary>{parser(currentBook.summary || "")}</Summary>
@@ -483,6 +487,7 @@ const ProgressWrapper = styled.div`
   border-radius: 6px;
   overflow: hidden;
   margin-right: 40px;
+  color: #1f2e16;
   @media screen and (max-width: 620px) {
     width: 320px;
     margin-right: 0px;
@@ -490,6 +495,7 @@ const ProgressWrapper = styled.div`
   }
 `;
 const ProgressTip = styled.p`
+  display: none;
   cursor: pointer;
   :hover {
     color: #1f2e16;

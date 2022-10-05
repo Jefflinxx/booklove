@@ -121,6 +121,12 @@ function Edit() {
 
                 updateUserLibrary(user.uid, a);
                 navigator("../../");
+                getUserInfo(user.uid).then((v) => {
+                  dispatch({
+                    type: actionType.USER.SETUSER,
+                    value: v,
+                  });
+                });
               }}
             >
               <DeleteIcon src={deleteIcon}></DeleteIcon>

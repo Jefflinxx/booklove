@@ -30,8 +30,8 @@ const Login = () => {
       state.currentLibraryReducer
   );
   const [signState, setSignState] = useState<string>("signin");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState<string>("fortest@t.com");
+  const [password, setPassword] = useState<string>("123456");
   const [loading, setLoading] = useState<boolean>(false);
 
   return (
@@ -138,12 +138,6 @@ const Login = () => {
             </Button>
           </Form>
         </LoginWrapper>
-        <TW>
-          <TestP>jeffxxtest@gmail.com</TestP>
-          <TestP>12345678</TestP>
-          <TestP>xxxx55554@gmail.com</TestP>
-          <TestP>123456</TestP>
-        </TW>
       </LW>
     </LoginPage>
   );
@@ -254,11 +248,6 @@ const LW = styled.div`
   z-index: 17;
 `;
 
-const TW = styled.div`
-  position: absolute;
-  top: 0px;
-  left: 0px;
-`;
 const LoginWrapper = styled.div`
   border-radius: 6px;
   overflow: hidden;
@@ -363,9 +352,4 @@ const Button = styled.button`
   @media screen and (max-width: 400px) {
     width: 90vw;
   }
-`;
-
-const TestP = styled.p`
-  text-align: center;
-  user-select: all;
 `;
