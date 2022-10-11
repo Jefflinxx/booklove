@@ -1,12 +1,9 @@
 import { useSelector, useDispatch } from "react-redux";
 import { actionType } from "../../reducer/rootReducer";
 import ReactLoading from "react-loading";
-
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-
 import TopSection from "../../components/TopSection/TopSection";
-
 import { User } from "../../reducer/userReducer";
 import { CurrentBook } from "../../reducer/currentBookReducer";
 import {
@@ -14,7 +11,6 @@ import {
   updateCategory,
   addSearchBookToUserLibrary,
   updateWishList,
-  updatelendFromList,
   updateUserLibrary,
   updateNotification,
   updateGiveBackAlert,
@@ -47,7 +43,6 @@ function Home() {
   const [categoryLendActive, setCategoryLendActive] = useState<boolean>(false);
   const [wishListActive, setWishListActive] = useState<boolean>(false);
   const [lendFromActive, setLendFromActive] = useState<boolean>(false);
-
   const [barrierBGActive, setBarrierBGActive] = useState<boolean>(false);
   const [notificationAlertActive, setNotificationAlertActive] =
     useState<boolean>(false);
@@ -63,34 +58,20 @@ function Home() {
     id: string;
     name: string;
   }>({ id: "", name: "" });
-
   const [categoryInput, setCategoryInput] = useState<string>("");
   const [categoryCurrent, setCategoryCurrent] = useState<string | null>(null);
-  const [render, setRender] = useState<boolean>(false);
-
-  const [c, setC] = useState<string[]>([]);
-  const [d, setD] = useState<string[]>([]);
+  const [
+    bookforLendOrBorrowInOthersNotification,
+    setBookforLendOrBorrowInOthersNotification,
+  ] = useState<string[]>([]);
+  const [
+    bookforGivebackInOthersNotification,
+    setBookforGivebackInOthersNotification,
+  ] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [wholePageloading, setWholePageLoading] = useState<boolean>(true);
 
   const localPath = Location.pathname.split("/")[1];
-
-  //這個useeffect應該跟本就不需要
-  // useEffect(() => {
-  //   if (user) {
-  //     getUserInfo(user.uid).then((v) => {
-  //       dispatch({
-  //         type: actionType.USER.SETUSER,
-  //         value: v,
-  //       });
-  //       console.log(v?.giveBackAlert);
-  //       dispatch({
-  //         type: actionType.GIVEBACK.SETGIVEBACK,
-  //         value: v?.giveBackAlert,
-  //       });
-  //     });
-  //   }
-  // }, []);
 
   useEffect(() => {
     setWholePageLoading(true);
@@ -174,8 +155,8 @@ function Home() {
   useEffect(() => {
     console.log("執行");
     //比對 對方的 notification 有沒有這本書 有的話，按鈕改為 已送出請求
-    let c: string[] = [];
-    let d: string[] = [];
+    let bookforLendOrBorrowInOthersNotification: string[] = [];
+    let bookforGivebackInOthersNotification: string[] = [];
 
     displayLibrary?.forEach((i) => {
       displayUser?.notification?.forEach((j) => {
@@ -183,19 +164,21 @@ function Home() {
           j.isbn === i.isbn &&
           (j.type === "borrow" || j.type === "lendFrom")
         ) {
-          c.push(i.isbn);
+          bookforLendOrBorrowInOthersNotification.push(i.isbn);
         }
       });
       if (giveBackAlert) {
         giveBackAlert?.forEach((j) => {
           if (j === i.isbn) {
-            d.push(j);
+            bookforGivebackInOthersNotification.push(j);
           }
         });
       }
     });
-    setC(c);
-    setD(d);
+    setBookforLendOrBorrowInOthersNotification(
+      bookforLendOrBorrowInOthersNotification
+    );
+    setBookforGivebackInOthersNotification(bookforGivebackInOthersNotification);
   }, [displayLibrary, giveBackAlert]);
 
   return (
@@ -233,7 +216,10 @@ function Home() {
                   } else {
                     updateNotification(localPath, [notification]);
                   }
-                  setC([...c, notification.isbn]);
+                  setBookforLendOrBorrowInOthersNotification([
+                    ...bookforLendOrBorrowInOthersNotification,
+                    notification.isbn,
+                  ]);
                 });
               }
               if (notification.type === "lendFrom") {
@@ -246,7 +232,10 @@ function Home() {
                   } else {
                     updateNotification(localPath, [notification]);
                   }
-                  setC([...c, notification.isbn]);
+                  setBookforLendOrBorrowInOthersNotification([
+                    ...bookforLendOrBorrowInOthersNotification,
+                    notification.isbn,
+                  ]);
                 });
               }
 
@@ -332,26 +321,26 @@ function Home() {
                       setCategorySelectActive(false);
                       setLendFromActive(false);
 
-                      let a;
+                      let userData;
                       if (localPath === user.uid || localPath === "") {
-                        a = await getUserInfo(user.uid);
+                        userData = await getUserInfo(user.uid);
                       } else {
-                        a = await getUserInfo(localPath);
-                        if (!a) return;
-                        if (a?.library) {
+                        userData = await getUserInfo(localPath);
+                        if (!userData) return;
+                        if (userData?.library) {
                           let newLibrary: CurrentBook[] = [];
-                          a?.library.forEach((i) => {
+                          userData?.library.forEach((i) => {
                             if (i?.isPublic) {
                               newLibrary.push(i);
                             }
                           });
-                          a = { ...a, library: newLibrary };
+                          userData = { ...userData, library: newLibrary };
                         }
                       }
 
                       dispatch({
                         type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
-                        value: a?.library || [],
+                        value: userData?.library || [],
                       });
 
                       setLoading(false);
@@ -374,24 +363,24 @@ function Home() {
                       setLendFromActive(false);
                       let categoryResult: CurrentBook[] = [];
 
-                      let a;
+                      let userData;
                       if (localPath === user.uid || localPath === "") {
-                        a = await getUserInfo(user.uid);
+                        userData = await getUserInfo(user.uid);
                       } else {
-                        a = await getUserInfo(localPath);
-                        if (!a) return;
-                        if (a?.library) {
+                        userData = await getUserInfo(localPath);
+                        if (!userData) return;
+                        if (userData?.library) {
                           let newLibrary: CurrentBook[] = [];
-                          a?.library.forEach((i) => {
+                          userData?.library.forEach((i) => {
                             if (i?.isPublic) {
                               newLibrary.push(i);
                             }
                           });
-                          a = { ...a, library: newLibrary };
+                          userData = { ...userData, library: newLibrary };
                         }
                       }
 
-                      a?.library?.forEach((j) => {
+                      userData?.library?.forEach((j) => {
                         if (j?.isFinishRead) {
                           categoryResult = [...categoryResult, j];
                         }
@@ -422,24 +411,24 @@ function Home() {
                       setLendFromActive(false);
                       let categoryResult: CurrentBook[] = [];
 
-                      let a;
+                      let userData;
                       if (localPath === user.uid || localPath === "") {
-                        a = await getUserInfo(user.uid);
+                        userData = await getUserInfo(user.uid);
                       } else {
-                        a = await getUserInfo(localPath);
-                        if (!a) return;
-                        if (a?.library) {
+                        userData = await getUserInfo(localPath);
+                        if (!userData) return;
+                        if (userData?.library) {
                           let newLibrary: CurrentBook[] = [];
-                          a?.library.forEach((i) => {
+                          userData?.library.forEach((i) => {
                             if (i?.isPublic) {
                               newLibrary.push(i);
                             }
                           });
-                          a = { ...a, library: newLibrary };
+                          userData = { ...userData, library: newLibrary };
                         }
                       }
 
-                      a?.library?.forEach((j) => {
+                      userData?.library?.forEach((j) => {
                         if (j?.isLendTo) {
                           categoryResult = [...categoryResult, j];
                         }
@@ -551,24 +540,27 @@ function Home() {
 
                               let categoryResult: CurrentBook[] = [];
 
-                              let a;
+                              let userData;
                               if (localPath === user.uid || localPath === "") {
-                                a = await getUserInfo(user.uid);
+                                userData = await getUserInfo(user.uid);
                               } else {
-                                a = await getUserInfo(localPath);
-                                if (!a) return;
-                                if (a?.library) {
+                                userData = await getUserInfo(localPath);
+                                if (!userData) return;
+                                if (userData?.library) {
                                   let newLibrary: CurrentBook[] = [];
-                                  a?.library.forEach((i) => {
+                                  userData?.library.forEach((i) => {
                                     if (i?.isPublic) {
                                       newLibrary.push(i);
                                     }
                                   });
-                                  a = { ...a, library: newLibrary };
+                                  userData = {
+                                    ...userData,
+                                    library: newLibrary,
+                                  };
                                 }
                               }
 
-                              a?.library?.forEach((j) => {
+                              userData?.library?.forEach((j) => {
                                 j?.category?.forEach((k) => {
                                   if (k === i) {
                                     categoryResult = [...categoryResult, j];
@@ -648,22 +640,22 @@ function Home() {
                       setCategorySelectActive(false);
                       setWishListActive(false);
 
-                      let a;
+                      let userData;
                       if (localPath === user.uid || localPath === "") {
-                        a = await getUserInfo(user.uid);
+                        userData = await getUserInfo(user.uid);
                       } else {
-                        a = await getUserInfo(localPath);
-                        if (!a) return;
+                        userData = await getUserInfo(localPath);
+                        if (!userData) return;
                       }
 
                       dispatch({
                         type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
-                        value: a?.lendFromList || [],
+                        value: userData?.lendFromList || [],
                       });
                       if (localPath === user.uid || localPath === "") {
                         dispatch({
                           type: actionType.GIVEBACK.SETGIVEBACK,
-                          value: a?.giveBackAlert || [],
+                          value: userData?.giveBackAlert || [],
                         });
                       }
 
@@ -686,17 +678,17 @@ function Home() {
                       setCategorySelectActive(false);
                       setLendFromActive(false);
 
-                      let a;
+                      let userData;
                       if (localPath === user.uid || localPath === "") {
-                        a = await getUserInfo(user.uid);
+                        userData = await getUserInfo(user.uid);
                       } else {
-                        a = await getUserInfo(localPath);
-                        if (!a) return;
+                        userData = await getUserInfo(localPath);
+                        if (!userData) return;
                       }
 
                       dispatch({
                         type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
-                        value: a?.wishList || [],
+                        value: userData?.wishList || [],
                       });
 
                       setLoading(false);
@@ -728,31 +720,22 @@ function Home() {
                   </BookcaseLoading>
                 )}
                 {displayLibrary?.map((i) => {
-                  //去別人的願望清單借給別人書
-                  let a = false;
-                  //借出朋友用的，這邊是user沒錯
-                  user?.library?.forEach((j) => {
-                    if (j.isbn === i.isbn) {
-                      a = true;
-                    }
-                  });
-                  console.log(a);
-                  console.log(c.find((j) => i.isbn === j));
+                  const hasBookinWishList = !!user?.library?.find(
+                    (j) => j.isbn === i.isbn
+                  );
 
-                  //去別人的書櫃跟別人借書 確認自己沒有這本書 且也沒有正在借同本書中
-                  let b = false;
-                  user?.library?.forEach((j) => {
-                    if (j.isbn === i.isbn) {
-                      b = true;
-                    }
-                  });
-                  user?.lendFromList?.forEach((j) => {
-                    if (j.isbn === i.isbn) {
-                      b = true;
-                    }
-                  });
-                  // console.log(d.find((j) => i.isbn === j));
-                  // console.log(d);
+                  const libraryHasThisBook = user?.library?.find(
+                    (j) => j.isbn === i.isbn
+                  );
+                  const lendFromListHasThisBook = user?.lendFromList?.find(
+                    (j) => j.isbn === i.isbn
+                  );
+                  const hasBookinLibrary = !!(
+                    libraryHasThisBook || lendFromListHasThisBook
+                  );
+                  console.log("");
+                  // console.log(bookforGivebackInOthersNotification.find((j) => i.isbn === j));
+                  console.log(bookforGivebackInOthersNotification);
 
                   return (
                     <BookDiv
@@ -787,12 +770,16 @@ function Home() {
                       {localPath &&
                         !wishListActive &&
                         !lendFromActive &&
-                        !b &&
-                        !c.find((j) => i.isbn === j) && (
+                        !hasBookinLibrary &&
+                        !bookforLendOrBorrowInOthersNotification.find(
+                          (j) => i.isbn === j
+                        ) && (
                           <>
                             <BorrowFrom
-                              $b={b}
-                              $c={c.find((j) => i.isbn === j)}
+                              $hasBookinLibrary={hasBookinLibrary}
+                              $bookforLendOrBorrowInOthersNotification={bookforLendOrBorrowInOthersNotification.find(
+                                (j) => i.isbn === j
+                              )}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setBarrierBGActive(true);
@@ -814,11 +801,15 @@ function Home() {
                       {localPath &&
                         !wishListActive &&
                         !lendFromActive &&
-                        !b &&
-                        c.find((j) => i.isbn === j) && (
+                        !hasBookinLibrary &&
+                        bookforLendOrBorrowInOthersNotification.find(
+                          (j) => i.isbn === j
+                        ) && (
                           <BorrowFrom
-                            $b={b}
-                            $c={c.find((j) => i.isbn === j)}
+                            $hasBookinLibrary={hasBookinLibrary}
+                            $bookforLendOrBorrowInOthersNotification={bookforLendOrBorrowInOthersNotification.find(
+                              (j) => i.isbn === j
+                            )}
                             onClick={(e) => {
                               e.stopPropagation();
                             }}
@@ -826,17 +817,22 @@ function Home() {
                             已送出請求
                           </BorrowFrom>
                         )}
-                      {localPath && !wishListActive && !lendFromActive && b && (
-                        <BorrowFrom
-                          $b={b}
-                          $c={c.find((j) => i.isbn === j)}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
-                        >
-                          已有此書
-                        </BorrowFrom>
-                      )}
+                      {localPath &&
+                        !wishListActive &&
+                        !lendFromActive &&
+                        hasBookinLibrary && (
+                          <BorrowFrom
+                            $hasBookinLibrary={hasBookinLibrary}
+                            $bookforLendOrBorrowInOthersNotification={bookforLendOrBorrowInOthersNotification.find(
+                              (j) => i.isbn === j
+                            )}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                          >
+                            已有此書
+                          </BorrowFrom>
+                        )}
                       {wishListActive && !localPath && (
                         <AddToLibrary
                           onClick={async () => {
@@ -848,26 +844,28 @@ function Home() {
                               i.publisher,
                               i.cover
                             );
-                            const a = await getUserInfo(user.uid);
+                            const userData = await getUserInfo(user.uid);
                             updateWishList(
                               user.uid,
-                              a?.wishList?.filter((j) => j.isbn !== i.isbn) ||
-                                []
+                              userData?.wishList?.filter(
+                                (j) => j.isbn !== i.isbn
+                              ) || []
                             );
                             dispatch({
                               type: actionType.DISPLAYLIBRARY.SETDISPLAYLIBRARY,
                               value:
-                                a?.wishList?.filter((j) => j.isbn !== i.isbn) ||
-                                [],
+                                userData?.wishList?.filter(
+                                  (j) => j.isbn !== i.isbn
+                                ) || [],
                             });
                             //這個是會讓他在header那邊通知確認取的東西是對的，但缺點就是會重新load資料
                             //實測效果是好的
                             dispatch({
                               type: actionType.USER.SETUSER,
                               value: {
-                                ...a,
+                                ...userData,
                                 wishList:
-                                  a?.wishList?.filter(
+                                  userData?.wishList?.filter(
                                     (j) => j.isbn !== i.isbn
                                   ) || [],
                               },
@@ -879,11 +877,15 @@ function Home() {
                       )}
                       {wishListActive &&
                         localPath &&
-                        a &&
-                        !c.find((j) => i.isbn === j) && (
+                        hasBookinWishList &&
+                        !bookforLendOrBorrowInOthersNotification.find(
+                          (j) => i.isbn === j
+                        ) && (
                           <LendToFriend
-                            $a={a}
-                            $c={c.find((j) => i.isbn === j)}
+                            $hasBookinWishList={hasBookinWishList}
+                            $bookforLendOrBorrowInOthersNotification={bookforLendOrBorrowInOthersNotification.find(
+                              (j) => i.isbn === j
+                            )}
                             onClick={() => {
                               setBarrierBGActive(true);
                               setNotificationAlertActive(true);
@@ -900,12 +902,21 @@ function Home() {
                             出借好友
                           </LendToFriend>
                         )}
-                      {wishListActive && localPath && !a && <Space />}
+                      {wishListActive && localPath && !hasBookinWishList && (
+                        <Space />
+                      )}
                       {wishListActive &&
                         localPath &&
-                        a &&
-                        c.find((j) => i.isbn === j) && (
-                          <LendToFriend $a={a} $c={c.find((j) => i.isbn === j)}>
+                        hasBookinWishList &&
+                        bookforLendOrBorrowInOthersNotification.find(
+                          (j) => i.isbn === j
+                        ) && (
+                          <LendToFriend
+                            $hasBookinWishList={hasBookinWishList}
+                            $bookforLendOrBorrowInOthersNotification={bookforLendOrBorrowInOthersNotification.find(
+                              (j) => i.isbn === j
+                            )}
+                          >
                             已送出請求
                           </LendToFriend>
                         )}
@@ -914,10 +925,14 @@ function Home() {
                       )}
                       {lendFromActive &&
                         !localPath &&
-                        !d.find((j) => i.isbn === j) && (
+                        !bookforGivebackInOthersNotification.find(
+                          (j) => i.isbn === j
+                        ) && (
                           <>
                             <GiveBackBtn
-                              $d={d.find((j) => i.isbn === j)}
+                              $bookforGivebackInOthersNotification={bookforGivebackInOthersNotification.find(
+                                (j) => i.isbn === j
+                              )}
                               onClick={() => {
                                 setBarrierBGActive(true);
                                 setNotificationAlertActive(true);
@@ -941,8 +956,14 @@ function Home() {
                         )}
                       {lendFromActive &&
                         !localPath &&
-                        d.find((j) => i.isbn === j) && (
-                          <GiveBackBtn $d={d.find((j) => i.isbn === j)}>
+                        bookforGivebackInOthersNotification.find(
+                          (j) => i.isbn === j
+                        ) && (
+                          <GiveBackBtn
+                            $bookforGivebackInOthersNotification={bookforGivebackInOthersNotification.find(
+                              (j) => i.isbn === j
+                            )}
+                          >
                             已送出請求
                           </GiveBackBtn>
                         )}
@@ -1542,7 +1563,10 @@ const BookName = styled.p`
   overflow: hidden;
 `;
 
-const BorrowFrom = styled.div<{ $b: boolean; $c: string | undefined }>`
+const BorrowFrom = styled.div<{
+  $hasBookinLibrary: boolean;
+  $bookforLendOrBorrowInOthersNotification: string | undefined;
+}>`
   margin-top: 16px;
   width: 120px;
   height: 36px;
@@ -1551,11 +1575,23 @@ const BorrowFrom = styled.div<{ $b: boolean; $c: string | undefined }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${(props) => (props.$b || props.$c ? "gray" : "#3f612d ")};
-  background: ${(props) => (props.$b || props.$c ? "" : "")};
-  cursor: ${(props) => (props.$b || props.$c ? "not-allowed" : "pointer")};
+  color: ${(props) =>
+    props.$hasBookinLibrary || props.$bookforLendOrBorrowInOthersNotification
+      ? "gray"
+      : "#3f612d "};
+  background: ${(props) =>
+    props.$hasBookinLibrary || props.$bookforLendOrBorrowInOthersNotification
+      ? ""
+      : ""};
+  cursor: ${(props) =>
+    props.$hasBookinLibrary || props.$bookforLendOrBorrowInOthersNotification
+      ? "not-allowed"
+      : "pointer"};
   :hover {
-    background: ${(props) => (props.$b || props.$c ? "" : "#fefadc")};
+    background: ${(props) =>
+      props.$hasBookinLibrary || props.$bookforLendOrBorrowInOthersNotification
+        ? ""
+        : "#fefadc"};
   }
 `;
 
@@ -1575,17 +1611,24 @@ const AddToLibrary = styled.div`
   }
 `;
 
-const LendToFriend = styled.div<{ $a: boolean; $c: string | undefined }>`
+const LendToFriend = styled.div<{
+  $hasBookinWishList: boolean;
+  $bookforLendOrBorrowInOthersNotification: string | undefined;
+}>`
   margin-top: 16px;
   width: 120px;
   height: 36px;
 
   border-radius: 6px;
-  color: ${(props) => (props.$c ? "gray" : "#3f612d")};
-  background: ${(props) => (props.$c ? "" : "")};
-  cursor: ${(props) => (props.$c ? "not-allowed" : "pointer")};
+  color: ${(props) =>
+    props.$bookforLendOrBorrowInOthersNotification ? "gray" : "#3f612d"};
+  background: ${(props) =>
+    props.$bookforLendOrBorrowInOthersNotification ? "" : ""};
+  cursor: ${(props) =>
+    props.$bookforLendOrBorrowInOthersNotification ? "not-allowed" : "pointer"};
   :hover {
-    background: ${(props) => (props.$c ? "" : "#fefadc")};
+    background: ${(props) =>
+      props.$bookforLendOrBorrowInOthersNotification ? "" : "#fefadc"};
   }
 
   display: flex;
@@ -1603,18 +1646,24 @@ const LendFromNameP = styled.div`
   font-weight: 500;
 `;
 
-const GiveBackBtn = styled.div<{ $d: string | undefined }>`
+const GiveBackBtn = styled.div<{
+  $bookforGivebackInOthersNotification: string | undefined;
+}>`
   width: 180px;
   height: 48px;
   margin-top: 4px;
   color: #3f612d;
 
   border-radius: 6px;
-  color: ${(props) => (props.$d ? "gray" : "#3f612d ")};
-  background: ${(props) => (props.$d ? "" : "")};
-  cursor: ${(props) => (props.$d ? "not-allowed" : "pointer")};
+  color: ${(props) =>
+    props.$bookforGivebackInOthersNotification ? "gray" : "#3f612d "};
+  background: ${(props) =>
+    props.$bookforGivebackInOthersNotification ? "" : ""};
+  cursor: ${(props) =>
+    props.$bookforGivebackInOthersNotification ? "not-allowed" : "pointer"};
   :hover {
-    background: ${(props) => (props.$d ? "" : "#fefadc")};
+    background: ${(props) =>
+      props.$bookforGivebackInOthersNotification ? "" : "#fefadc"};
   }
 
   display: flex;

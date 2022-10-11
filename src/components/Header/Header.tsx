@@ -25,7 +25,7 @@ import arrow from "./arrow.svg";
 import logout from "./logout.svg";
 import account from "./account.svg";
 import friend from "./friend.svg";
-import theme from "./theme.svg";
+
 import rightarrow from "./rightarrow.svg";
 import grayBack from "../TopSection/grayBack.png";
 
@@ -33,16 +33,11 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Friend from "../Friend/Friend";
 import Account from "../Account/Account";
-import Theme from "../Theme/Theme";
 
 function Header() {
   const Location = useLocation();
   const dispatch = useDispatch();
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
-  const displayLibrary = useSelector(
-    (state: { displayLibraryReducer: CurrentBook[] }) =>
-      state.displayLibraryReducer
-  );
   const notification = useSelector(
     (state: {
       notificationReducer: {
@@ -61,7 +56,7 @@ function Header() {
   const [friendActive, setFriendActive] = useState<boolean>(false);
   const [friendLoading, setFriendLoading] = useState<boolean>(false);
   const [accountActive, setAccountActive] = useState<boolean>(false);
-  const [themeActive, setThemeActive] = useState<boolean>(false);
+
   const [bGBlock, setBGBlock] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [isInputActive, setIsInputActive] = useState<boolean>(false);
@@ -71,7 +66,6 @@ function Header() {
   >(null);
   const [searchResultActive, setSearchResultActive] = useState<boolean>(false);
 
-  const [followActive, setFollowActive] = useState<boolean>(false);
   const navigator = useNavigate();
   const friendSearchRef = useRef<HTMLInputElement>(null);
   const localPath = Location.pathname.split("/")[1];
@@ -101,7 +95,7 @@ function Header() {
         setActive(false);
         setAccountActive(false);
         setFriendActive(false);
-        setThemeActive(false);
+
         setAlertActive(false);
         setIsInputActive(false);
         setInput("");
@@ -136,10 +130,6 @@ function Header() {
           type: actionType.NOTIFICATION.SETNOTIFICATION,
           value: v?.notification || [],
         });
-        // dispatch({
-        //   type: actionType.USER.SETUSER,
-        //   value: v,
-        // });
       });
     }
   }, [alertActive, user]);
@@ -154,7 +144,7 @@ function Header() {
               setActive(false);
               setAccountActive(false);
               setFriendActive(false);
-              setThemeActive(false);
+
               setAlertActive(false);
               setIsInputActive(false);
               setInput("");
@@ -223,7 +213,7 @@ function Header() {
                             },
                           });
                         }
-                        //偷更新user
+
                         const u = await getUserInfo(user.uid);
 
                         dispatch({
@@ -576,7 +566,7 @@ function Header() {
               setActive(false);
               setAccountActive(false);
               setFriendActive(false);
-              setThemeActive(false);
+
               setAlertActive(false);
               setIsInputActive(false);
               setInput("");
@@ -591,7 +581,7 @@ function Header() {
 
               setAccountActive(false);
               setFriendActive(false);
-              setThemeActive(false);
+
               setAlertActive(false);
               setIsInputActive(false);
               setInput("");
@@ -604,7 +594,7 @@ function Header() {
 
               setAccountActive(false);
               setFriendActive(false);
-              setThemeActive(false);
+
               setAlertActive(false);
               setIsInputActive(false);
               setInput("");
@@ -659,21 +649,6 @@ function Header() {
           accountActive={accountActive}
           setAccountActive={setAccountActive}
         />
-
-        {/* <UserDiv
-          onClick={() => {
-            setThemeActive(true);
-          }}
-        >
-          <UserDivLeft>
-            <ThemeIconDiv>
-              <ThemeIcon src={theme} />
-            </ThemeIconDiv>
-            <UserP>主題更換</UserP>
-          </UserDivLeft>
-          <RightArrow src={rightarrow}></RightArrow>
-        </UserDiv>
-        <Theme themeActive={themeActive} setThemeActive={setThemeActive} /> */}
 
         <UserDiv onClick={logOut}>
           <UserDivLeft>

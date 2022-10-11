@@ -3,10 +3,9 @@ import { actionType } from "../../reducer/rootReducer";
 import ReactLoading from "react-loading";
 
 import styled from "styled-components";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import pic from "./login.jpeg";
 
-import TopSection from "../../components/TopSection/TopSection";
 import { auth } from "../../utils/firebase";
 import { initUser, getUserInfo } from "../../utils/firestore";
 
@@ -24,11 +23,7 @@ const defaultAvatar =
 const Login = () => {
   const dispatch = useDispatch();
   const navigator = useNavigate();
-  const user = useSelector((state: { userReducer: User }) => state.userReducer);
-  const library = useSelector(
-    (state: { currentLibraryReducer: CurrentBook[] }) =>
-      state.currentLibraryReducer
-  );
+
   const [signState, setSignState] = useState<string>("signin");
   const [email, setEmail] = useState<string>("fortest@t.com");
   const [password, setPassword] = useState<string>("123456");
@@ -77,6 +72,10 @@ const Login = () => {
                 createUserWithEmailAndPassword(auth, email, password)
                   .then((u) => {
                     console.log("註冊成功");
+                    dispatch({
+                      type: actionType.USERID.SETUSERID,
+                      value: u.user.uid,
+                    });
                     initUser(u.user.uid, u.user.email!, defaultAvatar);
                     getUserInfo(u.user.uid).then((v) => {
                       dispatch({ type: actionType.USER.SETUSER, value: v });
@@ -98,6 +97,10 @@ const Login = () => {
                 signInWithEmailAndPassword(auth, email, password)
                   .then((u) => {
                     console.log("登入成功");
+                    dispatch({
+                      type: actionType.USERID.SETUSERID,
+                      value: u.user.uid,
+                    });
                     getUserInfo(u.user.uid).then((v) => {
                       dispatch({ type: actionType.USER.SETUSER, value: v });
                     });

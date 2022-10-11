@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDen2Hgkf-7u-rgYrcMPpWO78jm4L5rOWc",
+  apiKey: `${process.env.REACT_APP_FIREBASE_API_KEY}`,
   authDomain: "booklove-d393f.firebaseapp.com",
   projectId: "booklove-d393f",
   storageBucket: "booklove-d393f.appspot.com",

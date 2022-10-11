@@ -1,7 +1,7 @@
 import { useDispatch } from "react-redux";
 import { onAuthStateChanged } from "firebase/auth";
 import { createGlobalStyle } from "styled-components";
-import styled from "styled-components";
+
 import { auth } from "./utils/firebase";
 import { getUserInfo } from "./utils/firestore";
 import { actionType } from "./reducer/rootReducer";
@@ -22,6 +22,10 @@ function App() {
       console.log("監聽登入變化");
 
       if (u) {
+        dispatch({
+          type: actionType.USERID.SETUSERID,
+          value: u.uid,
+        });
         const uid = u.uid;
         const user = await getUserInfo(uid);
 
@@ -33,9 +37,9 @@ function App() {
         if (localPath === "login") {
           navigator("../");
         } else if (localPath === "book" || localPath === "edit") {
-          const a = Location.pathname.split("/")[2];
-          const bookId = a.slice(-13);
-          const userId = a.split(bookId)[0];
+          const pathname = Location.pathname.split("/")[2];
+          const bookId = pathname.slice(-13);
+          const userId = pathname.split(bookId)[0];
           getUserInfo(userId).then((v) => {
             if (v) {
               v.library.forEach((i) => {

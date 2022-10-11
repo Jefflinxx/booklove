@@ -1,4 +1,7 @@
 import { combineReducers } from "redux";
+
+import userIdReducer from "./userIdReducer";
+
 import userReducer from "./userReducer";
 import currentBookReducer from "./currentBookReducer";
 import currentLibraryReducer from "./currentLibraryReducer";
@@ -9,6 +12,8 @@ import notificationReducer from "./notificationReducer";
 import giveBackAlertReducer from "./giveBackAlertReducer";
 
 export const actionType = {
+  USERID: { SETUSERID: "setUserId" },
+
   USER: { SETUSER: "setUser" },
   BOOK: { SETBOOKDATA: "setBookdata" },
   LIBRARY: { SETLIBRARY: "setLibrary" },
@@ -22,6 +27,7 @@ export const actionType = {
 };
 
 const rootReducer = combineReducers({
+  userIdReducer,
   userReducer,
   currentBookReducer,
   currentLibraryReducer,

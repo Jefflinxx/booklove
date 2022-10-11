@@ -19,9 +19,8 @@ import {
 import { stringify } from "querystring";
 import { useNavigate } from "react-router-dom";
 import ReactLoading from "react-loading";
-
-const googleApi = `https://www.googleapis.com/books/v1/volumes?q=`;
-const esliteApi = `https://athena.eslite.com/api/v2/search?q=`;
+console.log(process.env.REACT_APP_GOOGLE_API);
+const googleApi = `${process.env.REACT_APP_GOOGLE_API}`;
 function Search() {
   const dispatch = useDispatch();
   const navigator = useNavigate();
@@ -55,7 +54,7 @@ function Search() {
 
   const fetchGoogleBooksData = async (input: string) => {
     setLoading(true);
-    const apiKey = "AIzaSyDz4bZxMmhDzE2XFztfzDqrBaCEuyiwFe4";
+    const apiKey = `${process.env.REACT_APP_GOOGLE_API_KEY}`;
     const response = await fetch(
       `${googleApi}${input}&maxResults=40&key=${apiKey}`,
       { method: "GET" }
@@ -133,37 +132,6 @@ function Search() {
     setResultCountActive(true);
     setLoading(false);
   };
-
-  //誠品
-  // const fetchEsliteBooksData = async (input) => {
-  //   const response = await fetch(`${esliteApi}${input}&size=40`, {
-  //     method: "GET",
-  //   });
-  //   if (response.status === 200) {
-  //     console.log("成功");
-  //   } else if (response.status === 403) {
-  //     alert("有點異常");
-  //   }
-  //   const message = await response.json();
-
-  //   //console.log(message.hits.hit);
-
-  //   setBooks((prev) => []);
-  //   message.hits.hit.forEach((i) => {
-  //     setBooks((prev) => {
-  //       return [
-  //         ...prev,
-  //         {
-  //           name: i.fields.name,
-  //           author: i.fields.author_for_autocomplete,
-  //           publisher: i.fields.manufacturer_for_autocomplete,
-  //           picture_url: `https://s.eslite.dev${i.fields.product_photo_url}`,
-  //           isbn: i.fields.isbn,
-  //         },
-  //       ];
-  //     });
-  //   });
-  // };
 
   useEffect(() => {
     friendSearchRef?.current?.focus();
@@ -784,4 +752,11 @@ const SearchLoading = styled.div<{ $active: boolean }>`
   align-items: center;
   justify-content: center;
   // background: white;
+
+  @media screen and (max-width: 1100px) {
+    right: ${(props) => (props.$active ? "50px" : "0px")};
+  }
+  @media screen and (max-width: 620px) {
+    right: ${(props) => (props.$active ? "40px" : "0px")};
+  }
 `;
