@@ -109,10 +109,11 @@ function Header() {
     if (input !== "") {
       setSearchResultActive(true);
       searchFriend(input).then((r) => {
-        const a: { uid: string; uname: string; avatar: string }[] | undefined =
-          r?.filter((i) => i.uid !== user.uid);
-        if (a) {
-          setSearchResult(a);
+        const filterResult:
+          | { uid: string; uname: string; avatar: string }[]
+          | undefined = r?.filter((i) => i.uid !== user.uid);
+        if (filterResult) {
+          setSearchResult(filterResult);
         } else {
           setSearchResult(null);
         }
@@ -214,11 +215,11 @@ function Header() {
                           });
                         }
 
-                        const u = await getUserInfo(user.uid);
+                        const userData = await getUserInfo(user.uid);
 
                         dispatch({
                           type: actionType.USER.SETUSER,
-                          value: u || null,
+                          value: userData || null,
                         });
                       }}
                     >
@@ -228,32 +229,37 @@ function Header() {
 
                     <SearchResultButton
                       onClick={() => {
-                        const a:
+                        const followList:
                           | {
                               uid: string;
                               uname: string;
                               avatar: string;
                             }[]
                           | undefined = user?.followList;
-                        if (a?.find((k) => k.uid === i.uid)) {
+                        if (followList?.find((k) => k.uid === i.uid)) {
                           updateFollowList(
                             user.uid,
-                            a.filter((j) => j.uid !== i.uid)
+                            followList.filter((j) => j.uid !== i.uid)
                           );
                           dispatch({
                             type: actionType.USER.SETUSER,
                             value: {
                               ...user,
-                              followList: a.filter((j) => j.uid !== i.uid),
+                              followList: followList.filter(
+                                (j) => j.uid !== i.uid
+                              ),
                             },
                           });
-                        } else if (a && !a?.find((k) => k.uid === i.uid)) {
-                          updateFollowList(user.uid, [...a, i]);
+                        } else if (
+                          followList &&
+                          !followList?.find((k) => k.uid === i.uid)
+                        ) {
+                          updateFollowList(user.uid, [...followList, i]);
                           dispatch({
                             type: actionType.USER.SETUSER,
-                            value: { ...user, followList: [...a, i] },
+                            value: { ...user, followList: [...followList, i] },
                           });
-                        } else if (!a) {
+                        } else if (!followList) {
                           updateFollowList(user.uid, [i]);
                           dispatch({
                             type: actionType.USER.SETUSER,
@@ -313,21 +319,21 @@ function Header() {
           <AlertWrapper $alertActive={alertActive}>
             {notification?.length ? <></> : <p>沒有通知</p>}
             {notification?.map((i) => {
-              let p;
+              let paragraph;
               let confirm;
               let cancel;
               if (i.type === "borrow") {
-                p = `想跟你借${i.bookname}`;
+                paragraph = `想跟你借${i.bookname}`;
                 confirm = "借出";
                 cancel = "不借";
               }
               if (i.type === "lendFrom") {
-                p = `想借你${i.bookname}`;
+                paragraph = `想借你${i.bookname}`;
                 confirm = "借入";
                 cancel = "不借";
               }
               if (i.type === "giveBack") {
-                p = `要歸還${i.bookname}`;
+                paragraph = `要歸還${i.bookname}`;
                 confirm = "確認";
                 cancel = "取消";
               }
@@ -338,7 +344,7 @@ function Header() {
                       <AlertAvatar src={i.avatar} />
                       <AlertP>
                         <AlertPB>{i.uname}</AlertPB>
-                        {p}
+                        {paragraph}
                       </AlertP>
                     </AlertLeftWrapper>
                     <AlertRightWrapper>
@@ -420,10 +426,10 @@ function Header() {
                               });
                             });
                             //並加到我的lendFromList，並把lendFrom改成對方id 把name改成對方姓名，方便取出
-                            let b;
+                            let bookInfo;
                             user.wishList?.forEach((j) => {
                               if (j.isbn === i.isbn) {
-                                b = {
+                                bookInfo = {
                                   ...j,
                                   lendFrom: i.uid,
                                   lendFromName: i.uname,
@@ -433,10 +439,10 @@ function Header() {
                             if (user.lendFromList) {
                               updatelendFromList(user.uid, [
                                 ...user.lendFromList,
-                                b,
+                                bookInfo,
                               ]);
                             } else {
-                              updatelendFromList(user.uid, [b]);
+                              updatelendFromList(user.uid, [bookInfo]);
                             }
                             //把我的書從願望清單移出
                             updateWishList(
@@ -507,19 +513,6 @@ function Header() {
                               notification?.filter((j) => j.isbn !== i.isbn) ||
                               [],
                           });
-                          //這個目前是應該不用
-                          // getUserInfo(user.uid).then((v) => {
-                          //   dispatch({
-                          //     type: actionType.USER.SETUSER,
-                          //     value: {
-                          //       ...v,
-                          //       notification:
-                          //         notification?.filter(
-                          //           (j) => j.isbn !== i.isbn
-                          //         ) || [],
-                          //     },
-                          //   });
-                          // });
                         }}
                       >
                         {confirm}

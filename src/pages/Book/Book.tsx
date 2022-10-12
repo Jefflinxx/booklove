@@ -45,18 +45,18 @@ function Book() {
 
   useEffect(() => {
     setProgressArray(() => {
-      const a: number[] = [];
+      const boxes: number[] = [];
       for (let j = 1; j <= currentBook.alreadyReadChapter; j++) {
-        a.push(j);
+        boxes.push(j);
       }
-      return a;
+      return boxes;
     });
 
     let likeCounter: number = 0;
     const getTotalLike = async () => {
-      const a = await getAllUserDoc();
+      const allUsers = await getAllUserDoc();
 
-      a.forEach((i) => {
+      allUsers.forEach((i) => {
         i.library?.forEach((j) => {
           if (j.isbn === currentBook.isbn && j.like) {
             likeCounter++;
@@ -68,15 +68,6 @@ function Book() {
 
     getTotalLike();
   }, [currentBook]);
-
-  // useEffect(() => {
-  //   getUserInfo(user.uid).then((v) => {
-  //     dispatch({
-  //       type: actionType.USER.SETUSER,
-  //       value: v,
-  //     });
-  //   });
-  // }, []);
 
   return (
     <>
@@ -119,14 +110,14 @@ function Book() {
             <BookImg src={currentBook.cover} />
             <TopRightSection>
               {[
-                { key: "書名", v: currentBook.bookname },
-                { key: "作者", v: currentBook.author },
-                { key: "出版", v: currentBook.publisher },
+                { key: "書名", content: currentBook.bookname },
+                { key: "作者", content: currentBook.author },
+                { key: "出版", content: currentBook.publisher },
               ].map((i) => {
                 return (
                   <SectionItem key={i.key}>
                     <BooknameP>{i.key}</BooknameP>
-                    <Bookname>{i.v}</Bookname>
+                    <Bookname>{i.content}</Bookname>
                   </SectionItem>
                 );
               })}
@@ -159,25 +150,25 @@ function Book() {
                     onMouseEnter={() => {
                       if (userId !== user.uid) return;
                       setProgressArray(() => {
-                        const a: number[] = [];
+                        const boxes: number[] = [];
                         for (let j = 1; j <= i; j++) {
-                          a.push(j);
+                          boxes.push(j);
                         }
-                        return [...a];
+                        return [...boxes];
                       });
                     }}
                     onMouseLeave={() => {
                       if (userId !== user.uid) return;
                       setProgressArray(() => {
-                        const a: number[] = [];
+                        const boxes: number[] = [];
                         for (
                           let j = 1;
                           j <= currentBook.alreadyReadChapter;
                           j++
                         ) {
-                          a.push(j);
+                          boxes.push(j);
                         }
-                        return a;
+                        return boxes;
                       });
                     }}
                     onClick={async () => {

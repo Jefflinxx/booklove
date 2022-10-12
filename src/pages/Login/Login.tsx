@@ -1,4 +1,4 @@
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { actionType } from "../../reducer/rootReducer";
 import ReactLoading from "react-loading";
 
@@ -8,9 +8,6 @@ import pic from "./login.jpeg";
 
 import { auth } from "../../utils/firebase";
 import { initUser, getUserInfo } from "../../utils/firestore";
-
-import { User } from "../../reducer/userReducer";
-import { CurrentBook } from "../../reducer/currentBookReducer";
 
 import {
   createUserWithEmailAndPassword,
@@ -199,7 +196,6 @@ const WholePageLoading = styled.div`
 const TitleWrapper = styled.div`
   width: 580px;
   height: 300px;
-  margin-right: ;
 
   display: flex;
   justify-content: center;

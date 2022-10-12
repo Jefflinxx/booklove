@@ -6,9 +6,7 @@ import styled from "styled-components";
 import { getUserInfo } from "../../utils/firestore";
 import { User } from "../../reducer/userReducer";
 import ReactLoading from "react-loading";
-
 import back from "../Header/back.svg";
-import { promises } from "stream";
 
 type FriendProps = {
   setActive: (value: boolean) => void;
@@ -35,13 +33,13 @@ const Friend: React.FC<FriendProps> = ({
   const localPath = Location.pathname.split("/")[1];
   useEffect(() => {
     const f = async () => {
-      const a: User | null = await getUserInfo(user.uid);
+      const userData: User | null = await getUserInfo(user.uid);
 
-      if (a?.followList) {
+      if (userData?.followList) {
         const newFollowList: { uid: string; avatar: string; uname: string }[] =
           [];
         const all: Promise<User | null>[] = [];
-        a.followList.forEach((i) => {
+        userData.followList.forEach((i) => {
           all.push(getUserInfo(i.uid));
         });
         Promise.all(all).then((j) => {
@@ -90,11 +88,7 @@ const Friend: React.FC<FriendProps> = ({
               onClick={async () => {
                 setActive(false);
                 navigator(`./${i.uid}`);
-                // const a = await getUserInfo(i.uid);
-                // dispatch({
-                //   type: actionType.DISPLAYUSER.SETDISPLAYUSER,
-                //   value: a,
-                // });
+
                 if (!localPath) {
                   dispatch({
                     type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
@@ -105,12 +99,11 @@ const Friend: React.FC<FriendProps> = ({
                     },
                   });
                 }
-                //偷更新user
-                const u = await getUserInfo(user.uid);
 
+                const userData = await getUserInfo(user.uid);
                 dispatch({
                   type: actionType.USER.SETUSER,
-                  value: u || null,
+                  value: userData || null,
                 });
               }}
             >

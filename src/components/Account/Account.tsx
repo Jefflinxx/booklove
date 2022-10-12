@@ -48,9 +48,9 @@ const Account: React.FC<AccountProps> = ({
     const getReadCount = async () => {
       let counter = 0;
 
-      const a = await getUserInfo(user.uid);
+      const userData = await getUserInfo(user.uid);
 
-      a?.library?.forEach((i) => {
+      userData?.library?.forEach((i) => {
         if (i.isFinishRead) {
           counter++;
         }
@@ -60,9 +60,9 @@ const Account: React.FC<AccountProps> = ({
 
     const getWriteCount = async () => {
       let counter = 0;
-      const a = await getUserInfo(user.uid);
+      const userData = await getUserInfo(user.uid);
 
-      a?.library?.forEach((i) => {
+      userData?.library?.forEach((i) => {
         if (i.summary) {
           counter += i.summary.length;
         }
@@ -135,7 +135,7 @@ const Account: React.FC<AccountProps> = ({
           $isEdit={isEdit}
           onClick={async () => {
             const imageUrl = await uploadImage();
-            const a = { cover: imageUrl, uname: input };
+            // const a = { cover: imageUrl, uname: input };
 
             if (input && imageUrl) {
               updateUser(user.uid, input, imageUrl);

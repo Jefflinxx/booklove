@@ -117,9 +117,11 @@ function Edit() {
                   setBarrierBGActive(true);
                   return;
                 }
-                const a = library.filter((i) => i.isbn !== currentBook.isbn);
+                const filterItems = library.filter(
+                  (i) => i.isbn !== currentBook.isbn
+                );
 
-                updateUserLibrary(user.uid, a);
+                updateUserLibrary(user.uid, filterItems);
                 navigator("../../");
                 getUserInfo(user.uid).then((v) => {
                   dispatch({
@@ -165,10 +167,6 @@ function Edit() {
                   };
                 }
               } else {
-                // console.log(
-                //   currentBook.alreadyReadChapter,
-                //   currentBook.alreadyReadChapter <= progress
-                // );
                 if (currentBook.alreadyReadChapter <= progress) {
                   submitData = {
                     ...data,
@@ -358,12 +356,6 @@ function Edit() {
                     likeActive={likeActive}
                     onClick={() => {
                       setLikeActive(!likeActive);
-                      // updateUserLibrary(user.uid, [
-                      //   ...user.library.filter(
-                      //     (i) => i.isbn !== currentBook.isbn
-                      //   ),
-                      //   { ...currentBook, like: !likeActive },
-                      // ]);
                     }}
                   ></LikeDiv>
                 </SectionItem>
@@ -374,12 +366,6 @@ function Edit() {
                     publicActive={publicActive}
                     onClick={() => {
                       setPublicActive(!publicActive);
-                      // updateUserLibrary(user.uid, [
-                      //   ...user.library.filter(
-                      //     (i) => i.isbn !== currentBook.isbn
-                      //   ),
-                      //   { ...currentBook, like: !publicActive },
-                      // ]);
                     }}
                   ></PublicDiv>
                 </SectionItem>
@@ -391,13 +377,13 @@ function Edit() {
                 <ProgressP>總章節</ProgressP>
                 <Progress
                   onChange={(e) => {
-                    const a = Number(e.target.value);
+                    const allChapterInput = Number(e.target.value);
 
-                    if (isNaN(a) || a > 30) {
+                    if (isNaN(allChapterInput) || allChapterInput > 30) {
                       setProgressWarn(true);
                     } else {
                       setProgressWarn(false);
-                      setProgress(a);
+                      setProgress(allChapterInput);
                     }
                   }}
                   defaultValue={currentBook?.totalChapter}
@@ -412,17 +398,16 @@ function Edit() {
                 <BookmarkP>書籤頁</BookmarkP>
                 <Bookmark
                   onChange={(e) => {
-                    const a = Number(e.target.value);
+                    const bookmarkInput = Number(e.target.value);
 
-                    if (isNaN(a)) {
+                    if (isNaN(bookmarkInput)) {
                       setPageWarn(true);
                     } else {
                       setPageWarn(false);
-                      setPage(a);
+                      setPage(bookmarkInput);
                     }
                   }}
                   defaultValue={currentBook?.page}
-                  // {...register("totalChapter")}
                 ></Bookmark>
                 <PageWarn pageWarn={pageWarn}>請輸入數字</PageWarn>
               </SectionBItem>
@@ -440,12 +425,6 @@ function Edit() {
                   isLendToActive={isLendToActive}
                   onClick={() => {
                     setIsLendToActive(!isLendToActive);
-                    // updateUserLibrary(user.uid, [
-                    //   ...user.library.filter(
-                    //     (i) => i.isbn !== currentBook.isbn
-                    //   ),
-                    //   { ...currentBook, isLendTo: !isLendToActive },
-                    // ]);
                   }}
                 ></IsLendTo>
               </SectionBItem>
@@ -463,11 +442,6 @@ function Edit() {
               ) : (
                 <></>
               )}
-
-              {/* <Summary
-                defaultValue={currentBook?.summary}
-                {...register("summary")}
-              ></Summary> */}
             </BottomSection>
             <ModifyButtonDiv>
               <ModifyButton type="submit">修改</ModifyButton>

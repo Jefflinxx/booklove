@@ -16,7 +16,6 @@ import {
   addSearchBookToUserWishList,
   getUserInfo,
 } from "../../utils/firestore";
-import { stringify } from "querystring";
 import { useNavigate } from "react-router-dom";
 import ReactLoading from "react-loading";
 console.log(process.env.REACT_APP_GOOGLE_API);
@@ -64,10 +63,10 @@ function Search() {
     } else if (response.status === 403) {
       alert("有點異常");
     }
-    const a = await response.json();
+    const searchResult = await response.json();
 
     setBooks((prev) => []);
-    a.items.forEach(
+    searchResult.items.forEach(
       (i: {
         volumeInfo: {
           title: string;
@@ -104,14 +103,14 @@ function Search() {
             picture_url = undefined;
           }
           if (i.volumeInfo.industryIdentifiers) {
-            const a = i.volumeInfo.industryIdentifiers;
-            const b: { identifier: string }[] = a.filter(
+            const isbnIdentifiers = i.volumeInfo.industryIdentifiers;
+            const hasIsbn: { identifier: string }[] = isbnIdentifiers.filter(
               (i: { type: string }) => i.type === "ISBN_13"
             );
-            if (b.length < 1) {
+            if (hasIsbn.length < 1) {
               return prev;
             }
-            isbn = b[0].identifier;
+            isbn = hasIsbn[0].identifier;
           } else {
             return prev;
           }
@@ -147,23 +146,23 @@ function Search() {
 
   useEffect(() => {
     //確認這本書是否已加入書櫃，加入了就不再顯示可加入的按鈕
-    let a: string[] = [];
+    let bookInLibrary: string[] = [];
     //確認這本書是否已加入願望清單，加入了就不再顯示可加入的按鈕
-    let b: string[] = [];
+    let bookInWishList: string[] = [];
     books?.forEach((i) => {
       user.library?.forEach((j) => {
         if (j.isbn === i.isbn) {
-          a.push(i.isbn);
+          bookInLibrary.push(i.isbn);
         }
       });
       user.wishList?.forEach((j) => {
         if (j.isbn === i.isbn) {
-          b.push(i.isbn);
+          bookInWishList.push(i.isbn);
         }
       });
     });
-    setBookAlreadyInLibrary(a);
-    setBookAlreadyInWishList(b);
+    setBookAlreadyInLibrary(bookInLibrary);
+    setBookAlreadyInWishList(bookInWishList);
   }, [books]);
 
   console.log(input);
@@ -183,12 +182,6 @@ function Search() {
         </PopupClose>
         <PopupBtnW>
           <PopupBtn
-            // $popupInfo={popupInfo}
-            // onClick={() => {
-            //   console.log(popupInfo);
-            //   window.location.assign(`../edit/${user.uid}${popupInfo}`);
-            //   //navigator(`../book/${user.uid}${popupInfo}`);
-            // }}
             onClick={() => {
               navigator("../");
               getUserInfo(user.uid).then((v) => {
@@ -202,7 +195,6 @@ function Search() {
             回到主頁
           </PopupBtn>
           <PopupBtn
-            // $popupInfo={popupInfo}
             onClick={() => {
               setPopupActive(false);
               setBarrierBGActive(false);
@@ -230,8 +222,6 @@ function Search() {
               placeholder="Search books, add to bookshelf"
               onKeyPress={(e) => {
                 if (e.key === "Enter") {
-                  //fetchEsliteBooksData(input);
-
                   if (input.trim()) {
                     fetchGoogleBooksData(input);
                   } else {
@@ -286,7 +276,9 @@ function Search() {
                     <AddWrapper>
                       {!bookAlreadyInLibrary.find((j) => i.isbn === j) && (
                         <AddBookBtn
-                          $a={bookAlreadyInLibrary.find((j) => i.isbn === j)}
+                          $bookAlreadyInLibrary={bookAlreadyInLibrary.find(
+                            (j) => i.isbn === j
+                          )}
                           onClick={() => {
                             // setPopupInfo(i.isbn);
                             addSearchBookToUserLibrary(
@@ -310,7 +302,9 @@ function Search() {
                       )}
                       {bookAlreadyInLibrary.find((j) => i.isbn === j) && (
                         <AddBookBtn
-                          $a={bookAlreadyInLibrary.find((j) => i.isbn === j)}
+                          $bookAlreadyInLibrary={bookAlreadyInLibrary.find(
+                            (j) => i.isbn === j
+                          )}
                         >
                           已加入書櫃
                         </AddBookBtn>
@@ -318,7 +312,9 @@ function Search() {
                       <SplitBtn />
                       {!bookAlreadyInWishList.find((j) => i.isbn === j) && (
                         <AddToWishList
-                          $b={bookAlreadyInWishList.find((j) => i.isbn === j)}
+                          $bookAlreadyInWishList={bookAlreadyInWishList.find(
+                            (j) => i.isbn === j
+                          )}
                           onClick={() => {
                             // setPopupInfo("");
                             addSearchBookToUserWishList(
@@ -343,7 +339,9 @@ function Search() {
                       )}
                       {bookAlreadyInWishList.find((j) => i.isbn === j) && (
                         <AddToWishList
-                          $b={bookAlreadyInWishList.find((j) => i.isbn === j)}
+                          $bookAlreadyInWishList={bookAlreadyInWishList.find(
+                            (j) => i.isbn === j
+                          )}
                         >
                           已加入願望清單
                         </AddToWishList>
@@ -373,14 +371,14 @@ const WholeWrapper = styled.div`
   background: #f6d4ba;
 `;
 
-const TopIconDivWrapper = styled.div`
-  width: 1080px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 32px;
-  padding: 8px;
-`;
+// const TopIconDivWrapper = styled.div`
+//   width: 1080px;
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+//   margin-bottom: 32px;
+//   padding: 8px;
+// `;
 
 const BackIconDiv = styled.div<{ $active: boolean }>`
   position: absolute;
@@ -699,23 +697,20 @@ const PopupBtn = styled.div`
   cursor: pointer;
 `;
 
-const AddBookBtn = styled.div<{ $a: string | undefined }>`
+const AddBookBtn = styled.div<{ $bookAlreadyInLibrary: string | undefined }>`
   width: 120px;
   height: 36px;
-font-size:16px;
+  font-size: 16px;
   justify-content: center;
   align-items: center;
- 
   border-radius: 6px;
- 
-
   display: flex;
-  }};
-  color:${(props) => (props.$a ? "gray" : "#1f2e16 ")};
-  background: ${(props) => (props.$a ? "" : "")};
-  cursor: ${(props) => (props.$a ? "not-allowed" : "pointer")};
+  color: ${(props) => (props.$bookAlreadyInLibrary ? "gray" : "#1f2e16 ")};
+  background: ${(props) => (props.$bookAlreadyInLibrary ? "" : "")};
+  cursor: ${(props) =>
+    props.$bookAlreadyInLibrary ? "not-allowed" : "pointer"};
   :hover {
-    background: ${(props) => (props.$a ? "" : "#fefadc")};
+    background: ${(props) => (props.$bookAlreadyInLibrary ? "" : "#fefadc")};
   }
 `;
 
@@ -724,7 +719,9 @@ const SplitBtn = styled.div`
   height: 24px;
 `;
 
-const AddToWishList = styled.div<{ $b: string | undefined }>`
+const AddToWishList = styled.div<{
+  $bookAlreadyInWishList: string | undefined;
+}>`
   width: 140px;
   height: 36px;
   font-size: 16px;
@@ -733,11 +730,12 @@ const AddToWishList = styled.div<{ $b: string | undefined }>`
   border-radius: 6px;
 
   display: flex;
-  color: ${(props) => (props.$b ? "gray" : "#1f2e16 ")};
-  background: ${(props) => (props.$b ? "" : "")};
-  cursor: ${(props) => (props.$b ? "not-allowed" : "pointer")};
+  color: ${(props) => (props.$bookAlreadyInWishList ? "gray" : "#1f2e16 ")};
+  background: ${(props) => (props.$bookAlreadyInWishList ? "" : "")};
+  cursor: ${(props) =>
+    props.$bookAlreadyInWishList ? "not-allowed" : "pointer"};
   :hover {
-    background: ${(props) => (props.$b ? "" : "#fefadc")};
+    background: ${(props) => (props.$bookAlreadyInWishList ? "" : "#fefadc")};
   }
 `;
 
