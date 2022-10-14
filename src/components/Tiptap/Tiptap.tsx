@@ -1,7 +1,5 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-//import React from "react";
-import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import {
@@ -114,9 +112,6 @@ const Tiptap: React.FC<TiptapProps> = ({ data, setData }) => {
       setData(html);
     },
   });
-  // useEffect(()=>{
-  //   editor.commands.setContent('<p>Example Text</p>')
-  // },[editor])
 
   return (
     <Wrapper>

@@ -22,23 +22,12 @@ function Book() {
     (state: { currentBookReducer: CurrentBook }) => state.currentBookReducer
   );
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
-  const library = useSelector(
-    (state: { currentLibraryReducer: CurrentBook[] }) =>
-      state.currentLibraryReducer
-  );
-  const displayLibrary = useSelector(
-    (state: { displayLibraryReducer: CurrentBook[] }) =>
-      state.displayLibraryReducer
-  );
-  //alreadyChapter
   const [progressArray, setProgressArray] = useState<number[]>([0]);
   const [totalLike, setTotalLike] = useState<number | null>(null);
-  //totalChapter
   const progressRows: number[] = [];
   for (let i = 1; i <= currentBook.totalChapter; i++) {
     progressRows.push(i);
   }
-
   const localPath = Location.pathname.split("/")[2];
   const bookId = localPath.slice(-13);
   const userId = localPath.split(bookId)[0];
@@ -65,7 +54,6 @@ function Book() {
       });
       setTotalLike(likeCounter);
     };
-
     getTotalLike();
   }, [currentBook]);
 
@@ -175,13 +163,6 @@ function Book() {
                       if (userId !== user.uid) return;
                       const userData = await getUserInfo(user.uid);
                       if (userData) {
-                        // setProgressArray(() => {
-                        //   const a: number[] = [];
-                        //   for (let j = 1; j <= i; j++) {
-                        //     a.push(j);
-                        //   }
-                        //   return [...a];
-                        // });
                         if (i === currentBook.totalChapter) {
                           updateUserLibrary(user.uid, [
                             {
@@ -290,7 +271,6 @@ const WholeWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-
   background: #eff2f5;
   width: 100%;
   background: #f6d4ba;
@@ -300,10 +280,8 @@ const WholeCenterWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-
   flex-direction: column;
   width: 902px;
-
   border-radius: 6px;
   margin: 120px 0px 150px 0px;
   @media screen and (max-width: 620px) {
@@ -316,7 +294,6 @@ const TopIconDivWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   padding: 8px;
   @media screen and (max-width: 1100px) {
     width: 900px;
@@ -340,6 +317,7 @@ const BackIconDiv = styled.div`
     background: #f3b391;
   }
 `;
+
 const BackIcon = styled.img`
   position: absolute;
   top: 8px;
@@ -358,6 +336,7 @@ const EditIconDiv = styled.div`
     background: #f3b391;
   }
 `;
+
 const EditIcon = styled.img`
   position: absolute;
   top: 8px;
@@ -403,10 +382,8 @@ const TopRightSection = styled.div`
 
 const SectionItem = styled.div`
   display: flex;
-
   font-size: 24px;
   margin-left: 32px;
-
   color: #3f612d;
   min-height: 64px;
   @media screen and (max-width: 620px) {
@@ -417,10 +394,8 @@ const SectionItem = styled.div`
 
 const SectionBItem = styled.div`
   display: flex;
-
   font-size: 24px;
   margin-left: 32px;
-
   color: #3f612d;
   min-height: 64px;
   @media screen and (max-width: 620px) {
@@ -485,6 +460,7 @@ const ProgressWrapper = styled.div`
     margin-bottom: 16px;
   }
 `;
+
 const ProgressTip = styled.p`
   display: none;
   cursor: pointer;
@@ -495,6 +471,7 @@ const ProgressTip = styled.p`
     display: none;
   }
 `;
+
 const Progress = styled.div<{ progressArray: number[]; $i: number }>`
   width: 40px;
   height: 32px;
@@ -519,7 +496,6 @@ const LendTo = styled(Content)``;
 const SummaryP = styled(Title)`
   font-size: 24px;
   margin-left: 32px;
-
   color: #3f612d;
   min-height: 52px;
   @media screen and (max-width: 620px) {
@@ -528,6 +504,7 @@ const SummaryP = styled(Title)`
     min-height: auto;
   }
 `;
+
 const Summary = styled(Content)`
   margin: 0px 54px 0px 32px;
   width: auto;

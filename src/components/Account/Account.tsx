@@ -28,7 +28,6 @@ const Account: React.FC<AccountProps> = ({
   const [input, setInput] = useState<string>("");
   const [readCount, setReadCount] = useState<number>(0);
   const [writeCount, setWriteCount] = useState<number>(0);
-  // const userNameRef = useRef<HTMLInputElement>(null);
 
   const uploadImage = async () => {
     if (imageFile === null) return;
@@ -47,9 +46,7 @@ const Account: React.FC<AccountProps> = ({
   useEffect(() => {
     const getReadCount = async () => {
       let counter = 0;
-
       const userData = await getUserInfo(user.uid);
-
       userData?.library?.forEach((i) => {
         if (i.isFinishRead) {
           counter++;
@@ -112,7 +109,6 @@ const Account: React.FC<AccountProps> = ({
         <UnameWrapper>
           <Username $isEdit={isEdit}>{user?.uname}</Username>
           <UsernameInput
-            // ref={userNameRef}
             $isEdit={isEdit}
             onChange={(e) => {
               if (e.target.value.length < 17) {
@@ -124,7 +120,6 @@ const Account: React.FC<AccountProps> = ({
           <EditIconDiv
             onClick={() => {
               setIsEdit(!isEdit);
-              // userNameRef?.current?.focus();
             }}
           >
             <EditIcon src={edit}></EditIcon>
@@ -135,7 +130,6 @@ const Account: React.FC<AccountProps> = ({
           $isEdit={isEdit}
           onClick={async () => {
             const imageUrl = await uploadImage();
-            // const a = { cover: imageUrl, uname: input };
 
             if (input && imageUrl) {
               updateUser(user.uid, input, imageUrl);
@@ -156,7 +150,6 @@ const Account: React.FC<AccountProps> = ({
         >
           確認修改
         </ConfirmBtn>
-
         <ReadCountWrapper $imageFile={imageFile} $isEdit={isEdit}>
           <ReadCountP>閱讀書本累計</ReadCountP>
           <ReadCountP>{readCount}本</ReadCountP>
@@ -272,7 +265,6 @@ const AvatarImgMask = styled.div`
   left: 0;
   z-index: 11;
   border-radius: 50%;
-
   background: rgba(0, 0, 0, 0.3);
 `;
 
@@ -296,7 +288,6 @@ const UploadImgBtn = styled.div`
 
 const UnameWrapper = styled.div`
   display: flex;
-
   width: 130px;
   height: 38px;
   justify-content: center;
@@ -311,26 +302,6 @@ const Username = styled.p<{ $isEdit: boolean }>`
   font-weight: 500;
   overflow-x: overlay;
   background: #f6d4ba;
-
-  // &::-webkit-scrollbar {
-  //   width: 4px;
-  // }
-  // &::-webkit-scrollbar-button {
-  //   display: none;
-  //   /* background: transparent;
-  // border-radius: 8px; */
-  // }
-  // &::-webkit-scrollbar-track-piece {
-  //   background: transparent;
-  // }
-  // &::-webkit-scrollbar-thumb {
-  //   border-radius: 8px;
-  //   background-color: rgba(0, 0, 0, 0.4);
-  //   border: 1px solid slategrey;
-  // }
-  // &::-webkit-scrollbar-track {
-  //   box-shadow: transparent;
-  // }
 `;
 
 const UsernameInput = styled.input<{ $isEdit: boolean }>`
@@ -342,6 +313,7 @@ const UsernameInput = styled.input<{ $isEdit: boolean }>`
   color: gray;
   text-align: center;
 `;
+
 const EditIconDiv = styled.div`
   width: 38px;
   height: 38px;
@@ -354,6 +326,7 @@ const EditIconDiv = styled.div`
     background: #f3b391;
   }
 `;
+
 const EditIcon = styled.img`
   position: absolute;
   top: 8px;
@@ -385,22 +358,23 @@ const ReadCountWrapper = styled.div<{
   justify-content: space-between;
   align-items: center;
   width: 200px;
-
   margin-top: ${(props) =>
     props.$imageFile || props.$isEdit ? "0px" : "54px"};
   margin-bottom: 16px;
 `;
+
 const ReadCountP = styled.div`
   font-size: 20px;
 `;
+
 const WriteCountWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 200px;
-
   margin-bottom: 16px;
 `;
+
 const WriteCountP = styled.div`
   font-size: 20px;
 `;

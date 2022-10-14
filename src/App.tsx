@@ -19,8 +19,6 @@ function App() {
 
   useEffect(() => {
     onAuthStateChanged(auth, async (u) => {
-      console.log("監聽登入變化");
-
       if (u) {
         dispatch({
           type: actionType.USERID.SETUSERID,
@@ -44,7 +42,6 @@ function App() {
             if (v) {
               v.library.forEach((i) => {
                 if (i.isbn === bookId) {
-                  // console.log("進到book edit時dispatch資料 ");
                   dispatch({
                     type: actionType.BOOK.SETBOOKDATA,
                     value: i,
@@ -66,9 +63,6 @@ function App() {
       <Header />
       <Outlet />
       <Footer />
-      {/* <button onClick={addMessageRoom}>addMessageRoom按鈕</button>
-      <button onClick={addUser}>addUser按鈕</button>
-      <button onClick={getMessageRoom}>MessageRoom按鈕</button> */}
     </>
   );
 }

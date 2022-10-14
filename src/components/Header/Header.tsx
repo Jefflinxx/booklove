@@ -2,12 +2,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { actionType } from "../../reducer/rootReducer";
 import { User } from "../../reducer/userReducer";
 import { CurrentBook } from "../../reducer/currentBookReducer";
-
 import styled from "styled-components";
-
 import { auth } from "../../utils/firebase";
 import { signOut } from "firebase/auth";
-
 import {
   getUserInfo,
   searchFriend,
@@ -25,7 +22,6 @@ import arrow from "./arrow.svg";
 import logout from "./logout.svg";
 import account from "./account.svg";
 import friend from "./friend.svg";
-
 import rightarrow from "./rightarrow.svg";
 import grayBack from "../TopSection/grayBack.png";
 
@@ -69,9 +65,6 @@ function Header() {
   const navigator = useNavigate();
   const friendSearchRef = useRef<HTMLInputElement>(null);
   const localPath = Location.pathname.split("/")[1];
-  console.log(localPath);
-
-  //登出
   function logOut() {
     signOut(auth)
       .then(() => {
@@ -102,9 +95,10 @@ function Header() {
         setBGBlock(false);
       })
       .catch((error) => {
-        console.log("登出失敗");
+        alert("登出失敗");
       });
   }
+
   useEffect(() => {
     if (input !== "") {
       setSearchResultActive(true);
@@ -125,7 +119,6 @@ function Header() {
 
   useEffect(() => {
     if (user) {
-      console.log("拿通知");
       getUserInfo(user.uid).then((v) => {
         dispatch({
           type: actionType.NOTIFICATION.SETNOTIFICATION,
@@ -151,7 +144,6 @@ function Header() {
               setInput("");
               setBGBlock(false);
 
-              //這邊希望點擊後可以回到自己的主頁
               navigator("./");
 
               if (localPath) {
@@ -214,9 +206,7 @@ function Header() {
                             },
                           });
                         }
-
                         const userData = await getUserInfo(user.uid);
-
                         dispatch({
                           type: actionType.USER.SETUSER,
                           value: userData || null,
@@ -295,8 +285,6 @@ function Header() {
                 },
               });
             }
-
-            //這邊希望點擊後可以回到自己的主頁
             navigator("./");
           }}
         >
@@ -337,6 +325,7 @@ function Header() {
                 confirm = "確認";
                 cancel = "取消";
               }
+
               return (
                 <div key={`${i.type}${i.uname}${i.bookname}`}>
                   <AlertDiv>
@@ -351,7 +340,6 @@ function Header() {
                       <AlertConfirm
                         onClick={() => {
                           if (i.type === "borrow") {
-                            //請求確認的話會在確認端把書的狀態改變為借出，借給誰改成那個人
                             let libraryExceptThisBook;
                             let bookPutInOtherLendFromList;
                             getUserInfo(user.uid).then((v) => {
@@ -372,7 +360,7 @@ function Header() {
                                   ]);
                                 }
                               });
-                              //更新要放到對方lendFromList的書資訊
+
                               v?.library?.forEach((j) => {
                                 if (j.isbn === i.isbn) {
                                   bookPutInOtherLendFromList = {
@@ -383,7 +371,7 @@ function Header() {
                                 }
                               });
                             });
-                            //在請求借書端會把那本書放入自己的借入書籍區
+
                             getUserInfo(i.uid).then((v) => {
                               if (v?.lendFromList) {
                                 updatelendFromList(i.uid, [
@@ -395,7 +383,7 @@ function Header() {
                                   bookPutInOtherLendFromList,
                                 ]);
                               }
-                              //也會檢查對方的願望清單去把他清除掉
+
                               updateWishList(
                                 i.uid,
                                 v?.wishList?.filter((j) => j.isbn !== i.isbn) ||
@@ -404,7 +392,6 @@ function Header() {
                             });
                           }
                           if (i.type === "lendFrom") {
-                            //把他的書改成出借狀態
                             let libraryExceptThisBook;
                             getUserInfo(i.uid).then((v) => {
                               libraryExceptThisBook = v!.library.filter(
@@ -425,7 +412,7 @@ function Header() {
                                 }
                               });
                             });
-                            //並加到我的lendFromList，並把lendFrom改成對方id 把name改成對方姓名，方便取出
+
                             let bookInfo;
                             user.wishList?.forEach((j) => {
                               if (j.isbn === i.isbn) {
@@ -444,7 +431,7 @@ function Header() {
                             } else {
                               updatelendFromList(user.uid, [bookInfo]);
                             }
-                            //把我的書從願望清單移出
+
                             updateWishList(
                               user.uid,
                               user.wishList?.filter((j) => j.isbn !== i.isbn) ||
@@ -459,7 +446,6 @@ function Header() {
                             });
                           }
                           if (i.type === "giveBack") {
-                            //把我的那本書的出借狀態改成flase 出借人清空
                             let libraryExceptThisBook;
                             getUserInfo(user.uid).then((v) => {
                               libraryExceptThisBook = v!.library.filter(
@@ -480,7 +466,7 @@ function Header() {
                                 }
                               });
                             });
-                            //把對方的lendFrom庫裡的那本書清掉
+
                             let lendFromListExceptThisBook;
 
                             getUserInfo(i.uid).then((v) => {
@@ -492,7 +478,6 @@ function Header() {
                                 i.uid,
                                 lendFromListExceptThisBook
                               );
-                              //把對方的歸還通知清掉
 
                               updateGiveBackAlert(
                                 i.uid,
@@ -501,7 +486,7 @@ function Header() {
                               );
                             });
                           }
-                          //把這則通知清除
+
                           updateNotification(
                             user.uid,
                             notification?.filter((j) => j.isbn !== i.isbn) || []
@@ -519,7 +504,6 @@ function Header() {
                       </AlertConfirm>
                       <AlertCancel
                         onClick={() => {
-                          //把這則通知清除
                           updateNotification(
                             user.uid,
                             notification?.filter((j) => j.isbn !== i.isbn) || []
@@ -533,8 +517,6 @@ function Header() {
                           });
                           if (i.type === "giveBack") {
                             getUserInfo(i.uid).then((v) => {
-                              //把對方的歸還通知清掉
-
                               updateGiveBackAlert(
                                 i.uid,
                                 v?.giveBackAlert?.filter((j) => j !== i.isbn) ||
@@ -1125,23 +1107,6 @@ const AccountIcon = styled.img`
   width: 20px;
   left: 10px;
   top: 8px;
-`;
-
-const ThemeIconDiv = styled.div`
-  position: relative;
-  width: 38px;
-  height: 38px;
-  margin-right: 8px;
-  background: #f3b391;
-
-  border-radius: 50%;
-`;
-
-const ThemeIcon = styled.img`
-  position: absolute;
-  width: 20px;
-  left: 9px;
-  top: 9px;
 `;
 
 const LogoutIconDiv = styled.div`

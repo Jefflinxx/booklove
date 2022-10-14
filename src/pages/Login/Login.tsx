@@ -1,14 +1,11 @@
 import { useDispatch } from "react-redux";
 import { actionType } from "../../reducer/rootReducer";
 import ReactLoading from "react-loading";
-
 import styled from "styled-components";
 import { useState } from "react";
 import pic from "./login.jpeg";
-
 import { auth } from "../../utils/firebase";
 import { initUser, getUserInfo } from "../../utils/firestore";
-
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -16,11 +13,9 @@ import {
 import { useNavigate } from "react-router-dom";
 const defaultAvatar =
   "https://firebasestorage.googleapis.com/v0/b/booklove-d393f.appspot.com/o/images%2Fdefault%2Favatar.svg?alt=media&token=ef7468d4-fc7e-43e4-8c95-1f7627ebb363";
-
 const Login = () => {
   const dispatch = useDispatch();
   const navigator = useNavigate();
-
   const [signState, setSignState] = useState<string>("signin");
   const [email, setEmail] = useState<string>("fortest@t.com");
   const [password, setPassword] = useState<string>("123456");

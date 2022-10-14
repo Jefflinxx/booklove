@@ -1,8 +1,3 @@
-const initialState = {
-  counter: 0,
-  showCounter: true,
-};
-
 export type BookInfo = {
   isbn: string;
   author: string;

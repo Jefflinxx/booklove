@@ -2,9 +2,7 @@ import { app } from "./firebase";
 
 import {
   getFirestore,
-  addDoc,
   collection,
-  onSnapshot,
   serverTimestamp,
   setDoc,
   doc,
@@ -14,15 +12,12 @@ import {
   getDoc,
   updateDoc,
   arrayUnion,
-  arrayRemove,
 } from "firebase/firestore";
-import { async } from "@firebase/util";
+
 import { User } from "../reducer/userReducer";
 import { CurrentBook } from "../reducer/currentBookReducer";
 
 const db = getFirestore(app);
-
-//collection
 
 export const addMessageRoom = (Uid: [], from: string, message: string) => {
   console.log("add Message");
@@ -43,7 +38,7 @@ export const addMessageRoom = (Uid: [], from: string, message: string) => {
   };
 
   setDoc(messageRoom, docData);
-  //setDoc(content, subDoc);
+
   setDoc(
     doc(db, "messageRooms", messageRoom.id, "contents", content.id),
     ContentDocData
@@ -60,7 +55,7 @@ export const addUser = (Uid: string, uname: string) => {
     background: "",
     avatar: "",
     followList: [{ Uid: "2", name: "max", avatar: "a" }],
-    category: ["文學", "漫畫", "美術"], //opt1
+    category: ["文學", "漫畫", "美術"],
     library: [
       {
         Bid: "1",
@@ -79,7 +74,7 @@ export const addUser = (Uid: string, uname: string) => {
         isPublic: true,
       },
     ],
-    wishList: [], //opt2
+    wishList: [],
     Notification: [{ follower: "name" }],
   };
   setDoc(user, docData);
@@ -87,19 +82,12 @@ export const addUser = (Uid: string, uname: string) => {
 
 export const getMessageRoom = async () => {
   console.log("get");
-  const docRef = doc(
-    db,
-    "messageRooms",
-    "yeozOWhDD2NinUdjIjOr"
-    // "contents",
-    // "9D1kN6vXebfWky8If2ZK"
-  );
+  const docRef = doc(db, "messageRooms", "yeozOWhDD2NinUdjIjOr");
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
     console.log("Document data:", docSnap.data());
   } else {
-    // doc.data() will be undefined in this case
     console.log("No such document!");
   }
 };
