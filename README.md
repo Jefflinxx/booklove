@@ -59,3 +59,10 @@ An interactive bookshelf website that enables users to manage a personal bookshe
 
 <h1>Future Features</h1>
 
+- chatroom
+- Book leaderboard
+- Summary leaderboard
+- Summary search function
+- Summary podcast
+- Achievement system
+
