@@ -2,14 +2,13 @@ import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import camera from "./camera.png";
 import { User } from "../../reducer/userReducer";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
   getUserInfo,
   updateBackground,
   updateFollowList,
 } from "../../utils/firestore";
-import { CurrentBook } from "../../reducer/currentBookReducer";
 import { actionType } from "../../reducer/rootReducer";
 import { storage } from "../../utils/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -32,10 +31,6 @@ function TopSection() {
   const [bSKT, setBSKT] = useState<boolean>(true);
   const [confirmActive, setConfirmActive] = useState<boolean>(false);
   const [libraryCount, setLibraryCount] = useState<number | null>(0);
-  const library = useSelector(
-    (state: { currentLibraryReducer: CurrentBook[] }) =>
-      state.currentLibraryReducer
-  );
   const topSDisplay = useSelector(
     (state: {
       topSDisplayReducer: {
@@ -72,7 +67,6 @@ function TopSection() {
     const getFollowObj = async () => {
       if (localPath) {
         const userData = await getUserInfo(localPath);
-
         if (userData) {
           dispatch({
             type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
@@ -140,7 +134,15 @@ function TopSection() {
             accept="image/gif, image/jpeg, image/png"
             onChange={(e) => {
               if (e.target.files) {
-                setImageFile(e.target.files[0]);
+                if (
+                  e.target.files[0].type === "image/jpeg" ||
+                  e.target.files[0].type === "image/png" ||
+                  e.target.files[0].type === "image/gif"
+                ) {
+                  setImageFile(e.target.files[0]);
+                } else {
+                  alert("格式不符");
+                }
               }
             }}
           />
@@ -332,7 +334,6 @@ const CancelBtn = styled.div<{ confirmActive: boolean }>`
     background: #f3eec8;
   }
   font-size: 15px;
-
   align-items: center;
   justify-content: center;
   display: ${(props) => (props.confirmActive ? "flex" : "none")};
@@ -374,6 +375,7 @@ const InfoDiv = styled.div`
     height: 182px;
   }
 `;
+
 const InfoLeft = styled.div`
   display: flex;
   align-items: center;
@@ -387,12 +389,10 @@ const Avatar = styled.img`
   width: 210px;
   height: 210px;
   margin-right: 16px;
-
   border: 6px solid #fefadc;
   border-radius: 50%;
   z-index: 1;
   background: #fefadc;
-
   position: absolute;
   top: -144px;
   left: 48px;
@@ -456,7 +456,6 @@ const LibraryCount = styled.p`
 const InfoRight = styled.div`
   display: flex;
   align-items: center;
-
   @media screen and (max-width: 830px) {
   }
 `;
@@ -494,11 +493,4 @@ const InfoRightP = styled.p<{ localPath: string; $uid: string }>`
       background: #f3eec8;
     }
   }
-`;
-
-const Split = styled.div`
-  width: 1186px;
-  height: 24px;
-  border-bottom: 1px solid rgb(206, 208, 212);
-  margin-bottom: 60px;
 `;
