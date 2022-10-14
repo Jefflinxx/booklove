@@ -29,13 +29,13 @@ An interactive bookshelf website that enables users to manage a personal bookshe
 <span><image src="https://img.shields.io/badge/prettier-1A2C34?style=for-the-badge&logo=prettier&logoColor=F7BA3E"/></span>
 
 - Used Redux for managing the application state.
-- Developed with TypeScript to improve application stability. 
+- Developed with TypeScript to improve application stability.
 - Realized world-wide (included ISBN) books searching function through Google Books API.
 - Applied React/React Router for SPA.
-- Implemented bookshelf UI/RWD with React/Styled Components. 
-- Organized user management with Firebase Authentication. 
-- Managed user uploaded images with Firebase Storage. 
-- Integrated data management with Firebase Firestore Database. 
+- Implemented bookshelf UI/RWD with React/Styled Components.
+- Organized user management with Firebase Authentication.
+- Managed user uploaded images with Firebase Storage.
+- Integrated data management with Firebase Firestore Database.
 - Built text editor with Tiptap.
 - Used trello to manage the project, and scrum as a development process.
 
@@ -65,4 +65,4 @@ An interactive bookshelf website that enables users to manage a personal bookshe
 - Summary search function
 - Summary podcast
 - Achievement system
-
+- book sharing platform
