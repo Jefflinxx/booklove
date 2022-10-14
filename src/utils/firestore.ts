@@ -20,7 +20,6 @@ import { CurrentBook } from "../reducer/currentBookReducer";
 const db = getFirestore(app);
 
 export const addMessageRoom = (Uid: [], from: string, message: string) => {
-  console.log("add Message");
   const messageRooms = collection(db, "messageRooms");
   const contents = collection(db, "contents");
   const messageRoom = doc(messageRooms);
@@ -46,7 +45,6 @@ export const addMessageRoom = (Uid: [], from: string, message: string) => {
 };
 
 export const addUser = (Uid: string, uname: string) => {
-  console.log("add User");
   const users = collection(db, "users");
   const user = doc(users, Uid);
   const docData = {
@@ -81,7 +79,6 @@ export const addUser = (Uid: string, uname: string) => {
 };
 
 export const getMessageRoom = async () => {
-  console.log("get");
   const docRef = doc(db, "messageRooms", "yeozOWhDD2NinUdjIjOr");
   const docSnap = await getDoc(docRef);
 
@@ -93,7 +90,6 @@ export const getMessageRoom = async () => {
 };
 
 export const initUser = async (uid: string, uname: string, avatar: string) => {
-  console.log("initUser");
   const users = collection(db, "users");
   const user = doc(users, uid);
   const docData = {
@@ -109,7 +105,6 @@ export const updateUser = async (
   uname: string,
   avatar: string
 ) => {
-  console.log("editUser");
   const Ref = doc(db, "users", uid);
   await updateDoc(Ref, {
     uname: uname,
@@ -118,7 +113,6 @@ export const updateUser = async (
 };
 
 export const updateBackground = async (uid: string, background: string) => {
-  console.log("editBG");
   const Ref = doc(db, "users", uid);
   await updateDoc(Ref, {
     background: background,
@@ -126,7 +120,6 @@ export const updateBackground = async (uid: string, background: string) => {
 };
 
 export const updateCategory = async (uid: string, category: string[]) => {
-  console.log("editCategory");
   const Ref = doc(db, "users", uid);
   await updateDoc(Ref, {
     category: category,
@@ -134,7 +127,6 @@ export const updateCategory = async (uid: string, category: string[]) => {
 };
 
 export const updateWishList = async (uid: string, wishList: CurrentBook[]) => {
-  console.log("editWishList");
   const Ref = doc(db, "users", uid);
   await updateDoc(Ref, {
     wishList: wishList,
@@ -145,8 +137,6 @@ export const updatelendFromList = async (
   uid: string,
   lendFromList: CurrentBook[]
 ) => {
-  console.log("editlendFromList");
-
   const Ref = doc(db, "users", uid);
   await updateDoc(Ref, {
     lendFromList: lendFromList,
@@ -164,7 +154,6 @@ export const updateNotification = async (
     bookname: string;
   }[]
 ) => {
-  console.log("editlendFromNotification");
   const Ref = doc(db, "users", uid);
   await updateDoc(Ref, {
     notification: notification,
@@ -179,7 +168,6 @@ export const addSearchBookToUserLibrary = async (
   publisher: string,
   cover: string
 ) => {
-  console.log("addSearchBookToUserLibrary");
   const docRef = doc(db, "users", uid);
   await updateDoc(docRef, {
     library: arrayUnion({
@@ -203,7 +191,6 @@ export const addSearchBookToUserWishList = async (
   publisher: string,
   cover: string
 ) => {
-  console.log("addSearchBookToUserWishList");
   const docRef = doc(db, "users", uid);
   await updateDoc(docRef, {
     wishList: arrayUnion({
@@ -220,11 +207,9 @@ export const addSearchBookToUserWishList = async (
 export const getUserInfo = async (uid: string) => {
   const docRef = doc(db, "users", uid);
   const docSnap = await getDoc(docRef);
-
   if (docSnap.exists()) {
-    const a = docSnap.data();
-
-    return a as User;
+    const data = docSnap.data();
+    return data as User;
   } else {
     return null;
   }
@@ -234,7 +219,6 @@ export const updateUserLibrary = async (
   uid: string,
   library: CurrentBook[] | object[]
 ) => {
-  console.log("editlibrary");
   const Ref = doc(db, "users", uid);
   await updateDoc(Ref, {
     library: library,
@@ -245,7 +229,6 @@ export const updateGiveBackAlert = async (
   uid: string,
   giveBackAlert: string[]
 ) => {
-  console.log("editGiveBackAlert");
   const Ref = doc(db, "users", uid);
   await updateDoc(Ref, {
     giveBackAlert: giveBackAlert,
@@ -255,14 +238,14 @@ export const updateGiveBackAlert = async (
 export const searchFriend = async (uname: string) => {
   const q = query(collection(db, "users"), where("uname", "==", uname));
   const querySnapshot = await getDocs(q);
-  let a: { uid: string; uname: string; avatar: string }[] = [];
+  let friendList: { uid: string; uname: string; avatar: string }[] = [];
   querySnapshot.forEach((doc) => {
-    a = [
-      ...a,
+    friendList = [
+      ...friendList,
       { uid: doc.id, avatar: doc.data().avatar, uname: doc.data().uname },
     ];
   });
-  if (a.length > 0) return a;
+  if (friendList.length > 0) return friendList;
   else return null;
 };
 
@@ -282,9 +265,9 @@ export const updateFollowList = async (
 
 export const getAllUserDoc = async () => {
   const querySnapshot = await getDocs(collection(db, "users"));
-  const a: any = [];
+  const allUser: any = [];
   querySnapshot.forEach((doc) => {
-    a.push(doc.data());
+    allUser.push(doc.data());
   });
-  return a;
+  return allUser;
 };

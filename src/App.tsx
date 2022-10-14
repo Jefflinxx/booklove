@@ -1,11 +1,9 @@
 import { useDispatch } from "react-redux";
 import { onAuthStateChanged } from "firebase/auth";
 import { createGlobalStyle } from "styled-components";
-
 import { auth } from "./utils/firebase";
 import { getUserInfo } from "./utils/firestore";
 import { actionType } from "./reducer/rootReducer";
-
 import Footer from "./components/Footer/Footer";
 import Header from "./components/Header/Header";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -26,12 +24,10 @@ function App() {
         });
         const uid = u.uid;
         const user = await getUserInfo(uid);
-
         dispatch({
           type: actionType.USER.SETUSER,
           value: user || null,
         });
-
         if (localPath === "login") {
           navigator("../");
         } else if (localPath === "book" || localPath === "edit") {
@@ -56,10 +52,10 @@ function App() {
       }
     });
   }, []);
+
   return (
     <>
       <GlobalStyle />
-
       <Header />
       <Outlet />
       <Footer />

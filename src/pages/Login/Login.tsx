@@ -63,7 +63,6 @@ const Login = () => {
               if (signState === "signup") {
                 createUserWithEmailAndPassword(auth, email, password)
                   .then((u) => {
-                    console.log("註冊成功");
                     dispatch({
                       type: actionType.USERID.SETUSERID,
                       value: u.user.uid,
@@ -88,7 +87,6 @@ const Login = () => {
               } else if (signState === "signin") {
                 signInWithEmailAndPassword(auth, email, password)
                   .then((u) => {
-                    console.log("登入成功");
                     dispatch({
                       type: actionType.USERID.SETUSERID,
                       value: u.user.uid,
@@ -145,11 +143,9 @@ const LoginPage = styled.div`
   position: fixed;
   top: 0px;
   left: 0px;
-
   width: 100vw;
   height: 100vh;
   background: #f6d4ba;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -169,6 +165,7 @@ const PicWrapper = styled.div`
     display: none;
   }
 `;
+
 const Pic = styled.img`
   width: 500px;
   height: 100vh;
@@ -191,7 +188,6 @@ const WholePageLoading = styled.div`
 const TitleWrapper = styled.div`
   width: 580px;
   height: 300px;
-
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -203,6 +199,7 @@ const TitleWrapper = styled.div`
     width: auto;
   }
 `;
+
 const Title = styled.p`
   font-size: 60px;
   font-weight: 500;
@@ -220,6 +217,7 @@ const Title = styled.p`
     font-size: 36px;
   }
 `;
+
 const SubTitle = styled.p`
   width: 500px;
   height: 84px;
@@ -238,6 +236,7 @@ const SubTitle = styled.p`
     font-size: 20px;
   }
 `;
+
 const LW = styled.div`
   z-index: 17;
 `;
@@ -245,10 +244,8 @@ const LW = styled.div`
 const LoginWrapper = styled.div`
   border-radius: 6px;
   overflow: hidden;
-
   box-shadow: 0 2px 4px rgb(0 0 0 / 10%), 0 8px 16px rgb(0 0 0 / 10%);
   background: #f3b391;
-
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -319,7 +316,6 @@ const Input = styled.input`
   display: block;
   width: 364px;
   height: 52px;
-
   background: #fefadc;
   font-size: 21px;
   border-radius: 6px;
