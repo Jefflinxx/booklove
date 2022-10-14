@@ -20,11 +20,11 @@ An interactive bookshelf website that enables users to manage a personal bookshe
 
 <h1>Tech</h1>
 
-*Used Redux for managing the application state.
-*Developed with TypeScript to improve application stability. Realized world-wide (included ISBN) books searching function through Google Books API.
-*Applied React/React Router for SPA.
-*Implemented bookshelf UI/RWD with React/Styled Components. Organized user management with Firebase Authentication. Managed user uploaded images with *Firebase Storage. Integrated data management with Firebase Firestore Database. Built text editor with Tiptap.
-*Used trello to manage the project, and scrum as a development process.
+- Used Redux for managing the application state.
+- Developed with TypeScript to improve application stability. Realized world-wide (included ISBN) books searching function through Google Books API.
+- Applied React/React Router for SPA.
+- Implemented bookshelf UI/RWD with React/Styled Components. Organized user management with Firebase Authentication. Managed user uploaded images with - - Firebase Storage. Integrated data management with Firebase Firestore Database. Built text editor with Tiptap.
+- Used trello to manage the project, and scrum as a development process.
 
 <h1>User Flow</h1>
 
