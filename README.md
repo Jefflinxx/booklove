@@ -45,15 +45,15 @@ An interactive bookshelf website that enables users to manage a personal bookshe
 
 <h1>Demo</h1>
 
-<h3>Search and add Books</h3>
+Search and add Books
 <br/>
 ![image](https://firebasestorage.googleapis.com/v0/b/booklove-d393f.appspot.com/o/forReadMe%2FSearch%20func.gif?alt=media&token=6ed43858-78b2-439d-bfe3-1f95860e31ea)
 
-<h3>Info and edit page</h3>
+Info and edit page
 <br/>
 ![image](https://firebasestorage.googleapis.com/v0/b/booklove-d393f.appspot.com/o/forReadMe%2Finfo%20%26%20edit.gif?alt=media&token=ef2d2070-8c7f-4136-ab16-9996003bec71)
 
-<h3>Header</h3>
+Header
 <br/>
 ![image](https://firebasestorage.googleapis.com/v0/b/booklove-d393f.appspot.com/o/forReadMe%2Fheader.gif?alt=media&token=f30e516c-6124-4c49-98d2-4ee8d285f2e5)
 
