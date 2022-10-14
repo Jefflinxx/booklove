@@ -41,6 +41,8 @@ An interactive bookshelf website that enables users to manage a personal bookshe
 
 <h1>User Flow</h1>
 
+![image](https://firebasestorage.googleapis.com/v0/b/booklove-d393f.appspot.com/o/forReadMe%2FUser%20Flow.png?alt=media&token=82abce11-6d15-49cc-a3dc-9aed1a74e92b)
+
 <h1>Demo</h1>
 
 <h1>Future Features</h1>
