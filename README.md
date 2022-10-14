@@ -12,11 +12,11 @@ An interactive bookshelf website that enables users to manage a personal bookshe
 
 <h1>Feature</h1>
 
-*Bookshelf which can manage and edit book info including book name, author, publisher, category, bookmark, book location, lending status, and summary.
-*Privacy settings for books.
-*Click like and check total likes for favorite books.
-*Progress bar for recording reading progress.
-*Visit others' bookshelves, automatically compare users' bookshelves and allow lend/borrow actions for books.
+-Bookshelf which can manage and edit book info including book name, author, publisher, category, bookmark, book location, lending status, and summary.
+-Privacy settings for books.
+-Click like and check total likes for favorite books.
+-Progress bar for recording reading progress.
+-Visit others' bookshelves, automatically compare users' bookshelves and allow lend/borrow actions for books.
 
 <h1>Tech</h1>
 
