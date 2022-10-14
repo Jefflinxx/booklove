@@ -1,8 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
-import avatar from "./avatar.svg";
 import camera from "./camera.png";
-// import grayBack from "./grayBack.png";
 import { User } from "../../reducer/userReducer";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -50,7 +48,6 @@ function TopSection() {
   const grayBack =
     "https://firebasestorage.googleapis.com/v0/b/booklove-d393f.appspot.com/o/defaultBG.jpeg?alt=media&token=3a992fc9-e591-440a-838d-45155bfebffe";
   const localPath = Location.pathname.split("/")[1];
-
   const uploadImage = async () => {
     if (imageFile === null) return;
     const imageRef = ref(storage, `${user.uid}/${Date.now() + imageFile.name}`);
@@ -74,23 +71,23 @@ function TopSection() {
 
     const getFollowObj = async () => {
       if (localPath) {
-        const a = await getUserInfo(localPath);
+        const userData = await getUserInfo(localPath);
 
-        if (a) {
+        if (userData) {
           dispatch({
             type: actionType.TOPSDISPLAY.SETTOPSDISPLAY,
             value: {
-              avatar: a.avatar,
-              uname: a.uname,
-              background: a.background || grayBack,
+              avatar: userData.avatar,
+              uname: userData.uname,
+              background: userData.background || grayBack,
             },
           });
-          setLibraryCount(a.library?.length || 0);
+          setLibraryCount(userData.library?.length || 0);
           setFollowObj({
-            uid: a.uid,
-            uname: a.uname,
-            avatar: a.avatar,
-            background: a.background || grayBack,
+            uid: userData.uid,
+            uname: userData.uname,
+            avatar: userData.avatar,
+            background: userData.background || grayBack,
           });
         }
       }
@@ -120,14 +117,8 @@ function TopSection() {
             onClick={async () => {
               setConfirmActive(false);
               const imageUrl = await uploadImage();
-              const a = { cover: imageUrl };
-
               if (imageUrl) {
                 updateBackground(user.uid, imageUrl);
-                // dispatch({
-                //   type: actionType.USER.SETUSER,
-                //   value: { ...user, background: imageUrl },
-                // });
               }
             }}
             confirmActive={confirmActive}
@@ -182,34 +173,42 @@ function TopSection() {
               $uid={user?.uid}
               localPath={localPath}
               onClick={() => {
-                const a:
+                const userFollowList:
                   | {
                       uid: string;
                       uname: string;
                       avatar: string;
                     }[]
                   | undefined = user?.followList;
-                if (a?.find((k) => k.uid === localPath)) {
+                if (userFollowList?.find((k) => k.uid === localPath)) {
                   updateFollowList(
                     user.uid,
-                    a.filter((j) => j.uid !== localPath)
+                    userFollowList.filter((j) => j.uid !== localPath)
                   );
                   dispatch({
                     type: actionType.USER.SETUSER,
                     value: {
                       ...user,
-                      followList: a.filter((j) => j.uid !== localPath),
+                      followList: userFollowList.filter(
+                        (j) => j.uid !== localPath
+                      ),
                     },
                   });
-                } else if (a && !a?.find((k) => k.uid === localPath)) {
+                } else if (
+                  userFollowList &&
+                  !userFollowList?.find((k) => k.uid === localPath)
+                ) {
                   if (followObj) {
-                    updateFollowList(user.uid, [...a, followObj]);
+                    updateFollowList(user.uid, [...userFollowList, followObj]);
                     dispatch({
                       type: actionType.USER.SETUSER,
-                      value: { ...user, followList: [...a, followObj] },
+                      value: {
+                        ...user,
+                        followList: [...userFollowList, followObj],
+                      },
                     });
                   }
-                } else if (!a) {
+                } else if (!userFollowList) {
                   if (followObj) {
                     updateFollowList(user.uid, [followObj]);
                     dispatch({
@@ -232,11 +231,6 @@ function TopSection() {
 }
 
 export default TopSection;
-
-const Center = styled.div`
-  display: flex;
-  justify-content: center;
-`;
 
 const WholeWrapper = styled.div`
   position: absolute;
@@ -471,7 +465,6 @@ const InfoRightP = styled.p<{ localPath: string; $uid: string }>`
   width: 120px;
   height: 40px;
   font-size: 16px;
-
   align-items: center;
   justify-content: center;
   margin-right: 30px;

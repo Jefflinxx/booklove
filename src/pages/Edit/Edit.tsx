@@ -192,7 +192,6 @@ function Edit() {
                   };
                 }
               }
-              // console.log(submitData);
 
               const userData = await getUserInfo(user.uid);
               if (userData) {
@@ -202,8 +201,6 @@ function Edit() {
                     bookInfoAddSubmitData = { ...i, ...submitData };
                   }
                 });
-                //firebase說資料不對就開這個
-                //console.log(bookInfoAddSubmitData);
 
                 dispatch({
                   type: actionType.BOOK.SETBOOKDATA,
@@ -224,7 +221,6 @@ function Edit() {
             })}
           >
             <TopSection>
-              {/* <UploadCard /> */}
               <BookImgLabel>
                 <BookImgInput
                   type="file"
@@ -387,7 +383,6 @@ function Edit() {
                     }
                   }}
                   defaultValue={currentBook?.totalChapter}
-                  // {...register("totalChapter")}
                 ></Progress>
                 <ProgressWarn progressWarn={progressWarn}>
                   請輸入數字，且不可大於30

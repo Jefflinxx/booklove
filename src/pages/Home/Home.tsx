@@ -82,7 +82,6 @@ function Home() {
     setCategorySelectActive(false);
     setLendFromActive(false);
     setCategoryAllActive(false);
-    console.log(user, "56不能亡");
     if (user) {
       getUserInfo(user.uid).then((v) => {
         dispatch({
@@ -153,8 +152,6 @@ function Home() {
   }, [localPath, user]);
 
   useEffect(() => {
-    console.log("執行");
-    //比對 對方的 notification 有沒有這本書 有的話，按鈕改為 已送出請求
     let bookforLendOrBorrowInOthersNotification: string[] = [];
     let bookforGivebackInOthersNotification: string[] = [];
 
@@ -188,12 +185,7 @@ function Home() {
           <ReactLoading type="cylon" color="black" width={100} />
         </WholePageLoading>
       )}
-      <BarrierBG
-        barrierBGActive={barrierBGActive}
-        onClick={(e) => {
-          // e.stopPropagation();
-        }}
-      ></BarrierBG>
+      <BarrierBG barrierBGActive={barrierBGActive}></BarrierBG>
       <NotificationAlert notificationAlertActive={notificationAlertActive}>
         <NAP>
           {notification.type === "borrow" &&
@@ -240,9 +232,7 @@ function Home() {
               }
 
               if (notification.type === "giveBack") {
-                console.log("giveBack Type");
                 getUserInfo(nAlendFrom.id).then((v) => {
-                  console.log("我要歸還的對象的通知列表", v?.notification);
                   if (v?.notification) {
                     updateNotification(nAlendFrom.id, [
                       ...v?.notification,
@@ -252,8 +242,7 @@ function Home() {
                     updateNotification(nAlendFrom.id, [notification]);
                   }
                 });
-                //把歸還通知放入自己的資料庫
-                //之後對方按取消或確認再幫對方刪掉
+
                 if (giveBackAlert) {
                   updateGiveBackAlert(user.uid, [
                     ...giveBackAlert,
@@ -583,7 +572,6 @@ function Home() {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (displayUser?.category) {
-                                  //遍歷每本書去把這項類別清除
                                   let libraryBook: CurrentBook[] = [];
                                   getUserInfo(user.uid).then((v) => {
                                     v?.library.forEach((k) => {
@@ -602,8 +590,6 @@ function Home() {
                                       value: libraryBook,
                                     });
                                   });
-
-                                  //刪除類別
                                   updateCategory(
                                     user.uid,
                                     displayUser?.category.filter((j) => j !== i)
@@ -733,9 +719,6 @@ function Home() {
                   const hasBookinLibrary = !!(
                     libraryHasThisBook || lendFromListHasThisBook
                   );
-                  console.log("");
-                  // console.log(bookforGivebackInOthersNotification.find((j) => i.isbn === j));
-                  console.log(bookforGivebackInOthersNotification);
 
                   return (
                     <BookDiv
@@ -757,14 +740,6 @@ function Home() {
                       }}
                     >
                       <BookImg src={i.cover}></BookImg>
-
-                      {/* {i.bookname.length > 6 && (
-                        <BookName>{`${i.bookname.slice(0, 7)}...`}</BookName>
-                      )}
-                      {i.bookname.length <= 6 && (
-                        <BookName>{i.bookname}</BookName>
-                      )} */}
-
                       <BookName>{i.bookname}</BookName>
 
                       {localPath &&
@@ -858,8 +833,6 @@ function Home() {
                                   (j) => j.isbn !== i.isbn
                                 ) || [],
                             });
-                            //這個是會讓他在header那邊通知確認取的東西是對的，但缺點就是會重新load資料
-                            //實測效果是好的
                             dispatch({
                               type: actionType.USER.SETUSER,
                               value: {
@@ -1036,12 +1009,14 @@ const NAP = styled.div`
   justify-content: center;
   height: 70px;
 `;
+
 const NABtnWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   height: 70px;
 `;
+
 const NAConfirm = styled.div`
   width: 100px;
   border: 2px solid #f3b391;
@@ -1051,6 +1026,7 @@ const NAConfirm = styled.div`
   margin-right: 32px;
   border-radius: 6px;
 `;
+
 const NACancel = styled.div`
   width: 100px;
   border: 2px solid #f3b391;
@@ -1075,13 +1051,6 @@ const CenterWrapper = styled.div`
   @media screen and (max-width: 1100px) {
     width: 100%;
   }
-  // @media screen and (max-width: 830px) {
-  //   width: 540px;
-  // }
-  // @media screen and (max-width: 560px) {
-  //   width: 270px;
-  // }
-  //border: 1px solid black;
 `;
 
 const Center = styled.div`
@@ -1141,7 +1110,6 @@ const PlusIconDiv = styled.div<{ localPath: string; $uid: string }>`
   }
 `;
 
-//上面的標籤
 const TopTagWrapper = styled.div`
   max-width: 1080px;
 
@@ -1166,16 +1134,6 @@ const Split = styled.div`
   @media screen and (max-width: 830px) {
     display: none;
   }
-`;
-
-const TopTagLeftWrapper = styled.div`
-  display: flex;
-  padding-left: 2px;
-`;
-
-const TopTagRightWrapper = styled.div`
-  display: flex;
-  padding-right: 2px;
 `;
 
 const LendFromFriend = styled.div<{ $active: boolean }>`
@@ -1541,12 +1499,6 @@ const BookImg = styled.img`
   width: 200px;
   height: 280px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
-`;
-
-const BookNameDiv = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `;
 
 const BookName = styled.p`

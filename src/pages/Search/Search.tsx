@@ -7,10 +7,8 @@ import { actionType } from "../../reducer/rootReducer";
 import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import { useEffect, useState, useRef } from "react";
-
 import { User } from "../../reducer/userReducer";
 import { CurrentBook } from "../../reducer/currentBookReducer";
-
 import {
   addSearchBookToUserLibrary,
   addSearchBookToUserWishList,
@@ -18,13 +16,12 @@ import {
 } from "../../utils/firestore";
 import { useNavigate } from "react-router-dom";
 import ReactLoading from "react-loading";
-console.log(process.env.REACT_APP_GOOGLE_API);
+
 const googleApi = `${process.env.REACT_APP_GOOGLE_API}`;
 function Search() {
   const dispatch = useDispatch();
   const navigator = useNavigate();
   const [input, setInput] = useState("");
-  // const [popupInfo, setPopupInfo] = useState("");
   const [resultCountActive, setResultCountActive] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [popupActive, setPopupActive] = useState(false);
@@ -45,12 +42,7 @@ function Search() {
     }[]
   >([]);
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
-  const library = useSelector(
-    (state: { currentLibraryReducer: CurrentBook[] }) =>
-      state.currentLibraryReducer
-  );
   const friendSearchRef = useRef<HTMLInputElement>(null);
-
   const fetchGoogleBooksData = async (input: string) => {
     setLoading(true);
     const apiKey = `${process.env.REACT_APP_GOOGLE_API_KEY}`;
@@ -58,9 +50,7 @@ function Search() {
       `${googleApi}${input}&maxResults=40&key=${apiKey}`,
       { method: "GET" }
     );
-    if (response.status === 200) {
-      console.log("成功");
-    } else if (response.status === 403) {
+    if (response.status === 403) {
       alert("有點異常");
     }
     const searchResult = await response.json();
@@ -145,9 +135,7 @@ function Search() {
   }, []);
 
   useEffect(() => {
-    //確認這本書是否已加入書櫃，加入了就不再顯示可加入的按鈕
     let bookInLibrary: string[] = [];
-    //確認這本書是否已加入願望清單，加入了就不再顯示可加入的按鈕
     let bookInWishList: string[] = [];
     books?.forEach((i) => {
       user.library?.forEach((j) => {
@@ -164,8 +152,6 @@ function Search() {
     setBookAlreadyInLibrary(bookInLibrary);
     setBookAlreadyInWishList(bookInWishList);
   }, [books]);
-
-  console.log(input);
 
   return (
     <>
@@ -225,7 +211,7 @@ function Search() {
                   if (input.trim()) {
                     fetchGoogleBooksData(input);
                   } else {
-                    console.log("不能空白");
+                    alert("不能空白");
                   }
                 }
               }}
@@ -259,7 +245,6 @@ function Search() {
                   <BookRightSection>
                     <BookItem>
                       <BookNameP>書名</BookNameP>
-
                       {i.name.length > 36 && (
                         <BookName>{`${i.name.slice(0, 37)}...`}</BookName>
                       )}
@@ -280,7 +265,6 @@ function Search() {
                             (j) => i.isbn === j
                           )}
                           onClick={() => {
-                            // setPopupInfo(i.isbn);
                             addSearchBookToUserLibrary(
                               user.uid,
                               i.isbn,
@@ -316,7 +300,6 @@ function Search() {
                             (j) => i.isbn === j
                           )}
                           onClick={() => {
-                            // setPopupInfo("");
                             addSearchBookToUserWishList(
                               user.uid,
                               i.isbn,
@@ -325,7 +308,6 @@ function Search() {
                               i.publisher,
                               i.picture_url
                             );
-
                             setBookAlreadyInWishList([
                               ...bookAlreadyInWishList,
                               i.isbn,
@@ -367,18 +349,8 @@ const WholeWrapper = styled.div`
   display: flex;
   align-items: center;
   flex-direction: column;
-
   background: #f6d4ba;
 `;
-
-// const TopIconDivWrapper = styled.div`
-//   width: 1080px;
-//   display: flex;
-//   align-items: center;
-//   justify-content: space-between;
-//   margin-bottom: 32px;
-//   padding: 8px;
-// `;
 
 const BackIconDiv = styled.div<{ $active: boolean }>`
   position: absolute;
@@ -388,11 +360,9 @@ const BackIconDiv = styled.div<{ $active: boolean }>`
   height: ${(props) => (props.$active ? "38px" : "48px")};
   border-radius: 50%;
   cursor: pointer;
-
   :hover {
     background: #f3b391;
   }
-
   @media screen and (max-width: 1100px) {
     top: 6px;
     left: 6px;
@@ -404,6 +374,7 @@ const BackIconDiv = styled.div<{ $active: boolean }>`
     left: ${(props) => (props.$active ? "6px" : "32px")};
   }
 `;
+
 const BackIcon = styled.img<{ $active: boolean }>`
   position: absolute;
   top: ${(props) => (props.$active ? "8px" : "5px")};
@@ -541,7 +512,6 @@ const Bookcase = styled.div`
   width: 1080px;
   display: flex;
   align-items: center;
-  ${"" /* justify-content: center; */}
   flex-wrap: wrap;
   @media screen and (max-width: 1100px) {
     width: 600px;
@@ -621,9 +591,6 @@ const AddWrapper = styled.div`
   right: 20px;
   display: flex;
   align-items: center;
-  @media screen and (max-width: 620px) {
-    // margin-left: 24px;
-  }
 `;
 
 const Popup = styled.div<{ $active: boolean }>`
@@ -745,11 +712,9 @@ const SearchLoading = styled.div<{ $active: boolean }>`
   right: ${(props) => (props.$active ? "290px" : "0px")};
   width: 40px;
   height: 40px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-  // background: white;
 
   @media screen and (max-width: 1100px) {
     right: ${(props) => (props.$active ? "50px" : "0px")};

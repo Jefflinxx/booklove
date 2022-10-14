@@ -43,7 +43,6 @@ const Friend: React.FC<FriendProps> = ({
           all.push(getUserInfo(i.uid));
         });
         Promise.all(all).then((j) => {
-          console.log(j);
           j?.forEach((k) => {
             newFollowList.push({
               uid: k!.uid,
@@ -51,7 +50,6 @@ const Friend: React.FC<FriendProps> = ({
               avatar: k!.avatar,
             });
           });
-          console.log(newFollowList);
           setFollowList(newFollowList);
         });
       }
@@ -61,6 +59,7 @@ const Friend: React.FC<FriendProps> = ({
       f();
     }
   }, [friendActive]);
+
   return (
     <Wrapper $active={friendActive}>
       <TitleWrapper>
@@ -130,10 +129,8 @@ const Wrapper = styled.div<{
   left: 0px;
   width: 360px;
   height: 450px;
-
   background: #f6d4ba;
   flex-direction: column;
-
   padding-bottom: 8px;
   border-radius: 6px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
@@ -153,6 +150,7 @@ const TitleWrapper = styled.div`
     justify-content: center;
   }
 `;
+
 const BackIconDiv = styled.div`
   width: 38px;
   height: 38px;
@@ -175,6 +173,7 @@ const BackIcon = styled.img`
   top: 10px;
   left: 12px;
 `;
+
 const Title = styled.div`
   font-size: 24px;
   font-weight: 500;
@@ -191,7 +190,6 @@ const FriendWrapper = styled.div`
   align-items: center;
   flex-direction: column;
   justify-content: flex-start;
-
   overflow: overlay;
   position: relative;
 `;
@@ -234,4 +232,5 @@ const FriendAvatar = styled.img`
   border: 2px solid #fefadc;
   border-radius: 50%;
 `;
+
 const FriendName = styled.p``;

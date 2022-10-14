@@ -1,10 +1,4 @@
 import { BookInfo } from "./userReducer";
-
-const initialState = {
-  counter: 0,
-  showCounter: true,
-};
-
 export type CurrentBook = BookInfo;
 
 const currentBookReducer = (
