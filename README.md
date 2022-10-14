@@ -1,6 +1,6 @@
 <h1>booklove</h1>
 
-![image](https://firebasestorage.googleapis.com/v0/b/booklove-d393f.appspot.com/o/forReadMe%2F%E5%B0%81%E9%9D%A2.png?alt=media&token=64154935-0ef6-45a7-94cf-fb19fc3b71f5)
+![image](https://firebasestorage.googleapis.com/v0/b/booklove-d393f.appspot.com/o/forReadMe%2F%E5%B0%81%E9%9D%A22.png?alt=media&token=bae347b2-26ac-4f08-ad0f-7a9c1a278c6f)
 
 <h1>Intro</h1>
 
