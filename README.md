@@ -19,7 +19,7 @@ An interactive bookshelf website that enables users to manage a personal bookshe
 - Visit others' bookshelves, automatically compare users' bookshelves and allow lend/borrow actions for books.
 
 <h1>Tech</h1>
-
+<span><image src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white"/></span>
 - Used Redux for managing the application state.
 - Developed with TypeScript to improve application stability. 
 - Realized world-wide (included ISBN) books searching function through Google Books API.
