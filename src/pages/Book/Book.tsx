@@ -11,8 +11,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import parser from "html-react-parser";
-import edit from "./edit.svg";
-import back from "./back.svg";
+import edit from "../../assets/edit.svg";
+import back from "../../assets/back.svg";
 
 function Book() {
   const Location = useLocation();
@@ -23,6 +23,7 @@ function Book() {
   );
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
   const [progressArray, setProgressArray] = useState<number[]>([0]);
+  const [clickProgress, setClickProgress] = useState<number[]>([]);
   const [totalLike, setTotalLike] = useState<number | null>(null);
   const progressRows: number[] = [];
   for (let i = 1; i <= currentBook.totalChapter; i++) {
@@ -33,19 +34,20 @@ function Book() {
   const userId = localPath.split(bookId)[0];
 
   useEffect(() => {
-    setProgressArray(() => {
+    if (currentBook) {
       const boxes: number[] = [];
       for (let j = 1; j <= currentBook.alreadyReadChapter; j++) {
         boxes.push(j);
       }
-      return boxes;
-    });
+      setProgressArray(boxes);
+      setClickProgress(boxes);
+    }
 
     let likeCounter: number = 0;
     const getTotalLike = async () => {
       const allUsers = await getAllUserDoc();
 
-      allUsers.forEach((i) => {
+      allUsers.forEach((i: User) => {
         i.library?.forEach((j) => {
           if (j.isbn === currentBook.isbn && j.like) {
             likeCounter++;
@@ -147,20 +149,17 @@ function Book() {
                     }}
                     onMouseLeave={() => {
                       if (userId !== user.uid) return;
-                      setProgressArray(() => {
-                        const boxes: number[] = [];
-                        for (
-                          let j = 1;
-                          j <= currentBook.alreadyReadChapter;
-                          j++
-                        ) {
-                          boxes.push(j);
-                        }
-                        return boxes;
-                      });
+                      setProgressArray(clickProgress);
                     }}
                     onClick={async () => {
                       if (userId !== user.uid) return;
+                      const nArr = [];
+                      let x = 1;
+                      while (x <= i) {
+                        nArr.push(x);
+                        x++;
+                      }
+                      setClickProgress(nArr);
                       const userData = await getUserInfo(user.uid);
                       if (userData) {
                         if (i === currentBook.totalChapter) {
@@ -174,15 +173,6 @@ function Book() {
                               (i) => i.isbn !== currentBook.isbn
                             ),
                           ]);
-
-                          dispatch({
-                            type: actionType.BOOK.SETBOOKDATA,
-                            value: {
-                              ...currentBook,
-                              alreadyReadChapter: i,
-                              isFinishRead: true,
-                            },
-                          });
                         } else {
                           updateUserLibrary(user.uid, [
                             {
@@ -194,15 +184,6 @@ function Book() {
                               (i) => i.isbn !== currentBook.isbn
                             ),
                           ]);
-
-                          dispatch({
-                            type: actionType.BOOK.SETBOOKDATA,
-                            value: {
-                              ...currentBook,
-                              alreadyReadChapter: i,
-                              isFinishRead: false,
-                            },
-                          });
                         }
                       }
                     }}

@@ -1,7 +1,7 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { Editor } from "@tiptap/core";
 import styled from "styled-components";
-
 import {
   BiBold,
   BiItalic,
@@ -12,7 +12,12 @@ import {
   BiRedo,
 } from "react-icons/bi";
 import { MdHorizontalRule, MdFormatQuote } from "react-icons/md";
-const MenuBar = ({ editor }) => {
+
+interface MenuProps {
+  editor: Editor | null;
+}
+
+const MenuBar = ({ editor }: MenuProps) => {
   if (!editor) {
     return null;
   }
@@ -98,10 +103,10 @@ const MenuBar = ({ editor }) => {
   );
 };
 
-type TiptapProps = {
+interface TiptapProps {
   data: string;
   setData: (value: string) => void;
-};
+}
 
 const Tiptap: React.FC<TiptapProps> = ({ data, setData }) => {
   const editor = useEditor({

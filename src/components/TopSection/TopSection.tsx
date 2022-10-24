@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
-import camera from "./camera.png";
+import camera from "../../assets/camera.png";
 import { User } from "../../reducer/userReducer";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
