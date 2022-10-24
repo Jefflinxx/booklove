@@ -6,15 +6,15 @@ import styled from "styled-components";
 import { getUserInfo } from "../../utils/firestore";
 import { User } from "../../reducer/userReducer";
 import ReactLoading from "react-loading";
-import back from "../Header/back.svg";
+import back from "../../assets/back.svg";
 
-type FriendProps = {
+interface FriendProps {
   setActive: (value: boolean) => void;
   friendActive: boolean;
   setFriendActive: (value: boolean) => void;
   friendLoading: boolean;
   setFriendLoading: (value: boolean) => void;
-};
+}
 
 const Friend: React.FC<FriendProps> = ({
   setActive,

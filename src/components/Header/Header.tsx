@@ -16,14 +16,14 @@ import {
   updateGiveBackAlert,
 } from "../../utils/firestore";
 
-import search from "./search.svg";
-import alert from "./alert.svg";
-import arrow from "./arrow.svg";
-import logout from "./logout.svg";
-import account from "./account.svg";
-import friend from "./friend.svg";
-import rightarrow from "./rightarrow.svg";
-import grayBack from "../TopSection/grayBack.png";
+import search from "../../assets/search.svg";
+import alert from "../../assets/alert.svg";
+import arrow from "../../assets/arrow.svg";
+import logout from "../../assets/logout.svg";
+import account from "../../assets/account.svg";
+import friend from "../../assets/friend.svg";
+import rightarrow from "../../assets/rightarrow.svg";
+import grayBack from "../../assets/grayBack.png";
 
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -340,8 +340,8 @@ function Header() {
                       <AlertConfirm
                         onClick={() => {
                           if (i.type === "borrow") {
-                            let libraryExceptThisBook;
-                            let bookPutInOtherLendFromList;
+                            let libraryExceptThisBook: CurrentBook[];
+                            let bookPutInOtherLendFromList: CurrentBook;
                             getUserInfo(user.uid).then((v) => {
                               libraryExceptThisBook = v!.library.filter(
                                 (j) => j.isbn !== i.isbn
@@ -392,7 +392,7 @@ function Header() {
                             });
                           }
                           if (i.type === "lendFrom") {
-                            let libraryExceptThisBook;
+                            let libraryExceptThisBook: CurrentBook[];
                             getUserInfo(i.uid).then((v) => {
                               libraryExceptThisBook = v!.library.filter(
                                 (j) => j.isbn !== i.isbn
@@ -413,23 +413,23 @@ function Header() {
                               });
                             });
 
-                            let bookInfo;
+                            let bookAddToWishList;
                             user.wishList?.forEach((j) => {
                               if (j.isbn === i.isbn) {
-                                bookInfo = {
+                                bookAddToWishList = {
                                   ...j,
                                   lendFrom: i.uid,
                                   lendFromName: i.uname,
                                 };
                               }
                             });
-                            if (user.lendFromList) {
+                            if (user.lendFromList && bookAddToWishList) {
                               updatelendFromList(user.uid, [
                                 ...user.lendFromList,
-                                bookInfo,
+                                bookAddToWishList,
                               ]);
-                            } else {
-                              updatelendFromList(user.uid, [bookInfo]);
+                            } else if (bookAddToWishList) {
+                              updatelendFromList(user.uid, [bookAddToWishList]);
                             }
 
                             updateWishList(
@@ -446,7 +446,7 @@ function Header() {
                             });
                           }
                           if (i.type === "giveBack") {
-                            let libraryExceptThisBook;
+                            let libraryExceptThisBook: CurrentBook[];
                             getUserInfo(user.uid).then((v) => {
                               libraryExceptThisBook = v!.library.filter(
                                 (j) => j.isbn !== i.isbn
@@ -711,7 +711,6 @@ const BGSearchBlock = styled.div<{ $active: boolean }>`
     left: 0px;
     width: 100%;
     height: 100%;
-
     z-index: ${(props) => (props.$active ? "13" : "-1")};
     opacity: ${(props) => (props.$active ? "1" : "0")};
     transition: opacity 0.7s;
@@ -724,6 +723,9 @@ const SearchWrapper = styled.div`
 `;
 
 const SearchIconDiv = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: relative;
   width: 40px;
   height: 40px;
@@ -738,10 +740,7 @@ const SearchIconDiv = styled.div`
 `;
 
 const SearchIcon = styled.img`
-  position: absolute;
   width: 18px;
-  left: 10px;
-  top: 10px;
 `;
 
 const SearchInput = styled.input<{ isInputActive: boolean }>`
@@ -797,7 +796,6 @@ const SearchResultDiv = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   width: 100%;
   height: 52px;
   padding: 0px 8px;
@@ -843,13 +841,14 @@ const RightDiv = styled.div`
 `;
 
 const AlertIconDiv = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: relative;
   width: 38px;
   height: 38px;
   margin-right: 8px;
-
   border-radius: 50%;
-
   background: #fefadc;
   cursor: pointer;
   user-select: none;
@@ -860,10 +859,7 @@ const AlertIconDiv = styled.div`
 `;
 
 const AlertIcon = styled.img`
-  position: absolute;
   width: 20px;
-  left: 9px;
-  top: 8px;
 `;
 
 const AlertDot = styled.div`
@@ -871,7 +867,6 @@ const AlertDot = styled.div`
   height: 16px;
   border-radius: 50%;
   position: absolute;
-
   right: -2px;
   top: -2px;
   background: #feea00;
@@ -886,7 +881,6 @@ const AlertWrapper = styled.div<{ $alertActive: boolean }>`
   width: 360px;
   flex-direction: column;
   align-items: center;
-
   background: #f6d4ba;
   color: #3f612d;
   padding: 8px 0px;
@@ -904,7 +898,6 @@ const AlertDiv = styled.div`
   width: 344px;
   height: auto;
   user-select: none;
-
   align-items: center;
   padding: 0px 8px;
   border-radius: 6px;
@@ -923,7 +916,6 @@ const AlertAvatar = styled.img`
   width: 38px;
   height: 38px;
   margin-right: 8px;
-
   border: 2px solid #fefadc;
   border-radius: 50%;
 `;
@@ -983,7 +975,6 @@ const BGBlock = styled.div<{ $active: boolean }>`
 
   z-index: 9;
   display: ${(props) => (props.$active ? "block" : "none")};
-  // background: #00000035;
 `;
 
 const Avatar = styled.img`
@@ -998,6 +989,9 @@ const Avatar = styled.img`
 `;
 
 const AvatarArrowIconDiv = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
   right: 28px;
   top: 30px;
@@ -1015,10 +1009,7 @@ const AvatarArrowIconDiv = styled.div`
 `;
 
 const AvatarArrowIcon = styled.img`
-  position: absolute;
   width: 10px;
-  left: 2px;
-  top: 4px;
 `;
 
 const UserWrapper = styled.div<{ $active: boolean }>`

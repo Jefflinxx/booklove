@@ -12,12 +12,11 @@ import { storage } from "../../utils/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useEffect, useState } from "react";
 import { User } from "../../reducer/userReducer";
-import currentBookReducer, {
-  CurrentBook,
-} from "../../reducer/currentBookReducer";
-import back from "./back.svg";
-import deleteIcon from "./delete.svg";
+import { CurrentBook } from "../../reducer/currentBookReducer";
 import Tiptap from "../../components/Tiptap/Tiptap";
+
+import back from "../../assets/back.svg";
+import deleteIcon from "../../assets/delete.svg";
 
 function Edit() {
   const dispatch = useDispatch();

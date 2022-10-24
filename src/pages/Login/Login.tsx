@@ -3,7 +3,7 @@ import { actionType } from "../../reducer/rootReducer";
 import ReactLoading from "react-loading";
 import styled from "styled-components";
 import { useState } from "react";
-import pic from "./login.jpeg";
+import pic from "../../assets/login.jpeg";
 import { auth } from "../../utils/firebase";
 import { initUser, getUserInfo } from "../../utils/firestore";
 import {

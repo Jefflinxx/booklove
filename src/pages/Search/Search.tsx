@@ -1,14 +1,13 @@
-import search from "./search.svg";
-import back from "./back.svg";
-import bg from "./search.jpeg";
-import bc from "./bookcover.jpg";
+import search from "../../assets/search.svg";
+import back from "../../assets/back.svg";
+import bg from "../../assets/search.jpeg";
+import bc from "../../assets/bookcover.jpg";
 
 import { actionType } from "../../reducer/rootReducer";
 import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import { useEffect, useState, useRef } from "react";
 import { User } from "../../reducer/userReducer";
-import { CurrentBook } from "../../reducer/currentBookReducer";
 import {
   addSearchBookToUserLibrary,
   addSearchBookToUserWishList,
@@ -44,82 +43,55 @@ function Search() {
   const user = useSelector((state: { userReducer: User }) => state.userReducer);
   const friendSearchRef = useRef<HTMLInputElement>(null);
   const fetchGoogleBooksData = async (input: string) => {
-    setLoading(true);
-    const apiKey = `${process.env.REACT_APP_GOOGLE_API_KEY}`;
-    const response = await fetch(
-      `${googleApi}${input}&maxResults=40&key=${apiKey}`,
-      { method: "GET" }
-    );
-    if (response.status === 403) {
-      alert("有點異常");
+    try {
+      setLoading(true);
+      const apiKey = `${process.env.REACT_APP_GOOGLE_API_KEY}`;
+      const response = await fetch(
+        `${googleApi}${input}&maxResults=40&key=${apiKey}`,
+        { method: "GET" }
+      );
+      const searchResult = await response.json();
+      setBooks((prev) => []);
+      searchResult.items.forEach(
+        (i: {
+          volumeInfo: {
+            title: string;
+            authors: string;
+            publisher: string;
+            imageLinks: { thumbnail: string };
+            industryIdentifiers: [];
+          };
+        }) => {
+          setBooks((prev) => {
+            if (!i.volumeInfo.industryIdentifiers) return prev;
+            const hasIsbn: { identifier: string }[] =
+              i.volumeInfo.industryIdentifiers.filter(
+                (i: { type: string }) => i.type === "ISBN_13"
+              );
+            if (!hasIsbn.length) return prev;
+
+            const newBook = {
+              name: i.volumeInfo.title ? i.volumeInfo.title : "查無資料",
+              author: i.volumeInfo.authors
+                ? i.volumeInfo.authors[0]
+                : "查無資料",
+              publisher: i.volumeInfo.publisher
+                ? i.volumeInfo.publisher
+                : "查無資料",
+              picture_url: i.volumeInfo.imageLinks
+                ? i.volumeInfo.imageLinks.thumbnail
+                : bc,
+              isbn: hasIsbn[0].identifier,
+            };
+            return [...prev, newBook];
+          });
+        }
+      );
+      setResultCountActive(true);
+      setLoading(false);
+    } catch (err) {
+      console.log(err);
     }
-    const searchResult = await response.json();
-
-    setBooks((prev) => []);
-    searchResult.items.forEach(
-      (i: {
-        volumeInfo: {
-          title: string;
-          authors: string;
-          publisher: string;
-          imageLinks: { thumbnail: string };
-          industryIdentifiers: [];
-        };
-      }) => {
-        setBooks((prev) => {
-          let name;
-          let author;
-          let publisher;
-          let picture_url;
-          let isbn;
-          if (i.volumeInfo.title) {
-            name = i.volumeInfo.title;
-          } else {
-            name = undefined;
-          }
-          if (i.volumeInfo.authors) {
-            author = i.volumeInfo.authors[0];
-          } else {
-            author = undefined;
-          }
-          if (i.volumeInfo.publisher) {
-            publisher = i.volumeInfo.publisher;
-          } else {
-            publisher = undefined;
-          }
-          if (i.volumeInfo.imageLinks) {
-            picture_url = i.volumeInfo.imageLinks.thumbnail;
-          } else {
-            picture_url = undefined;
-          }
-          if (i.volumeInfo.industryIdentifiers) {
-            const isbnIdentifiers = i.volumeInfo.industryIdentifiers;
-            const hasIsbn: { identifier: string }[] = isbnIdentifiers.filter(
-              (i: { type: string }) => i.type === "ISBN_13"
-            );
-            if (hasIsbn.length < 1) {
-              return prev;
-            }
-            isbn = hasIsbn[0].identifier;
-          } else {
-            return prev;
-          }
-
-          return [
-            ...prev,
-            {
-              name: name || "查無資料",
-              author: author || "查無資料",
-              publisher: publisher || "查無資料",
-              picture_url: picture_url || bc,
-              isbn: isbn,
-            },
-          ];
-        });
-      }
-    );
-    setResultCountActive(true);
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -192,7 +164,7 @@ function Search() {
       </Popup>
       <WholeWrapper>
         <Center>
-          <SearchIconDiv $active={resultCountActive}>
+          <SearchDiv $active={resultCountActive}>
             <BackIconDiv
               $active={resultCountActive}
               onClick={() => {
@@ -224,7 +196,7 @@ function Search() {
                 <ReactLoading type="cylon" color="black" width={40} />
               </SearchLoading>
             )}
-          </SearchIconDiv>
+          </SearchDiv>
           {resultCountActive ? (
             <>
               <SearchCount>{books.length}筆搜尋結果</SearchCount>
@@ -365,7 +337,7 @@ const BackIconDiv = styled.div<{ $active: boolean }>`
   }
   @media screen and (max-width: 1100px) {
     top: 6px;
-    left: 6px;
+    left: ${(props) => (props.$active ? "6px" : "36px")};
   }
   @media screen and (max-width: 800px) {
     left: ${(props) => (props.$active ? "-6px" : "6px")};
@@ -387,7 +359,7 @@ const Center = styled.div`
   margin: 120px 0px;
 `;
 
-const SearchIconDiv = styled.div<{ $active: boolean }>`
+const SearchDiv = styled.div<{ $active: boolean }>`
   position: relative;
   top: ${(props) => (props.$active ? "0px" : "33vh")};
   right: ${(props) => (props.$active ? "0px" : "-370px")};
@@ -418,10 +390,10 @@ const SearchIcon = styled.img<{ $active: boolean }>`
   position: absolute;
   width: ${(props) => (props.$active ? "24px" : "36px")};
   left: ${(props) => (props.$active ? "292px" : "100px")};
-  top: ${(props) => (props.$active ? "16px" : "12px")};
+  top: ${(props) => (props.$active ? "14px" : "12px")};
   @media screen and (max-width: 1100px) {
     top: 14px;
-    left: 50px;
+    left: ${(props) => (props.$active ? "50px" : "100px")};
   }
   @media screen and (max-width: 800px) {
     left: ${(props) => (props.$active ? "36px" : "62px")};
