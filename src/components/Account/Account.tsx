@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { storage } from "../../utils/firebase";
 import { getUserInfo, updateUser } from "../../utils/firestore";
@@ -6,15 +6,15 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { User } from "../../reducer/userReducer";
 import { useSelector, useDispatch } from "react-redux";
 import { actionType } from "../../reducer/rootReducer";
-import back from "../Header/back.svg";
-import edit from "./edit.svg";
+import back from "../../assets/back.svg";
+import edit from "../../assets/edit.svg";
 
-type AccountProps = {
+interface AccountProps {
   accountActive: boolean;
   setAccountActive: (value: boolean) => void;
   isEdit: boolean;
   setIsEdit: (value: boolean) => void;
-};
+}
 
 const Account: React.FC<AccountProps> = ({
   accountActive,

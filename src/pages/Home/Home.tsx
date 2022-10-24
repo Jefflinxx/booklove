@@ -343,7 +343,6 @@ function Home() {
                     $active={categoryReadActive}
                     onClick={async () => {
                       setLoading(true);
-
                       setCategoryCurrent(null);
                       setCategoryAllActive(false);
                       setCategoryLendActive(false);
@@ -351,7 +350,6 @@ function Home() {
                       setCategorySelectActive(false);
                       setLendFromActive(false);
                       let categoryResult: CurrentBook[] = [];
-
                       let userData;
                       if (localPath === user.uid || localPath === "") {
                         userData = await getUserInfo(user.uid);
@@ -917,10 +915,11 @@ function Home() {
                                   isbn: i.isbn,
                                   bookname: i.bookname,
                                 });
-                                setNAlendFrom({
-                                  id: i.lendFrom,
-                                  name: i.lendFromName,
-                                });
+                                if (i.lendFrom && i.lendFromName)
+                                  setNAlendFrom({
+                                    id: i.lendFrom,
+                                    name: i.lendFromName,
+                                  });
                               }}
                             >
                               歸還

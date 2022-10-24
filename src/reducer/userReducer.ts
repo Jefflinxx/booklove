@@ -1,4 +1,4 @@
-export type BookInfo = {
+export interface BookInfo {
   isbn: string;
   author: string;
   bookname: string;
@@ -13,14 +13,14 @@ export type BookInfo = {
   place: string;
   lendTo: string;
   isLendTo: boolean;
-  lendFrom: string;
-  lendFromName: string;
+  lendFrom?: string;
+  lendFromName?: string;
   summary: string;
   uploadCover: string[];
   isPublic: boolean;
-};
+}
 
-export type User = {
+export interface User {
   uid: string;
   uname: string;
   background?: string;
@@ -39,7 +39,7 @@ export type User = {
     bookname: string;
   }[];
   giveBackAlert: string[];
-};
+}
 
 const userReducer = (
   state = null,
