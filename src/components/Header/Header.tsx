@@ -980,12 +980,12 @@ const BGBlock = styled.div<{ $active: boolean }>`
 const Avatar = styled.img`
   width: 38px;
   height: 38px;
-
   background: #fefadc;
   border-radius: 50%;
   user-select: none;
   cursor: pointer;
   z-index: 12;
+  object-fit: cover;
 `;
 
 const AvatarArrowIconDiv = styled.div`

@@ -255,6 +255,7 @@ const Avatar = styled.img`
   left: 0;
   border-radius: 50%;
   z-index: 11;
+  object-fit: cover;
 `;
 
 const AvatarImgMask = styled.div`
