@@ -836,6 +836,7 @@ const RightDiv = styled.div`
   align-items: center;
   padding-right: 32px;
   @media screen and (max-width: 685px) {
+    padding-right: 16px;
     position: absolute;
     right: 0px;
   }
