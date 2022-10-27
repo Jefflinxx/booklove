@@ -786,7 +786,8 @@ const SearchResultWrapper = styled.div<{ searchResultActive: boolean }>`
   color: #3f612d;
   display: ${(props) => (props.searchResultActive ? "block" : "none")};
   @media screen and (max-width: 685px) {
-    width: ${() => `calc(100vw - 15px)`};
+    //width: ${() => `calc(100vw - 15px)`};
+    width: 100vw;
     left: 0px;
     border-radius: 0px;
   }
@@ -887,8 +888,9 @@ const AlertWrapper = styled.div<{ $alertActive: boolean }>`
   border-radius: 6px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
   @media screen and (max-width: 830px) {
-    width: ${() => `calc(100vw - 15px)`};
-    right: 15px;
+    //width: ${() => `calc(100vw - 15px)`};
+    width: 100vw;
+    right: 0px;
     top: 47px;
     border-radius: 0px;
   }
@@ -902,6 +904,9 @@ const AlertDiv = styled.div`
   padding: 0px 8px;
   border-radius: 6px;
   justify-content: space-between;
+  @media screen and (max-width: 830px) {
+    width: 100vw;
+  }
 `;
 
 const AlertSplit = styled.div`
@@ -909,6 +914,9 @@ const AlertSplit = styled.div`
   border-bottom: 2px solid #f3b391;
   :last-child {
     display: none;
+  }
+  @media screen and (max-width: 830px) {
+    width: 100vw;
   }
 `;
 
@@ -1028,7 +1036,8 @@ const UserWrapper = styled.div<{ $active: boolean }>`
   border-radius: 6px;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
   @media screen and (max-width: 830px) {
-    width: ${() => `calc(100vw - 15px)`};
+    //width: ${() => `calc(100vw - 15px)`};
+    width: 100vw;
     right: 0px;
     top: 56px;
     border-radius: 0px;
