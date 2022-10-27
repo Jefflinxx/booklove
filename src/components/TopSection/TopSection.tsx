@@ -122,6 +122,7 @@ function TopSection() {
           <CancelBtn
             onClick={() => {
               setConfirmActive(false);
+              setImageFile(null);
             }}
             confirmActive={confirmActive}
           >
@@ -397,6 +398,7 @@ const Avatar = styled.img`
   top: -144px;
   left: 48px;
   user-select: none;
+  object-fit: cover;
   @media screen and (max-width: 830px) {
     position: relative;
     left: 0px;
