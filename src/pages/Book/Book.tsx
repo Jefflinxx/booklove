@@ -66,7 +66,8 @@ function Book() {
           <TopIconDivWrapper>
             <BackIconDiv
               onClick={() => {
-                navigator(-1);
+                // navigator(-1);
+                navigator("../");
               }}
             >
               <BackIcon src={back}></BackIcon>
